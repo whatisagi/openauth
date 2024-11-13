@@ -1,0 +1,15 @@
+{
+  "name": "@opennextjs/core",
+  "type": "module",
+  "devDependencies": {
+    "@tsconfig/node20": "20.1.4",
+    "hono": "4.6.9"
+  },
+  "peerDependencies": {
+    "hono": "^4.0.0"
+  },
+  "dependencies": {
+    "@standard-schema/spec": "1.0.0-beta.3",
+    "jose": "5.9.6"
+  }
+}
