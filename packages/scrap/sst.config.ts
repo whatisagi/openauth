@@ -12,8 +12,12 @@ export default $config({
     const key = new tls.PrivateKey(`Keypair`, {
       algorithm: "RSA",
     });
-    const worker = new sst.cloudflare.Worker("Worker", {
-      handler: "index.ts",
+
+    const kv = new sst.cloudflare.Kv("AuthKV");
+
+    const auth = new sst.cloudflare.Worker("Auth", {
+      handler: "./cloudflare/authorizer.ts",
+      link: [kv],
       url: true,
       environment: {
         OPENAUTH_PUBLIC_KEY: $util.secret(key.publicKeyPem),
@@ -21,8 +25,18 @@ export default $config({
       },
     });
 
+    const api = new sst.cloudflare.Worker("Api", {
+      handler: "./cloudflare/api.ts",
+      url: true,
+      link: [auth],
+      environment: {
+        OPENAUTH_ISSUER: auth.url.apply((v) => v!),
+      },
+    });
+
     return {
-      url: worker.url,
+      api: api.url,
+      url: auth.url,
     };
   },
 });

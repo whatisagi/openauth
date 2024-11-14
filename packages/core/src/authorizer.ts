@@ -1,6 +1,5 @@
 import { Adapter, AdapterOptions } from "./adapter/adapter.js";
-import * as jose from "jose";
-import { SessionBuilder, defineSession, SessionValues } from "./session.js";
+import { SessionValues, SessionSchemas } from "./session.js";
 import { Hono } from "hono/tiny";
 import { handle as awsHandle } from "hono/aws-lambda";
 import { Context } from "hono";
@@ -12,10 +11,6 @@ export interface OnSuccessResponder<
   session<Type extends T["type"]>(
     type: Type,
     properties: Extract<T, { type: Type }>["properties"],
-    options?: {
-      accessExpiry?: number | string | Date;
-      refreshExpiry?: number | string | Date;
-    },
   ): Promise<Response>;
 }
 
@@ -30,12 +25,21 @@ import {
   UnknownProviderError,
   UnknownStateError,
 } from "./error.js";
+import {
+  compactDecrypt,
+  CompactEncrypt,
+  exportJWK,
+  importPKCS8,
+  importSPKI,
+  SignJWT,
+} from "jose";
+import { Storage, StorageAdapter } from "./storage/storage.js";
 
 export const aws = awsHandle;
 
 export function authorizer<
   Providers extends Record<string, Adapter<any>>,
-  Sessions extends SessionBuilder,
+  Sessions extends SessionSchemas,
   Result = {
     [key in keyof Providers]: Prettify<
       {
@@ -44,8 +48,13 @@ export function authorizer<
     >;
   }[keyof Providers],
 >(input: {
-  session: Sessions;
+  sessions: Sessions;
+  storage: StorageAdapter;
   providers: Providers;
+  ttl?: {
+    access?: number;
+    refresh?: number;
+  };
   publicKey?: string;
   privateKey?: string;
   callbacks: {
@@ -66,7 +75,7 @@ export function authorizer<
         req: Request,
       ): Promise<boolean>;
       success(
-        response: OnSuccessResponder<SessionValues<Sessions["types"]>>,
+        response: OnSuccessResponder<SessionValues<Sessions>>,
         input: Result,
         req: Request,
       ): Promise<Response>;
@@ -104,25 +113,24 @@ export function authorizer<
   if (!publicKey) throw new Error("No public key");
   const privateKey = input.privateKey ?? process.env.OPENAUTH_PRIVATE_KEY;
   if (!privateKey) throw new Error("No private key");
-
-  const session = defineSession(input.session.types, {
-    publicKey,
-    privateKey,
-  });
+  const ttlAccess = input.ttl?.access ?? 60 * 60 * 24 * 30;
+  const ttlRefresh = input.ttl?.refresh ?? 60 * 60 * 24 * 365;
 
   const key = {
     algorithm: "RS512",
+    header: { alg: "RS512", typ: "JWT", kid: "sst" },
     signing: {
-      privateKey: jose.importPKCS8(privateKey, "RS512"),
-      publicKey: jose.importSPKI(publicKey, "RS512", {
+      privateKey: importPKCS8(privateKey, "RS512"),
+      publicKey: importSPKI(publicKey, "RS512", {
         extractable: true,
       }),
     },
     encryption: {
-      privateKey: jose.importPKCS8(privateKey, "RSA-OAEP-512"),
-      publicKey: jose.importSPKI(publicKey, "RSA-OAEP-512"),
+      privateKey: importPKCS8(privateKey, "RSA-OAEP-512"),
+      publicKey: importSPKI(publicKey, "RSA-OAEP-512"),
     },
   };
+
   const auth: Omit<AdapterOptions<any>, "name"> = {
     async success(ctx: Context, properties: any) {
       const authorization = await auth.get(ctx, "authorization");
@@ -137,49 +145,37 @@ export function authorizer<
       }
       return await input.callbacks.auth.success(
         {
-          async session(type, properties, options) {
+          async session(type, properties) {
             const authorization = await auth.get(ctx, "authorization");
             auth.unset(ctx, "authorization");
-
             if (authorization.response_type === "token") {
-              const accessToken = await session.create(
-                type as string,
-                properties,
-                {
-                  mode: "access",
-                  audience: authorization.audience,
-                  expiresIn: options?.accessExpiry,
-                },
-              );
-              const refreshToken = await session.create(
-                type as string,
-                properties,
-                {
-                  mode: "refresh",
-                  expiresIn: options?.refreshExpiry,
-                },
-              );
               const location = new URL(authorization.redirect_uri);
+              const tokens = await generateTokens(ctx, {
+                type: type as string,
+                properties,
+                clientID: authorization.client_id,
+              });
               location.hash = new URLSearchParams({
-                access_token: accessToken,
-                refresh_token: refreshToken,
+                access_token: tokens.access,
+                refresh_token: tokens.refresh,
                 state: authorization.state || "",
               }).toString();
               return ctx.redirect(location.toString(), 302);
             }
 
             if (authorization.response_type === "code") {
-              // This allows the code to be reused within a 30 second window
-              // The code should be single use but we're making this tradeoff to remain stateless
-              // In the future can store this in a dynamo table to ensure single use
-              const code = await encrypt({
-                type,
-                properties,
-                options,
-                client_id: authorization.client_id,
-                redirect_uri: authorization.redirect_uri,
-                expiry: new Date(Date.now() + 30 * 1000),
-              });
+              const code = crypto.randomUUID();
+              await Storage.set(
+                input.storage,
+                ["oauth:code", code],
+                {
+                  type,
+                  properties,
+                  redirectURI: authorization.redirect_uri,
+                  clientID: authorization.client_id,
+                },
+                60,
+              );
               const location = new URL(authorization.redirect_uri);
               location.searchParams.set("code", code);
               location.searchParams.set("state", authorization.state || "");
@@ -227,27 +223,79 @@ export function authorizer<
   };
 
   async function encrypt(value: any) {
-    return await new jose.CompactEncrypt(
+    return await new CompactEncrypt(
       new TextEncoder().encode(JSON.stringify(value)),
     )
       .setProtectedHeader({ alg: "RSA-OAEP-512", enc: "A256GCM" })
       .encrypt(await key.encryption.publicKey);
   }
 
+  async function resolveSubject(type: string, properties: any) {
+    const jsonString = JSON.stringify(properties);
+    const encoder = new TextEncoder();
+    const data = encoder.encode(jsonString);
+    const hashBuffer = await crypto.subtle.digest("SHA-1", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    return `${type}:${hashHex.slice(0, 8)}`;
+  }
+
+  async function generateTokens(
+    ctx: Context,
+    value: {
+      type: string;
+      properties: any;
+      clientID: string;
+    },
+  ) {
+    const subjectPrefix = await resolveSubject(value.type, value.properties);
+    const refreshToken = crypto.randomUUID();
+    const subject = [subjectPrefix, refreshToken].join(":");
+    await Storage.set(
+      input.storage,
+      ["oauth:refresh", subjectPrefix, refreshToken],
+      {
+        ...input,
+      },
+      Date.now() / 1000 + ttlRefresh,
+    );
+    return {
+      access: await new SignJWT({
+        mode: "access",
+        type: value.type,
+        properties: value.properties,
+        audience: issuer(ctx),
+        issuer: issuer(ctx),
+        sub: subject,
+      })
+        .setExpirationTime(Date.now() / 1000 + ttlAccess)
+        .setProtectedHeader(key.header)
+        .sign(await key.signing.privateKey),
+      refresh: subject,
+    };
+  }
+
   async function decrypt(value: string) {
     return JSON.parse(
       new TextDecoder().decode(
-        await jose
-          .compactDecrypt(value, await key.encryption.privateKey)
-          .then((value) => value.plaintext),
+        await compactDecrypt(value, await key.encryption.privateKey).then(
+          (value) => value.plaintext,
+        ),
       ),
     );
+  }
+
+  function issuer(ctx: Context) {
+    const host = ctx.header("x-forwarded-host") ?? new URL(ctx.req.url).host;
+    return `https://${host}`;
   }
 
   const app = new Hono();
 
   app.get("/.well-known/jwks.json", async (c) => {
-    const jwk = await jose.exportJWK(await key.signing.publicKey);
+    const jwk = await exportJWK(await key.signing.publicKey);
     return c.json({
       keys: [
         {
@@ -259,14 +307,12 @@ export function authorizer<
   });
 
   app.get("/.well-known/oauth-authorization-server", async (c) => {
-    const issuer =
-      `https://` +
-      (c.req.header("x-forwarded-host") || new URL(c.req.url).host);
+    const iss = issuer(c);
     return c.json({
-      issuer: issuer,
-      authorization_endpoint: `${issuer}/authorize`,
-      token_endpoint: `${issuer}/token`,
-      jwks_uri: `${issuer}/.well-known/jwks.json`,
+      issuer: iss,
+      authorization_endpoint: `${iss}/authorize`,
+      token_endpoint: `${iss}/token`,
+      jwks_uri: `${iss}/.well-known/jwks.json`,
       response_types_supported: ["code", "token"],
     });
   });
@@ -280,27 +326,28 @@ export function authorizer<
     if (!code) {
       return c.text("Missing code", 400);
     }
-    const payload = await decrypt(code.toString());
+    const key = ["oauth:code", code.toString()];
+    const payload = await Storage.get<{
+      type: string;
+      properties: any;
+      clientID: string;
+      redirectURI: string;
+    }>(input.storage, key);
     if (!payload) {
       return c.text("Invalid code", 400);
     }
-    if (payload.redirect_uri !== form.get("redirect_uri")) {
+    await Storage.remove(input.storage, key);
+    if (payload.redirectURI !== form.get("redirect_uri")) {
       return c.text("redirect_uri mismatch", 400);
     }
-    if (payload.client_id !== form.get("client_id")) {
+    if (payload.clientID !== form.get("client_id")) {
       c.status(400);
       return c.text("client_id mismatch");
     }
-
+    const tokens = await generateTokens(c, payload);
     return c.json({
-      access_token: session.create(payload.type, payload.properties, {
-        mode: "access",
-        expiresIn: payload.options?.accessExpiry,
-      }),
-      refresh_token: session.create(payload.type, payload.properties, {
-        mode: "refresh",
-        expiresIn: payload.options?.refreshExpiry,
-      }),
+      access_token: tokens.access,
+      refresh_token: tokens.refresh,
     });
   });
 

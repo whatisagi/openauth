@@ -1,8 +1,6 @@
 import { v1 } from "@standard-schema/spec";
-import { SignJWT, importPKCS8, importSPKI, jwtVerify } from "jose";
+import { jwtVerify, JSONWebKeySet, createLocalJWKSet } from "jose";
 import process from "node:process";
-
-export type SessionBuilder = ReturnType<typeof defineSession>;
 
 export type SessionSchemas = {
   [key: string]: v1.StandardSchema;
@@ -15,86 +13,78 @@ export type SessionValues<T extends SessionSchemas> = {
   };
 }[keyof T];
 
-export function defineSession<SessionTypes extends SessionSchemas = {}>(
+export function defineSessions<SessionTypes extends SessionSchemas = {}>(
   types: SessionTypes,
-  options?: { publicKey?: string; privateKey?: string; issuer?: string },
 ) {
-  type WithPublic = SessionTypes & {
+  return {
+    ...types,
+    public: {
+      "~standard": {
+        vendor: "sst",
+        version: 1,
+        validate() {
+          return {
+            value: {},
+            issues: [],
+          };
+        },
+      },
+    },
+  } as SessionTypes & {
     public: v1.StandardSchema<{}, {}>;
   };
+}
 
-  const publicKey = options?.publicKey ?? process.env.AUTH_PUBLIC_KEY;
-  const privateKey = options?.privateKey ?? process.env.AUTH_PRIVATE_KEY;
-  const spki = publicKey ? importSPKI(publicKey, "RS512") : undefined;
-  const pkcs8 = privateKey ? importPKCS8(privateKey, "RS512") : undefined;
-  const issuer = options?.issuer ?? "todo-issuer";
+const issuerCache = new Map<string, ReturnType<typeof createLocalJWKSet>>();
 
-  return {
-    async verify(
-      token: string,
-      mode: "access" | "refresh" = "access",
-    ): Promise<
-      {
-        [type in keyof WithPublic]: {
-          type: type;
-          properties: v1.InferOutput<WithPublic[type]>;
-        };
-      }[keyof WithPublic]
-    > {
-      if (!spki) throw new Error("No public key");
-      const result = await jwtVerify<{
-        mode: "access";
-        type: keyof WithPublic;
-        properties: v1.InferInput<WithPublic[keyof WithPublic]>;
-      }>(token, await spki);
-      const validated = await types[result.payload.type]["~standard"].validate(
-        result.payload.properties,
-      );
-      if (!validated.issues && result.payload.mode === mode)
-        return {
-          type: result.payload.type,
-          properties: validated.value,
-        } as any;
+async function getJWKS(issuer: string, f?: typeof fetch) {
+  const cached = issuerCache.get(issuer);
+  if (cached) return cached;
+  const wellKnown = await (f || fetch)(
+    `${issuer}/.well-known/openid-configuration`,
+  ).then((r) => r.json() as any);
+  const keyset = (await (f || fetch)(wellKnown.jwks_uri).then((r) =>
+    r.json(),
+  )) as JSONWebKeySet;
+  const result = createLocalJWKSet(keyset);
+  issuerCache.set(issuer, result);
+  return result;
+}
 
-      throw new Error("Invalid session");
-    },
-    async create<Type extends keyof WithPublic>(
-      type: Type,
-      properties: v1.InferInput<WithPublic[Type]>,
-      options?: (
-        | {
-            mode: "access";
-            audience?: string;
-          }
-        | {
-            mode: "refresh";
-          }
-      ) & {
-        expiresIn?: number | string | Date;
-      },
-    ) {
-      options ??= {
-        mode: "access",
-      };
-      options.mode ??= "access";
-      if (!pkcs8) throw new Error("No private key");
-      const parsed = await types[type]["~standard"].validate(properties);
-      if (parsed.issues)
-        throw new Error(
-          "Invalid session properties: " + parsed.issues.map((i) => i.message),
-        );
-      const token = await new SignJWT({
-        mode: options.mode,
-        type,
-        properties: parsed.value,
-        aud: options.mode === "access" ? options?.audience : issuer,
-        iss: issuer,
-      })
-        .setExpirationTime(options?.expiresIn ?? "1yr")
-        .setProtectedHeader({ alg: "RS512", typ: "JWT", kid: "sst" })
-        .sign(await pkcs8);
-      return token;
-    },
-    types,
-  };
+export async function verify<T extends SessionSchemas>(
+  sessions: T,
+  token: string,
+  options?: {
+    issuer?: string;
+    audience?: string;
+    fetch?: typeof fetch;
+  },
+): Promise<
+  {
+    [type in keyof T]: {
+      type: type;
+      properties: v1.InferOutput<T[type]>;
+    };
+  }[keyof T]
+> {
+  const issuer = options?.issuer || process.env.OPENAUTH_ISSUER;
+  if (!issuer) throw new Error("No issuer");
+  const jwks = await getJWKS(issuer, options?.fetch);
+  const result = await jwtVerify<{
+    mode: "access";
+    type: keyof T;
+    properties: v1.InferInput<T[keyof T]>;
+  }>(token, jwks, {
+    issuer,
+  });
+  const validated = await sessions[result.payload.type]["~standard"].validate(
+    result.payload.properties,
+  );
+  if (!validated.issues && result.payload.mode === "access")
+    return {
+      type: result.payload.type,
+      properties: validated.value,
+    } as any;
+
+  throw new Error("Invalid session");
 }

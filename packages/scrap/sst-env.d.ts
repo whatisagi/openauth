@@ -13,6 +13,8 @@ declare module "sst" {
 import * as cloudflare from "@cloudflare/workers-types";
 declare module "sst" {
   export interface Resource {
-    "Worker": cloudflare.Service
+    "Api": cloudflare.Service
+    "Auth": cloudflare.Service
+    "AuthKV": cloudflare.KVNamespace
   }
 }
