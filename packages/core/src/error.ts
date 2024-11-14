@@ -32,3 +32,15 @@ export class InvalidSessionError extends Error {
     super("Invalid session");
   }
 }
+
+export class InvalidRefreshTokenError extends Error {
+  constructor() {
+    super("Invalid refresh token");
+  }
+}
+
+export class InvalidAuthorizationCodeError extends Error {
+  constructor() {
+    super("Invalid authorization code");
+  }
+}

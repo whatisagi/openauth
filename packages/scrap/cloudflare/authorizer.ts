@@ -5,7 +5,7 @@ import {
   type ExecutionContext,
   type KVNamespace,
 } from "@cloudflare/workers-types";
-import { sessions } from "../sessions.js";
+import { subjects } from "../subjects.js";
 
 interface Env {
   OPENAUTH_PUBLIC_KEY: string;
@@ -16,12 +16,15 @@ interface Env {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     return authorizer({
-      sessions: sessions,
+      subjects,
       storage: CloudflareStorage({
         namespace: env.AuthKV,
       }),
       publicKey: env.OPENAUTH_PUBLIC_KEY,
       privateKey: env.OPENAUTH_PRIVATE_KEY,
+      ttl: {
+        access: 60 * 5,
+      },
       providers: {
         code: CodeAdapter({
           length: 6,

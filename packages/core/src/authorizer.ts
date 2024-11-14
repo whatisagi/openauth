@@ -1,5 +1,5 @@
 import { Adapter, AdapterOptions } from "./adapter/adapter.js";
-import { SessionValues, SessionSchemas } from "./session.js";
+import { SubjectPayload, SubjectSchema } from "./session.js";
 import { Hono } from "hono/tiny";
 import { handle as awsHandle } from "hono/aws-lambda";
 import { Context } from "hono";
@@ -39,7 +39,7 @@ export const aws = awsHandle;
 
 export function authorizer<
   Providers extends Record<string, Adapter<any>>,
-  Sessions extends SessionSchemas,
+  Sessions extends SubjectSchema,
   Result = {
     [key in keyof Providers]: Prettify<
       {
@@ -48,7 +48,7 @@ export function authorizer<
     >;
   }[keyof Providers],
 >(input: {
-  sessions: Sessions;
+  subjects: Sessions;
   storage: StorageAdapter;
   providers: Providers;
   ttl?: {
@@ -75,7 +75,7 @@ export function authorizer<
         req: Request,
       ): Promise<boolean>;
       success(
-        response: OnSuccessResponder<SessionValues<Sessions>>,
+        response: OnSuccessResponder<SubjectPayload<Sessions>>,
         input: Result,
         req: Request,
       ): Promise<Response>;
@@ -239,7 +239,7 @@ export function authorizer<
     const hashHex = hashArray
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
-    return `${type}:${hashHex.slice(0, 8)}`;
+    return `${type}:${hashHex.slice(0, 16)}`;
   }
 
   async function generateTokens(
@@ -250,14 +250,13 @@ export function authorizer<
       clientID: string;
     },
   ) {
-    const subjectPrefix = await resolveSubject(value.type, value.properties);
+    const subject = await resolveSubject(value.type, value.properties);
     const refreshToken = crypto.randomUUID();
-    const subject = [subjectPrefix, refreshToken].join(":");
     await Storage.set(
       input.storage,
-      ["oauth:refresh", subjectPrefix, refreshToken],
+      ["oauth:refresh", subject, refreshToken],
       {
-        ...input,
+        ...value,
       },
       Date.now() / 1000 + ttlRefresh,
     );
@@ -267,13 +266,13 @@ export function authorizer<
         type: value.type,
         properties: value.properties,
         audience: issuer(ctx),
-        issuer: issuer(ctx),
+        iss: issuer(ctx),
         sub: subject,
       })
         .setExpirationTime(Date.now() / 1000 + ttlAccess)
         .setProtectedHeader(key.header)
         .sign(await key.signing.privateKey),
-      refresh: subject,
+      refresh: [subject, refreshToken].join(":"),
     };
   }
 
@@ -319,36 +318,97 @@ export function authorizer<
 
   app.post("/token", async (c) => {
     const form = await c.req.formData();
-    if (form.get("grant_type") !== "authorization_code") {
-      return c.text("Invalid grant_type", 400);
+    const grantType = form.get("grant_type");
+
+    if (grantType === "authorization_code") {
+      const code = form.get("code");
+      if (!code)
+        return c.json(
+          {
+            error: "invalid_request",
+            error_description: "Missing code",
+          },
+          400,
+        );
+      const key = ["oauth:code", code.toString()];
+      const payload = await Storage.get<{
+        type: string;
+        properties: any;
+        clientID: string;
+        redirectURI: string;
+      }>(input.storage, key);
+      if (!payload) {
+        return c.json(
+          {
+            error: "invalid_grant",
+            error_description: "Authorization code has been used or expired",
+          },
+          400,
+        );
+      }
+      await Storage.remove(input.storage, key);
+      if (payload.redirectURI !== form.get("redirect_uri")) {
+        return c.json(
+          {
+            error: "invalid_redirect_uri",
+            error_description: "Redirect URI mismatch",
+          },
+          400,
+        );
+      }
+      if (payload.clientID !== form.get("client_id")) {
+        return c.json(
+          {
+            error: "unauthorized_client",
+            error_description:
+              "Client is not authorized to use this authorization code",
+          },
+          403,
+        );
+      }
+      const tokens = await generateTokens(c, payload);
+      return c.json({
+        access_token: tokens.access,
+        refresh_token: tokens.refresh,
+      });
     }
-    const code = form.get("code");
-    if (!code) {
-      return c.text("Missing code", 400);
+
+    if (grantType === "refresh_token") {
+      const refreshToken = form.get("refresh_token");
+      if (!refreshToken)
+        return c.json(
+          {
+            error: "invalid_request",
+            error_description: "Missing refresh_token",
+          },
+          400,
+        );
+      const splits = refreshToken.toString().split(":");
+      const token = splits.pop()!;
+      const subject = splits.join(":");
+      const key = ["oauth:refresh", subject, token];
+      console.log("looking for", key.join(":"));
+      const payload = await Storage.get<{
+        type: string;
+        properties: any;
+        clientID: string;
+      }>(input.storage, key);
+      if (!payload) {
+        return c.json(
+          {
+            error: "invalid_grant",
+            error_description: "Refresh token has been used or expired",
+          },
+          400,
+        );
+      }
+      await Storage.remove(input.storage, key);
+      const tokens = await generateTokens(c, payload);
+      return c.json({
+        access_token: tokens.access,
+        refresh_token: tokens.refresh,
+      });
     }
-    const key = ["oauth:code", code.toString()];
-    const payload = await Storage.get<{
-      type: string;
-      properties: any;
-      clientID: string;
-      redirectURI: string;
-    }>(input.storage, key);
-    if (!payload) {
-      return c.text("Invalid code", 400);
-    }
-    await Storage.remove(input.storage, key);
-    if (payload.redirectURI !== form.get("redirect_uri")) {
-      return c.text("redirect_uri mismatch", 400);
-    }
-    if (payload.clientID !== form.get("client_id")) {
-      c.status(400);
-      return c.text("client_id mismatch");
-    }
-    const tokens = await generateTokens(c, payload);
-    return c.json({
-      access_token: tokens.access,
-      refresh_token: tokens.refresh,
-    });
   });
 
   app.use("/:provider/authorize", async (c, next) => {

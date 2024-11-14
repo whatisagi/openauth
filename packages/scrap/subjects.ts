@@ -1,7 +1,7 @@
 import { object, string } from "valibot";
-import { defineSessions } from "../core/src";
+import { createSubjects } from "../core/src";
 
-export const sessions = defineSessions({
+export const subjects = createSubjects({
   user: object({
     userID: string(),
     workspaceID: string(),

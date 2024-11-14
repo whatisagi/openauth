@@ -1,6 +1,6 @@
 import type { Service } from "@cloudflare/workers-types";
-import { verify } from "../../core/src/session";
-import { sessions } from "../sessions";
+import { subjects } from "../subjects.js";
+import { createClient } from "../../core/src/client.js";
 
 interface Env {
   OPENAUTH_ISSUER: string;
@@ -9,61 +9,70 @@ interface Env {
 
 export default {
   async fetch(request: Request, env: Env) {
+    process.env.OPENAUTH_ISSUER = env.OPENAUTH_ISSUER;
+
+    const client = createClient({
+      clientID: "123",
+      fetch: (...args) => env.Auth.fetch(...args),
+    });
     const url = new URL(request.url);
+    const redirectURI = url.origin + "/callback";
+
     switch (url.pathname) {
       case "/callback":
-        const code = url.searchParams.get("code")!;
-        const response = await env.Auth.fetch(env.OPENAUTH_ISSUER + "/token", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: new URLSearchParams({
-            code,
-            redirect_uri: url.origin + "/callback",
-            client_id: "123",
-            grant_type: "authorization_code",
-          }).toString(),
-        });
-        // token
-        // callback#access_token=xx
-        // code
-        // /callback?code=xxx
-        // --> POST /token -> access_token, refresh_token
-
-        return response;
-
-        console.log(response);
-        const session = await verify(sessions, response.access_token, {
-          issuer: env.OPENAUTH_ISSUER,
-          // @ts-ignore
-          fetch: env.Auth.fetch,
-        });
-
-        async function getToken() {
-          const token = localStorage.get("access_token");
-          if (isExpired(token)) {
-            const nextToken = fetch(authserver + "/refresh", {
-              body: JSON.stringify({
-                refresh_token: localStorage.get("refresh_token"),
-              }),
-            });
-            localStorage.set("access_token", nextToken);
-            return nextToken;
-          }
-          return token;
+        try {
+          const code = url.searchParams.get("code")!;
+          const tokens = await client.exchange(code, redirectURI);
+          const response = new Response(null, { status: 302, headers: {} });
+          response.headers.set("Location", url.origin);
+          setSession(response, tokens.access, tokens.refresh);
+          return response;
+        } catch (e: any) {
+          return new Response(e.toString());
         }
-
-        console.log(session);
-        return Response.json(session);
       case "/authorize":
-        const redir = new URL(env.OPENAUTH_ISSUER + "/code/authorize");
-        redir.searchParams.set("client_id", "123");
-        redir.searchParams.set("redirect_uri", url.origin + "/callback");
-        redir.searchParams.set("response_type", "code");
-        return Response.redirect(redir);
+        return Response.redirect(client.authorize(redirectURI, "code"));
+      case "/":
+        console.log("here", request.headers.get("cookie"));
+        const cookies = new URLSearchParams(
+          request.headers.get("cookie")?.replaceAll("; ", "&"),
+        );
+        try {
+          const verified = await client.verify(
+            subjects,
+            cookies.get("access_token")!,
+            {
+              refresh: cookies.get("refresh_token") || undefined,
+            },
+          );
+          const resp = Response.json(verified.subject);
+          setSession(resp, verified.access, verified.refresh);
+          return resp;
+        } catch (e) {
+          console.error(e);
+          return Response.redirect(url.origin + "/authorize");
+        }
       default:
         return new Response("Not found", { status: 404 });
     }
   },
 };
+
+function setSession(
+  response: Response,
+  accessToken?: string,
+  refreshToken?: string,
+) {
+  if (accessToken) {
+    response.headers.append(
+      "Set-Cookie",
+      `access_token=${accessToken}; HttpOnly; SameSite=Strict; Path=/; Max-Age=2147483647`,
+    );
+  }
+  if (refreshToken) {
+    response.headers.append(
+      "Set-Cookie",
+      `refresh_token=${refreshToken}; HttpOnly; SameSite=Strict; Path=/; Max-Age=2147483647`,
+    );
+  }
+}
