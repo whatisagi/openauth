@@ -13,6 +13,7 @@ export default $config({
 
     const auth = new sst.cloudflare.Worker("Auth", {
       handler: "./cloudflare/authorizer.ts",
+      domain: "auth.sst.cheap",
       link: [kv],
       url: true,
     });
@@ -21,6 +22,7 @@ export default $config({
       handler: "./cloudflare/api.ts",
       url: true,
       link: [auth],
+      domain: "api.sst.cheap",
       environment: {
         OPENAUTH_ISSUER: auth.url.apply((v) => v!),
       },
