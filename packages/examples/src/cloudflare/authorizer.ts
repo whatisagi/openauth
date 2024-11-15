@@ -19,22 +19,14 @@ export default {
       storage: CloudflareStorage({
         namespace: env.AuthKV,
       }),
-      ttl: {
-        access: 60 * 5,
-      },
       providers: {
         code: CodeAdapter<{ email: string }>(CodeUI({})),
       },
-      callbacks: {
-        auth: {
-          allowClient: async () => true,
-          success: async (ctx, value) => {
-            console.log("value", value);
-            return ctx.session("user", {
-              email: value.claims.email,
-            });
-          },
-        },
+      allow: async () => true,
+      success: async (ctx, value) => {
+        return ctx.session("user", {
+          email: value.claims.email,
+        });
       },
     }).fetch(request, env, ctx);
   },

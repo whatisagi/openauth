@@ -436,5 +436,17 @@ export function authorizer<
     return c.notFound();
   });
 
+  app.onError(async (err, c) => {
+    if (
+      err instanceof MissingParameterError ||
+      err instanceof UnauthorizedClientError ||
+      err instanceof UnknownProviderError
+    ) {
+      return auth.forward(c, await input.error(err, c.req.raw));
+    }
+
+    return c.text(err.message, 500);
+  });
+
   return app;
 }

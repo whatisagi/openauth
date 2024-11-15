@@ -1,6 +1,6 @@
 import { authorizer } from "../../../core/src/index.js";
 import { CodeAdapter } from "../../../core/src/adapter/code.js";
-import { CodeEnter, CodeStart, CodeUI } from "../../../core/src/ui/code.js";
+import { CodeUI } from "../../../core/src/ui/code.js";
 import { subjects } from "../subjects.js";
 import { MemoryStorage } from "../../../core/src/storage/memory.js";
 
@@ -12,7 +12,6 @@ export default authorizer({
   },
   allow: async () => true,
   success: async (ctx, value) => {
-    console.log("value", value);
     return ctx.session("user", {
       email: value.claims.email,
     });
