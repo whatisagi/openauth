@@ -58,7 +58,8 @@ export function createClient(input: {
       redirectURI: string,
       response: "code" | "token",
     ) {
-      const result = new URL(issuer + "/" + provider + "/authorize");
+      const result = new URL(issuer + "/authorize");
+      result.searchParams.set("provider", provider);
       result.searchParams.set("client_id", input.clientID);
       result.searchParams.set("redirect_uri", redirectURI);
       result.searchParams.set("response_type", response);

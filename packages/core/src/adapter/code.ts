@@ -34,6 +34,7 @@ export function CodeAdapter(config: {
     routes.get("/authorize", async (c) =>
       ctx.forward(c, await config.onStart(c.req.raw)),
     );
+
     routes.post("/submit", async (c) => {
       const code = generate();
       const claims = await c.req.formData();

@@ -1,4 +1,4 @@
-import { Adapter, AdapterOptions } from "./adapter/adapter.js";
+import { Adapter, AdapterOptions, AdapterReturn } from "./adapter/adapter.js";
 import { SubjectPayload, SubjectSchema } from "./session.js";
 import { Hono } from "hono/tiny";
 import { handle as awsHandle } from "hono/aws-lambda";
@@ -26,7 +26,7 @@ import {
 } from "./error.js";
 import { compactDecrypt, CompactEncrypt, SignJWT } from "jose";
 import { Storage, StorageAdapter } from "./storage/storage.js";
-import { KeyPair, keys } from "./keys.js";
+import { keys } from "./keys.js";
 
 export const aws = awsHandle;
 
@@ -270,7 +270,8 @@ export function authorizer<
   }
 
   function issuer(ctx: Context) {
-    const host = ctx.header("x-forwarded-host") ?? new URL(ctx.req.url).host;
+    const host =
+      ctx.req.header("x-forwarded-host") ?? new URL(ctx.req.url).host;
     return `https://${host}`;
   }
 
@@ -279,6 +280,19 @@ export function authorizer<
       authorization: any;
     };
   }>();
+
+  for (const [name, value] of Object.entries(input.providers)) {
+    const route = new Hono<any>();
+    route.use(async (c, next) => {
+      c.set("provider", name);
+      await next();
+    });
+    value(route, {
+      name,
+      ...auth,
+    });
+    app.route(`/${name}`, route);
+  }
 
   app.get("/.well-known/jwks.json", async (c) => {
     const all = await allKeys;
@@ -392,14 +406,17 @@ export function authorizer<
     }
   });
 
-  app.use("/:provider/authorize", async (c, next) => {
-    const provider = c.req.param("provider");
+  app.get("/authorize", async (c, next) => {
+    const provider = c.req.query("provider");
+    if (!provider) return c.text("Missing provider", 400);
+    let authorization = (await auth.get(c, "authorization")) || {};
     const response_type =
-      c.req.query("response_type") || getCookie(c, "response_type");
+      c.req.query("response_type") || authorization.response_type;
     const redirect_uri =
-      c.req.query("redirect_uri") || getCookie(c, "redirect_uri");
-    const state = c.req.query("state") || getCookie(c, "state");
-    const client_id = c.req.query("client_id") || getCookie(c, "client_id");
+      c.req.query("redirect_uri") || authorization.redirect_uri;
+    const state = c.req.query("state") || authorization.state;
+    const client_id = c.req.query("client_id") || authorization.client_id;
+    const audience = c.req.query("audience") || authorization.audience;
 
     if (!provider) {
       c.status(400);
@@ -421,13 +438,13 @@ export function authorizer<
       return c.text("Missing client_id");
     }
 
-    const authorization = {
+    authorization = {
       provider,
       response_type,
       redirect_uri,
       state,
       client_id,
-      audience: c.req.query("audience"),
+      audience,
     };
     await auth.set(c, "authorization", 60 * 10, authorization);
     c.set("authorization", authorization);
@@ -435,21 +452,10 @@ export function authorizer<
     if (input.callbacks.auth.start) {
       await input.callbacks.auth.start(c.req.raw);
     }
-    await next();
+    return app.routes
+      .find((r) => r.path === `/${provider}/authorize`)!
+      .handler(c, next);
   });
-
-  for (const [name, value] of Object.entries(input.providers)) {
-    const route = new Hono<any>();
-    route.use(async (c, next) => {
-      c.set("provider", name);
-      await next();
-    });
-    value(route, {
-      name,
-      ...auth,
-    });
-    app.route(`/${name}`, route);
-  }
 
   app.all("/*", async (c) => {
     return c.notFound();

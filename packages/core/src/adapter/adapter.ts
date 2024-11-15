@@ -5,6 +5,8 @@ export type Adapter<Properties = any> = (
   options: AdapterOptions<Properties>,
 ) => void;
 
+export type AdapterReturn = ReturnType<Adapter>;
+
 export type AdapterRoute = Hono;
 export interface AdapterOptions<Properties> {
   name: string;
@@ -14,6 +16,5 @@ export interface AdapterOptions<Properties> {
   get: (ctx: Context, key: string) => Promise<any>;
   unset: (ctx: Context, key: string) => Promise<void>;
 }
-
 export class AdapterError extends Error {}
 export class AdapterUnknownError extends AdapterError {}

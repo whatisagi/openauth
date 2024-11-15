@@ -47,6 +47,7 @@ test("code flow", async () => {
     "code",
   );
   const response = await auth.request(authorization);
+  expect(response.status).toBe(302);
   const location = new URL(response.headers.get("location")!);
   const code = location.searchParams.get("code");
   expect(code).not.toBeNull();
