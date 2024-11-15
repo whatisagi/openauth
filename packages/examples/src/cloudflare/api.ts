@@ -1,6 +1,6 @@
 import type { Service } from "@cloudflare/workers-types";
 import { subjects } from "../subjects.js";
-import { createClient } from "../../core/src/client.js";
+import { createClient } from "../../../core/src/client.js";
 
 interface Env {
   OPENAUTH_ISSUER: string;

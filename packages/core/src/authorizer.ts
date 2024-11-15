@@ -1,4 +1,4 @@
-import { Adapter, AdapterOptions, AdapterReturn } from "./adapter/adapter.js";
+import { Adapter, AdapterOptions } from "./adapter/adapter.js";
 import { SubjectPayload, SubjectSchema } from "./session.js";
 import { Hono } from "hono/tiny";
 import { handle as awsHandle } from "hono/aws-lambda";
@@ -48,49 +48,28 @@ export function authorizer<
     access?: number;
     refresh?: number;
   };
-  callbacks: {
-    index?(req: Request): Promise<Response>;
-    auth: {
-      error?(
-        error:
-          | MissingParameterError
-          | UnauthorizedClientError
-          | UnknownProviderError,
-        req: Request,
-      ): Promise<Response>;
-      start?(event: Request): Promise<void>;
-      allowClient(
-        clientID: string,
-        audience: string | undefined,
-        redirect: string,
-        req: Request,
-      ): Promise<boolean>;
-      success(
-        response: OnSuccessResponder<SubjectPayload<Sessions>>,
-        input: Result,
-        req: Request,
-      ): Promise<Response>;
-    };
-    /*
-    connect?: {
-      error?(
-        error: InvalidSessionError | UnknownProviderError,
-        req: Request,
-      ): Promise<Response | undefined>;
-      start?(
-        session: SessionValues<Sessions["types"]>,
-        req: Request,
-      ): Promise<void>;
-      success?(
-        session: SessionValues<Sessions["types"]>,
-        input: {},
-      ): Promise<Response>;
-    };
-    */
-  };
+  start?(req: Request): Promise<void>;
+  success(
+    response: OnSuccessResponder<SubjectPayload<Sessions>>,
+    input: Result,
+    req: Request,
+  ): Promise<Response>;
+  error?(
+    error:
+      | MissingParameterError
+      | UnauthorizedClientError
+      | UnknownProviderError,
+    req: Request,
+  ): Promise<Response>;
+  allow(
+    clientID: string,
+    audience: string | undefined,
+    redirect: string,
+    req: Request,
+  ): Promise<boolean>;
 }) {
-  if (!input.callbacks.auth.error) {
-    input.callbacks.auth.error = async (err) => {
+  if (!input.error) {
+    input.error = async (err) => {
       return new Response(err.message, {
         status: 400,
         headers: {
@@ -110,16 +89,13 @@ export function authorizer<
     async success(ctx: Context, properties: any) {
       const authorization =
         ctx.get("authorization") || (await auth.get(ctx, "authorization"));
-      if (!authorization.redirect_uri) {
+      if (!authorization || !authorization.redirect_uri) {
         return auth.forward(
           ctx,
-          await input.callbacks.auth.error!(
-            new UnknownStateError(),
-            ctx.req.raw,
-          ),
+          await input.error!(new UnknownStateError(), ctx.req.raw),
         );
       }
-      return await input.callbacks.auth.success(
+      return await input.success(
         {
           async session(type, properties) {
             const authorization =
@@ -191,7 +167,7 @@ export function authorizer<
     async get(ctx: Context, key: string) {
       const raw = getCookie(ctx, key);
       if (!raw) return;
-      return decrypt(raw);
+      return decrypt(raw).catch(() => {});
     },
     async unset(ctx: Context, key: string) {
       deleteCookie(ctx, key);
@@ -406,7 +382,7 @@ export function authorizer<
     }
   });
 
-  app.get("/authorize", async (c, next) => {
+  app.get("/authorize", async (c) => {
     const provider = c.req.query("provider");
     if (!provider) return c.text("Missing provider", 400);
     let authorization = (await auth.get(c, "authorization")) || {};
@@ -449,12 +425,11 @@ export function authorizer<
     await auth.set(c, "authorization", 60 * 10, authorization);
     c.set("authorization", authorization);
 
-    if (input.callbacks.auth.start) {
-      await input.callbacks.auth.start(c.req.raw);
+    if (input.start) {
+      await input.start(c.req.raw);
     }
-    return app.routes
-      .find((r) => r.path === `/${provider}/authorize`)!
-      .handler(c, next);
+
+    return c.redirect(`/${provider}/authorize`);
   });
 
   app.all("/*", async (c) => {

@@ -1,5 +1,5 @@
 {
-  "name": "@openauthjs/scrap",
+  "name": "@openauthjs/examples",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {

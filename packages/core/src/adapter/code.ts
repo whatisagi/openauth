@@ -7,19 +7,13 @@ interface AdapterState {
   code: string;
 }
 
-export function CodeAdapter(config: {
+export function CodeAdapter<
+  Claims extends Record<string, string> = Record<string, string>,
+>(config: {
   length?: number;
-  onStart: (req: Request) => Promise<Response>;
-  onCodeRequest: (
-    code: string,
-    claims: Record<string, any>,
-    req: Request,
-  ) => Promise<Response>;
-  onCodeInvalid: (
-    code: string,
-    claims: Record<string, any>,
-    req: Request,
-  ) => Promise<Response>;
+  start: (req: Request) => Promise<Response>;
+  send: (code: string, claims: Claims, req: Request) => Promise<Response>;
+  invalid: (code: string, claims: Claims, req: Request) => Promise<Response>;
 }) {
   const length = config.length || 6;
   function generate() {
@@ -32,20 +26,20 @@ export function CodeAdapter(config: {
 
   return function (routes, ctx) {
     routes.get("/authorize", async (c) =>
-      ctx.forward(c, await config.onStart(c.req.raw)),
+      ctx.forward(c, await config.start(c.req.raw)),
     );
 
     routes.post("/submit", async (c) => {
       const code = generate();
-      const claims = await c.req.formData();
+      const claims = (await c.req
+        .formData()
+        .then((claims) => Object.fromEntries(claims))) as Claims;
+      console.log("claims", claims);
       await ctx.set(c, "adapter", 60 * 10, {
-        claims: Object.fromEntries(claims.entries()),
+        claims,
         code,
       });
-      return ctx.forward(
-        c,
-        await config.onCodeRequest(code, claims, c.req.raw),
-      );
+      return ctx.forward(c, await config.send(code, claims, c.req.raw));
     });
 
     routes.post("/verify", async (c) => {
@@ -53,25 +47,25 @@ export function CodeAdapter(config: {
       if (!authorization) throw new UnknownStateError();
       const state = await ctx.get(c, "adapter");
       if (!state) throw new UnknownStateError();
-      console.log("state", state);
       if (!state.code || !state.claims) {
         return ctx.forward(
           c,
-          await config.onCodeInvalid(state.code, state.claims, c.req.raw),
+          await config.invalid(state.code, state.claims, c.req.raw),
         );
       }
       const form = await c.req.formData();
       const compare = form.get("code")?.toString();
       if (!compare) throw new MissingParameterError("code");
-      console.log("comparing", state.code, "to", compare);
       if (state.code !== compare) {
         return ctx.forward(
           c,
-          await config.onCodeInvalid(compare, state.claims, c.req.raw),
+          await config.invalid(compare, state.claims, c.req.raw),
         );
       }
       await ctx.unset(c, "adapter");
       return ctx.forward(c, await ctx.success(c, { claims: state.claims }));
     });
-  } satisfies Adapter<{ claims: Record<string, string> }>;
+  } satisfies Adapter<{ claims: Claims }>;
 }
+
+export type CodeAdapterOptions = Parameters<typeof CodeAdapter>[0];

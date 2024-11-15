@@ -1,5 +1,5 @@
 import { object, string } from "valibot";
-import { createSubjects } from "../core/src";
+import { createSubjects } from "../../core/src/index.js";
 
 export const subjects = createSubjects({
   user: object({

@@ -1,3 +1,4 @@
+import { CodeAdapterOptions } from "../adapter/code.js";
 import { Header, Layout } from "./base.js";
 
 export function CodeStart(props: {
@@ -38,7 +39,7 @@ export function CodeStart(props: {
         </div>
       </div>
     </Layout>
-  );
+  ) as string;
 }
 
 export function CodeEnter(props: {
@@ -99,5 +100,49 @@ export function CodeEnter(props: {
         </div>
       </div>
     </Layout>
-  );
+  ) as string;
+}
+
+export function CodeUI(props: {
+  title?: string;
+  description?: string;
+  logo?: string;
+}) {
+  return {
+    length: 6,
+    start: async () =>
+      new Response(
+        CodeStart({
+          logo: props.logo,
+          title: props.title,
+          description: props.description,
+          mode: "email",
+        }),
+        {
+          headers: {
+            "Content-Type": "text/html",
+          },
+        },
+      ),
+    send: async (code, claims) =>
+      new Response(CodeEnter({ mode: "email", debugCode: code, claims }), {
+        headers: {
+          "Content-Type": "text/html",
+        },
+      }),
+    invalid: async (_, claims) => {
+      return new Response(
+        CodeEnter({
+          mode: "email",
+          error: "Invalid code, try again",
+          claims,
+        }),
+        {
+          headers: {
+            "Content-Type": "text/html",
+          },
+        },
+      );
+    },
+  } satisfies CodeAdapterOptions;
 }

@@ -46,7 +46,13 @@ test("code flow", async () => {
     "https://client.example.com/callback",
     "code",
   );
-  const response = await auth.request(authorization);
+  let response = await auth.request(authorization);
+  expect(response.status).toBe(302);
+  response = await auth.request(response.headers.get("location")!, {
+    headers: {
+      cookie: response.headers.get("set-cookie")!,
+    },
+  });
   expect(response.status).toBe(302);
   const location = new URL(response.headers.get("location")!);
   const code = location.searchParams.get("code");
