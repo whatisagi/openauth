@@ -3,7 +3,8 @@
   "type": "module",
   "devDependencies": {
     "@tsconfig/node20": "20.1.4",
-    "hono": "4.6.9"
+    "hono": "4.6.9",
+    "valibot": "1.0.0-beta.5"
   },
   "peerDependencies": {
     "hono": "^4.0.0"

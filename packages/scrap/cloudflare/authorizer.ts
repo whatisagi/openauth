@@ -8,8 +8,6 @@ import {
 import { subjects } from "../subjects.js";
 
 interface Env {
-  OPENAUTH_PUBLIC_KEY: string;
-  OPENAUTH_PRIVATE_KEY: string;
   AuthKV: KVNamespace;
 }
 
@@ -20,15 +18,15 @@ export default {
       storage: CloudflareStorage({
         namespace: env.AuthKV,
       }),
-      publicKey: env.OPENAUTH_PUBLIC_KEY,
-      privateKey: env.OPENAUTH_PRIVATE_KEY,
       ttl: {
         access: 60 * 5,
       },
       providers: {
         code: CodeAdapter({
           length: 6,
-          onCodeRequest: async (code, claims, req) => {
+          onCodeRequest: async (code, _claims, req) => {
+            // TODO: send over email
+            console.log("code", code);
             const resp = new Response(
               '<a href="' +
                 new URL(req.url).origin +
@@ -43,15 +41,15 @@ export default {
             );
             return resp;
           },
-          onCodeInvalid: async (code, claims, req) => {
+          onCodeInvalid: async () => {
             return new Response("Code invalid");
           },
         }),
       },
       callbacks: {
         auth: {
-          allowClient: async (clientID, aud, redirect) => true,
-          success: async (ctx, value) => {
+          allowClient: async () => true,
+          success: async (ctx) => {
             return ctx.session("user", {
               userID: "123",
               workspaceID: "123",

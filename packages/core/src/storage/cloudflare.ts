@@ -8,9 +8,10 @@ export function CloudflareStorage(
   options: CloudflareStorageOptions,
 ): StorageAdapter {
   return {
-    async get<T>(key: string[]) {
+    async get(key: string[]) {
       const value = await options.namespace.get(joinKey(key), "json");
-      return value === null ? null : (value as T);
+      if (!value) return;
+      return value as Record<string, any>;
     },
 
     async set(key: string[], value: any, ttl?: number) {

@@ -10,11 +10,11 @@ interface Env {
 export default {
   async fetch(request: Request, env: Env) {
     process.env.OPENAUTH_ISSUER = env.OPENAUTH_ISSUER;
-
     const client = createClient({
       clientID: "123",
-      fetch: (...args) => env.Auth.fetch(...args),
+      fetch: (input, init) => env.Auth.fetch(input, init),
     });
+    fetch;
     const url = new URL(request.url);
     const redirectURI = url.origin + "/callback";
 
@@ -31,9 +31,8 @@ export default {
           return new Response(e.toString());
         }
       case "/authorize":
-        return Response.redirect(client.authorize(redirectURI, "code"));
+        return Response.redirect(client.authorize("code", redirectURI, "code"));
       case "/":
-        console.log("here", request.headers.get("cookie"));
         const cookies = new URLSearchParams(
           request.headers.get("cookie")?.replaceAll("; ", "&"),
         );

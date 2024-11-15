@@ -1,5 +1,5 @@
 export interface StorageAdapter {
-  get(key: string[]): Promise<any | null>;
+  get(key: string[]): Promise<Record<string, any> | undefined>;
   remove(key: string[]): Promise<void>;
   set(key: string[], value: any, ttl?: number): Promise<void>;
   scan(prefix: string[]): AsyncIterable<[string, any]>;
@@ -36,7 +36,10 @@ export namespace Storage {
     return adapter.remove(encode(key));
   }
 
-  export function scan(adapter: StorageAdapter, key: string[]) {
+  export function scan<T>(
+    adapter: StorageAdapter,
+    key: string[],
+  ): AsyncIterable<[string, T]> {
     return adapter.scan(encode(key));
   }
 }

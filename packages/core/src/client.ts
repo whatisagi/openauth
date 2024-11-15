@@ -15,10 +15,16 @@ interface WellKnown {
 const jwksCache = new Map<string, ReturnType<typeof createLocalJWKSet>>();
 const issuerCache = new Map<string, WellKnown>();
 
+interface ResponseLike {
+  json(): Promise<unknown>;
+  ok: Response["ok"];
+}
+type FetchLike = (...args: any[]) => Promise<ResponseLike>;
+
 export function createClient(input: {
   clientID: string;
   issuer?: string;
-  fetch?: typeof fetch;
+  fetch?: FetchLike;
 }) {
   const issuer = input.issuer || process.env.OPENAUTH_ISSUER;
   if (!issuer) throw new Error("No issuer");
@@ -109,7 +115,6 @@ export function createClient(input: {
         }>(token, jwks, {
           issuer,
         });
-        console.log("got jwt type", result.payload.type);
         const validated = await subjects[result.payload.type][
           "~standard"
         ].validate(result.payload.properties);
@@ -122,7 +127,6 @@ export function createClient(input: {
           };
       } catch (e) {
         if (e instanceof errors.JWTExpired && options?.refresh) {
-          console.log("access token expired, refreshing");
           const wk = await getIssuer();
           const tokens = await f(wk.token_endpoint, {
             method: "POST",

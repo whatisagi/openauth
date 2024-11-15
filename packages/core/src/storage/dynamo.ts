@@ -20,8 +20,8 @@ export function DynamoStorage(options: DynamoStorageOptions): StorageAdapter {
   function parseKey(key: string[]) {
     if (key.length === 2) {
       return {
-        pk: joinKey(key),
-        sk: "value",
+        pk: key[0],
+        sk: key[1],
       };
     }
 

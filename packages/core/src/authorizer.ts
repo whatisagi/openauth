@@ -18,22 +18,15 @@ export type Prettify<T> = {
   [K in keyof T]: T[K];
 } & {};
 
-import process from "node:process";
 import {
   MissingParameterError,
   UnauthorizedClientError,
   UnknownProviderError,
   UnknownStateError,
 } from "./error.js";
-import {
-  compactDecrypt,
-  CompactEncrypt,
-  exportJWK,
-  importPKCS8,
-  importSPKI,
-  SignJWT,
-} from "jose";
+import { compactDecrypt, CompactEncrypt, SignJWT } from "jose";
 import { Storage, StorageAdapter } from "./storage/storage.js";
+import { KeyPair, keys } from "./keys.js";
 
 export const aws = awsHandle;
 
@@ -55,8 +48,6 @@ export function authorizer<
     access?: number;
     refresh?: number;
   };
-  publicKey?: string;
-  privateKey?: string;
   callbacks: {
     index?(req: Request): Promise<Response>;
     auth: {
@@ -109,31 +100,19 @@ export function authorizer<
     };
   }
 
-  const publicKey = input.publicKey ?? process.env.OPENAUTH_PUBLIC_KEY;
-  if (!publicKey) throw new Error("No public key");
-  const privateKey = input.privateKey ?? process.env.OPENAUTH_PRIVATE_KEY;
-  if (!privateKey) throw new Error("No private key");
   const ttlAccess = input.ttl?.access ?? 60 * 60 * 24 * 30;
   const ttlRefresh = input.ttl?.refresh ?? 60 * 60 * 24 * 365;
 
-  const key = {
-    algorithm: "RS512",
-    header: { alg: "RS512", typ: "JWT", kid: "sst" },
-    signing: {
-      privateKey: importPKCS8(privateKey, "RS512"),
-      publicKey: importSPKI(publicKey, "RS512", {
-        extractable: true,
-      }),
-    },
-    encryption: {
-      privateKey: importPKCS8(privateKey, "RSA-OAEP-512"),
-      publicKey: importSPKI(publicKey, "RSA-OAEP-512"),
-    },
-  };
+  const allKeys = keys(input.storage);
+  const primaryKey = new Promise<KeyPair>(async (resolve) => {
+    const all = await allKeys;
+    resolve(all[0]);
+  });
 
   const auth: Omit<AdapterOptions<any>, "name"> = {
     async success(ctx: Context, properties: any) {
-      const authorization = await auth.get(ctx, "authorization");
+      const authorization =
+        ctx.get("authorization") || (await auth.get(ctx, "authorization"));
       if (!authorization.redirect_uri) {
         return auth.forward(
           ctx,
@@ -146,7 +125,9 @@ export function authorizer<
       return await input.callbacks.auth.success(
         {
           async session(type, properties) {
-            const authorization = await auth.get(ctx, "authorization");
+            const authorization =
+              ctx.get("authorization") ||
+              (await auth.get(ctx, "authorization"));
             auth.unset(ctx, "authorization");
             if (authorization.response_type === "token") {
               const location = new URL(authorization.redirect_uri);
@@ -210,13 +191,11 @@ export function authorizer<
           : {}),
       });
     },
-
     async get(ctx: Context, key: string) {
       const raw = getCookie(ctx, key);
       if (!raw) return;
       return decrypt(raw);
     },
-
     async unset(ctx: Context, key: string) {
       deleteCookie(ctx, key);
     },
@@ -227,7 +206,7 @@ export function authorizer<
       new TextEncoder().encode(JSON.stringify(value)),
     )
       .setProtectedHeader({ alg: "RSA-OAEP-512", enc: "A256GCM" })
-      .encrypt(await key.encryption.publicKey);
+      .encrypt(await primaryKey.then((k) => k.encryption.public));
   }
 
   async function resolveSubject(type: string, properties: any) {
@@ -270,8 +249,14 @@ export function authorizer<
         sub: subject,
       })
         .setExpirationTime(Date.now() / 1000 + ttlAccess)
-        .setProtectedHeader(key.header)
-        .sign(await key.signing.privateKey),
+        .setProtectedHeader(
+          await primaryKey.then((k) => ({
+            alg: k.alg,
+            kid: k.id,
+            typ: "JWT",
+          })),
+        )
+        .sign(await primaryKey.then((v) => v.signing.private)),
       refresh: [subject, refreshToken].join(":"),
     };
   }
@@ -279,9 +264,10 @@ export function authorizer<
   async function decrypt(value: string) {
     return JSON.parse(
       new TextDecoder().decode(
-        await compactDecrypt(value, await key.encryption.privateKey).then(
-          (value) => value.plaintext,
-        ),
+        await compactDecrypt(
+          value,
+          await primaryKey.then((v) => v.encryption.private),
+        ).then((value) => value.plaintext),
       ),
     );
   }
@@ -291,17 +277,16 @@ export function authorizer<
     return `https://${host}`;
   }
 
-  const app = new Hono();
+  const app = new Hono<{
+    Variables: {
+      authorization: any;
+    };
+  }>();
 
   app.get("/.well-known/jwks.json", async (c) => {
-    const jwk = await exportJWK(await key.signing.publicKey);
+    const all = await allKeys;
     return c.json({
-      keys: [
-        {
-          ...jwk,
-          kid: "sst",
-        },
-      ],
+      keys: all.map((item) => item.jwk),
     });
   });
 
@@ -387,7 +372,6 @@ export function authorizer<
       const token = splits.pop()!;
       const subject = splits.join(":");
       const key = ["oauth:refresh", subject, token];
-      console.log("looking for", key.join(":"));
       const payload = await Storage.get<{
         type: string;
         properties: any;
@@ -413,7 +397,6 @@ export function authorizer<
 
   app.use("/:provider/authorize", async (c, next) => {
     const provider = c.req.param("provider");
-    console.log("authorize request for", provider);
     const response_type =
       c.req.query("response_type") || getCookie(c, "response_type");
     const redirect_uri =
@@ -441,14 +424,16 @@ export function authorizer<
       return c.text("Missing client_id");
     }
 
-    await auth.set(c, "authorization", 60 * 10, {
+    const authorization = {
       provider,
       response_type,
       redirect_uri,
       state,
       client_id,
       audience: c.req.query("audience"),
-    });
+    };
+    await auth.set(c, "authorization", 60 * 10, authorization);
+    c.set("authorization", authorization);
 
     if (input.callbacks.auth.start) {
       await input.callbacks.auth.start(c.req.raw);
