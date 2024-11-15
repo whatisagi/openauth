@@ -3,8 +3,7 @@ import { createSubjects } from "../core/src";
 
 export const subjects = createSubjects({
   user: object({
-    userID: string(),
-    workspaceID: string(),
+    email: string(),
   }),
   api: object({
     userID: string(),

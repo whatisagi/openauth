@@ -104,10 +104,7 @@ export function authorizer<
   const ttlRefresh = input.ttl?.refresh ?? 60 * 60 * 24 * 365;
 
   const allKeys = keys(input.storage);
-  const primaryKey = new Promise<KeyPair>(async (resolve) => {
-    const all = await allKeys;
-    resolve(all[0]);
-  });
+  const primaryKey = allKeys.then((all) => all[0]);
 
   const auth: Omit<AdapterOptions<any>, "name"> = {
     async success(ctx: Context, properties: any) {

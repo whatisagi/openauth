@@ -1,5 +1,6 @@
 import { authorizer } from "../../core/src/index.js";
 import { CodeAdapter } from "../../core/src/adapter/code.js";
+import { CodeEnter, CodeStart } from "../../core/src/ui/code.js";
 import { CloudflareStorage } from "../../core/src/storage/cloudflare.js";
 import {
   type ExecutionContext,
@@ -24,35 +25,50 @@ export default {
       providers: {
         code: CodeAdapter({
           length: 6,
-          onCodeRequest: async (code, _claims, req) => {
-            // TODO: send over email
-            console.log("code", code);
-            const resp = new Response(
-              '<a href="' +
-                new URL(req.url).origin +
-                "/code/callback?code=" +
-                code +
-                '">Link</a>',
+          onStart: async (req) => {
+            return new Response(
+              CodeStart({
+                mode: "email",
+              }),
               {
                 headers: {
                   "Content-Type": "text/html",
                 },
               },
             );
-            return resp;
           },
-          onCodeInvalid: async () => {
-            return new Response("Code invalid");
+          onCodeRequest: async (code, claims, req) =>
+            new Response(
+              CodeEnter({ mode: "email", debugCode: code, claims }),
+              {
+                headers: {
+                  "Content-Type": "text/html",
+                },
+              },
+            ),
+          onCodeInvalid: async (_, claims) => {
+            return new Response(
+              CodeEnter({
+                mode: "email",
+                error: "Invalid code, try again",
+                claims,
+              }),
+              {
+                headers: {
+                  "Content-Type": "text/html",
+                },
+              },
+            );
           },
         }),
       },
       callbacks: {
         auth: {
           allowClient: async () => true,
-          success: async (ctx) => {
+          success: async (ctx, value) => {
+            console.log("value", value);
             return ctx.session("user", {
-              userID: "123",
-              workspaceID: "123",
+              email: value.claims.email,
             });
           },
         },

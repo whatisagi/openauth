@@ -9,6 +9,7 @@ interface AdapterState {
 
 export function CodeAdapter(config: {
   length?: number;
+  onStart: (req: Request) => Promise<Response>;
   onCodeRequest: (
     code: string,
     claims: Record<string, any>,
@@ -30,15 +31,14 @@ export function CodeAdapter(config: {
   }
 
   return function (routes, ctx) {
-    routes.get("/authorize", async (c) => {
+    routes.get("/authorize", async (c) =>
+      ctx.forward(c, await config.onStart(c.req.raw)),
+    );
+    routes.post("/submit", async (c) => {
       const code = generate();
-      const claims = { ...c.req.query() };
-      delete claims["client_id"];
-      delete claims["redirect_uri"];
-      delete claims["response_type"];
-      delete claims["provider"];
+      const claims = await c.req.formData();
       await ctx.set(c, "adapter", 60 * 10, {
-        claims,
+        claims: Object.fromEntries(claims.entries()),
         code,
       });
       return ctx.forward(
@@ -47,7 +47,7 @@ export function CodeAdapter(config: {
       );
     });
 
-    routes.get("/callback", async (c) => {
+    routes.post("/verify", async (c) => {
       const authorization = getCookie(c, "authorization");
       if (!authorization) throw new UnknownStateError();
       const state = await ctx.get(c, "adapter");
@@ -59,7 +59,8 @@ export function CodeAdapter(config: {
           await config.onCodeInvalid(state.code, state.claims, c.req.raw),
         );
       }
-      const compare = c.req.query("code");
+      const form = await c.req.formData();
+      const compare = form.get("code")?.toString();
       if (!compare) throw new MissingParameterError("code");
       console.log("comparing", state.code, "to", compare);
       if (state.code !== compare) {
