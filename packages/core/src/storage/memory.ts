@@ -23,22 +23,15 @@ export function MemoryStorage(): StorageAdapter {
   return {
     async get(key: string[]) {
       const match = search(joinKey(key));
-      if (!match.found) return;
-      const value = store[match.index][1];
-      const { ttl, ...rest } = value;
-      if (ttl && ttl < Date.now() / 1000) return;
-      return rest;
+      if (match.found) {
+        return store[match.index][1];
+      }
+      return;
     },
     async set(key: string[], value: any, ttl?: number) {
       const joined = joinKey(key);
       const match = search(joined);
-      store[match.index] = [
-        joined,
-        {
-          ...value,
-          ttl: Date.now() / 1000 + ttl,
-        },
-      ];
+      store[match.index] = [joined, value];
     },
     async remove(key: string[]) {
       const joined = joinKey(key);
