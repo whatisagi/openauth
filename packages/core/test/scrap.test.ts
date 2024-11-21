@@ -3,25 +3,21 @@ import { authorizer } from "../src/authorizer.js";
 import { MemoryStorage } from "../src/storage/memory.js";
 import { createClient, createSubjects } from "../src/index.js";
 import { object, string } from "valibot";
-import { CodeAdapter } from "../src/adapter/code.js";
 
 const subjects = createSubjects({
   user: object({
     userID: string(),
   }),
 });
+
 const auth = authorizer({
   storage: MemoryStorage(),
   subjects,
-  callbacks: {
-    auth: {
-      allowClient: async () => true,
-      success: async (ctx, value) => {
-        return ctx.session("user", {
-          userID: "123",
-        });
-      },
-    },
+  allow: async () => true,
+  success: async (ctx) => {
+    return ctx.session("user", {
+      userID: "123",
+    });
   },
   ttl: {
     access: 1,

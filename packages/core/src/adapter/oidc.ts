@@ -68,11 +68,9 @@ export function OidcAdapter(config: OidcConfig) {
       authorization.searchParams.set("nonce", adapter.nonce);
       authorization.searchParams.set("redirect_uri", adapter.redirect);
       authorization.searchParams.set("scope", ["openid", ...scopes].join(" "));
-
       for (const [key, value] of Object.entries(query)) {
         authorization.searchParams.set(key, value);
       }
-
       return c.redirect(authorization.toString());
     });
 
