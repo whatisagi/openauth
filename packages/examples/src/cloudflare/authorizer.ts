@@ -1,7 +1,7 @@
-import { authorizer } from "../../../core/src/index.js";
-import { CodeAdapter } from "../../../core/src/adapter/code.js";
-import { CodeUI } from "../../../core/src/ui/code.js";
-import { CloudflareStorage } from "../../../core/src/storage/cloudflare.js";
+import { authorizer } from "@openauthjs/core";
+import { CodeAdapter } from "@openauthjs/core/adapter/code";
+import { CodeUI } from "@openauthjs/core/ui/code";
+import { CloudflareStorage } from "@openauthjs/core/storage/cloudflare";
 import {
   type ExecutionContext,
   type KVNamespace,

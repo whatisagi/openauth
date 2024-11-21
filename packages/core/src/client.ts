@@ -7,9 +7,10 @@ import {
   InvalidSessionError,
 } from "./error.js";
 
-interface WellKnown {
+export interface WellKnown {
   jwks_uri: string;
   token_endpoint: string;
+  authorization_endpoint: string;
 }
 
 const jwksCache = new Map<string, ReturnType<typeof createLocalJWKSet>>();

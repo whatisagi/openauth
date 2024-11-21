@@ -12,6 +12,7 @@
   "dependencies": {
     "prettier": "3.3.3",
     "sst": "3.3.21",
-    "valibot": "1.0.0-beta.5"
+    "valibot": "1.0.0-beta.5",
+    "@openauthjs/core": "workspace:*"
   }
 }

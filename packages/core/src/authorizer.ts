@@ -68,8 +68,9 @@ export function authorizer<
     req: Request,
   ): Promise<boolean>;
 }) {
-  if (!input.error) {
-    input.error = async (err) => {
+  const error =
+    input.error ??
+    function (err) {
       return new Response(err.message, {
         status: 400,
         headers: {
@@ -77,7 +78,6 @@ export function authorizer<
         },
       });
     };
-  }
 
   const ttlAccess = input.ttl?.access ?? 60 * 60 * 24 * 30;
   const ttlRefresh = input.ttl?.refresh ?? 60 * 60 * 24 * 365;
@@ -167,7 +167,9 @@ export function authorizer<
     async get(ctx: Context, key: string) {
       const raw = getCookie(ctx, key);
       if (!raw) return;
-      return decrypt(raw).catch(() => {});
+      return decrypt(raw).catch((ex) => {
+        console.error(ex);
+      });
     },
     async unset(ctx: Context, key: string) {
       deleteCookie(ctx, key);
@@ -442,7 +444,7 @@ export function authorizer<
       err instanceof UnauthorizedClientError ||
       err instanceof UnknownProviderError
     ) {
-      return auth.forward(c, await input.error(err, c.req.raw));
+      return auth.forward(c, await error(err, c.req.raw));
     }
 
     return c.text(err.message, 500);

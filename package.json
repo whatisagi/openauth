@@ -1,5 +1,5 @@
 {
-  "name": "@openauthjs/core",
+  "name": "openauthjs",
   "module": "index.ts",
   "type": "module",
   "workspaces": [

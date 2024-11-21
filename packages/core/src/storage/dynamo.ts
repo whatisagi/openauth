@@ -11,7 +11,7 @@ interface DynamoStorageOptions {
   sk?: string;
 }
 
-export function DynamoStorage(options: DynamoStorageOptions): StorageAdapter {
+export function DynamoStorage(options: DynamoStorageOptions) {
   const client = new AwsClient({
     ...options,
     service: "dynamodb",

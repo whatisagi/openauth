@@ -1,6 +1,6 @@
 import type { Service } from "@cloudflare/workers-types";
 import { subjects } from "../subjects.js";
-import { createClient } from "../../../core/src/client.js";
+import { createClient } from "@openauthjs/core";
 
 interface Env {
   OPENAUTH_ISSUER: string;
@@ -31,7 +31,10 @@ export default {
           return new Response(e.toString());
         }
       case "/authorize":
-        return Response.redirect(client.authorize("code", redirectURI, "code"));
+        return Response.redirect(
+          client.authorize("code", redirectURI, "code"),
+          302,
+        );
       case "/":
         const cookies = new URLSearchParams(
           request.headers.get("cookie")?.replaceAll("; ", "&"),
@@ -49,7 +52,7 @@ export default {
           return resp;
         } catch (e) {
           console.error(e);
-          return Response.redirect(url.origin + "/authorize");
+          return Response.redirect(url.origin + "/authorize", 302);
         }
       default:
         return new Response("Not found", { status: 404 });

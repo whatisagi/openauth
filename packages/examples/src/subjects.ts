@@ -1,5 +1,5 @@
 import { object, string } from "valibot";
-import { createSubjects } from "../../core/src/index.js";
+import { createSubjects } from "@openauthjs/core";
 
 export const subjects = createSubjects({
   user: object({
