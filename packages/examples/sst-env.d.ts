@@ -7,14 +7,28 @@ export {}
 import "sst"
 declare module "sst" {
   export interface Resource {
+    "LambdaApi": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
+    "LambdaAuth": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
+    "LambdaAuthTable": {
+      "name": string
+      "type": "sst.aws.Dynamo"
+    }
   }
 }
 // cloudflare 
 import * as cloudflare from "@cloudflare/workers-types";
 declare module "sst" {
   export interface Resource {
-    "Api": cloudflare.Service
-    "Auth": cloudflare.Service
-    "AuthKV": cloudflare.KVNamespace
+    "CloudflareApi": cloudflare.Service
+    "CloudflareAuth": cloudflare.Service
+    "CloudflareAuthKV": cloudflare.KVNamespace
   }
 }

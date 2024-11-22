@@ -219,7 +219,7 @@ export function authorizer<
         mode: "access",
         type: value.type,
         properties: value.properties,
-        audience: issuer(ctx),
+        aud: value.clientID,
         iss: issuer(ctx),
         sub: subject,
       })

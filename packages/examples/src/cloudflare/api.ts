@@ -14,7 +14,6 @@ export default {
       clientID: "123",
       fetch: (input, init) => env.Auth.fetch(input, init),
     });
-    fetch;
     const url = new URL(request.url);
     const redirectURI = url.origin + "/callback";
 

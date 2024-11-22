@@ -1,0 +1,66 @@
+import { Context, Hono } from "hono";
+import { getCookie, setCookie } from "hono/cookie";
+import { subjects } from "../subjects.js";
+import { createClient } from "@openauthjs/core";
+import { handle } from "hono/aws-lambda";
+
+const client = createClient({
+  clientID: "123",
+});
+
+const app = new Hono()
+  .get("/authorize", async (c) => {
+    const origin = new URL(c.req.url).origin;
+    return c.redirect(
+      client.authorize("code", origin + "/callback", "code"),
+      302,
+    );
+  })
+  .get("/callback", async (c) => {
+    const origin = new URL(c.req.url).origin;
+    try {
+      const code = c.req.query("code");
+      if (!code) throw new Error("Missing code");
+      const tokens = await client.exchange(code, origin + "/callback");
+      setSession(c, tokens.access, tokens.refresh);
+      return c.redirect("/", 302);
+    } catch (e: any) {
+      return new Response(e.toString());
+    }
+  })
+  .get("/", async (c) => {
+    console.log(process.env.OPENAUTH_ISSUER);
+    const access = getCookie(c, "access_token");
+    const refresh = getCookie(c, "refresh_token");
+    try {
+      const verified = await client.verify(subjects, access!, {
+        refresh,
+      });
+      setSession(c, verified.access, verified.refresh);
+      return c.json(verified.subject);
+    } catch (e) {
+      console.error(e);
+      return c.redirect("/authorize", 302);
+    }
+  });
+
+export const handler = handle(app);
+
+function setSession(c: Context, accessToken?: string, refreshToken?: string) {
+  if (accessToken) {
+    setCookie(c, "access_token", accessToken, {
+      httpOnly: true,
+      sameSite: "Strict",
+      path: "/",
+      maxAge: 34560000,
+    });
+  }
+  if (refreshToken) {
+    setCookie(c, "refresh_token", refreshToken, {
+      httpOnly: true,
+      sameSite: "Strict",
+      path: "/",
+      maxAge: 34560000,
+    });
+  }
+}

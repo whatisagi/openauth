@@ -36,9 +36,8 @@ export interface KeyPair {
 
 export async function keys(storage: StorageAdapter): Promise<KeyPair[]> {
   const results = [] as KeyPair[];
-  for await (const [_key, value] of Storage.scan<SerializedKeyPair>(storage, [
-    "oauth:key",
-  ])) {
+  const scanner = Storage.scan<SerializedKeyPair>(storage, ["oauth:key"]);
+  for await (const [_key, value] of scanner) {
     const publicKey = await importSPKI(value.publicKey, alg, {
       extractable: true,
     });

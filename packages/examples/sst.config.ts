@@ -5,21 +5,20 @@ export default $config({
       name: "scrap",
       removal: input?.stage === "production" ? "retain" : "remove",
       home: "cloudflare",
-      providers: { random: "4.16.7", tls: "5.0.9" },
+      providers: { random: "4.16.7", tls: "5.0.9", aws: "6.60.0" },
     };
   },
   async run() {
-    const kv = new sst.cloudflare.Kv("AuthKV");
-
-    const auth = new sst.cloudflare.Worker("Auth", {
-      handler: "./cloudflare/authorizer.ts",
+    // cloudflare
+    const kv = new sst.cloudflare.Kv("CloudflareAuthKV");
+    const auth = new sst.cloudflare.Worker("CloudflareAuth", {
+      handler: "./src/cloudflare/authorizer.ts",
       domain: "auth.sst.cheap",
       link: [kv],
       url: true,
     });
-
-    const api = new sst.cloudflare.Worker("Api", {
-      handler: "./cloudflare/api.ts",
+    new sst.cloudflare.Worker("CloudflareApi", {
+      handler: "./src/cloudflare/api.ts",
       url: true,
       link: [auth],
       domain: "api.sst.cheap",
@@ -28,9 +27,29 @@ export default $config({
       },
     });
 
-    return {
-      api: api.url,
-      url: auth.url,
-    };
+    // lambda
+    const table = new sst.aws.Dynamo("LambdaAuthTable", {
+      fields: {
+        pk: "string",
+        sk: "string",
+      },
+      primaryIndex: {
+        hashKey: "pk",
+        rangeKey: "sk",
+      },
+    });
+    const lambdaAuth = new sst.aws.Function("LambdaAuth", {
+      handler: "./src/lambda/authorizer.handler",
+      url: true,
+      link: [table],
+    });
+
+    new sst.aws.Function("LambdaApi", {
+      handler: "./src/lambda/api.handler",
+      url: true,
+      environment: {
+        OPENAUTH_ISSUER: lambdaAuth.url.apply((v) => v!.replace(/\/$/, "")),
+      },
+    });
   },
 });
