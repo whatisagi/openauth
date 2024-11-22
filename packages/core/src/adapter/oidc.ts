@@ -1,8 +1,13 @@
 import { createLocalJWKSet, JSONWebKeySet, jwtVerify } from "jose";
 import { WellKnown } from "../client.js";
-import { MissingParameterError, UnknownStateError } from "../error.js";
+import {
+  MissingParameterError,
+  OauthError,
+  UnknownStateError,
+} from "../error.js";
 import { Adapter } from "./adapter.js";
 import { JWTPayload } from "hono/utils/jwt/types";
+import { getRelativeUrl } from "../util.js";
 
 export interface OidcConfig {
   clientID: string;
@@ -46,18 +51,12 @@ export function OidcAdapter(config: OidcConfig) {
 
   return function (routes, ctx) {
     routes.get("/authorize", async (c) => {
-      const redirect = new URL(c.req.url);
-      redirect.pathname = redirect.pathname.replace(/authorize.*$/, "callback");
-      redirect.search = "";
-      redirect.host = c.req.header("x-forwarded-host") || redirect.host;
-
       const adapter: AdapterState = {
         state: crypto.randomUUID(),
         nonce: crypto.randomUUID(),
-        redirect: redirect.toString(),
+        redirect: getRelativeUrl(c, "./callback"),
       };
       await ctx.set(c, "adapter", 60 * 10, adapter);
-
       const authorization = new URL(
         await wk.then((r) => r.authorization_endpoint),
       );
@@ -75,16 +74,22 @@ export function OidcAdapter(config: OidcConfig) {
     });
 
     routes.post("/callback", async (c) => {
-      const adapter = (await ctx.get(c, "adapter")) as AdapterState;
-      if (!adapter) throw new UnknownStateError();
+      const adapter = await ctx.get<AdapterState>(c, "adapter");
+      if (!adapter) return c.redirect(getRelativeUrl(c, "./authorize"));
       const body = await c.req.formData();
+      const error = body.get("error");
+      if (error)
+        throw new OauthError(
+          error.toString() as any,
+          body.get("error_description")?.toString() || "",
+        );
       const idToken = body.get("id_token");
-      if (!idToken) throw new MissingParameterError("id_token");
+      if (!idToken) throw new OauthError("invalid_request", "Missing id_token");
       const result = await jwtVerify(idToken.toString(), await jwks, {
         audience: config.clientID,
       });
       if (result.payload.nonce !== adapter.nonce) {
-        throw new Error("Invalid nonce");
+        throw new OauthError("invalid_request", "Invalid nonce");
       }
       return ctx.success(c, {
         id: result.payload,

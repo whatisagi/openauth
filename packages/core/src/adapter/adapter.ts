@@ -12,8 +12,13 @@ export interface AdapterOptions<Properties> {
   name: string;
   success: (ctx: Context, properties: Properties) => Promise<Response>;
   forward: (ctx: Context, response: Response) => Response;
-  set: (ctx: Context, key: string, maxAge: number, value: any) => Promise<void>;
-  get: (ctx: Context, key: string) => Promise<any>;
+  set: <T>(
+    ctx: Context,
+    key: string,
+    maxAge: number,
+    value: T,
+  ) => Promise<void>;
+  get: <T>(ctx: Context, key: string) => Promise<T>;
   unset: (ctx: Context, key: string) => Promise<void>;
 }
 export class AdapterError extends Error {}

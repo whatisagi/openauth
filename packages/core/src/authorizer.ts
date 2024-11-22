@@ -14,16 +14,20 @@ export interface OnSuccessResponder<
   ): Promise<Response>;
 }
 
+interface AuthorizationState {
+  provider: string;
+  redirect_uri: string;
+  response_type: string;
+  state: string;
+  client_id: string;
+  audience?: string;
+}
+
 export type Prettify<T> = {
   [K in keyof T]: T[K];
 } & {};
 
-import {
-  MissingParameterError,
-  UnauthorizedClientError,
-  UnknownProviderError,
-  UnknownStateError,
-} from "./error.js";
+import { OauthError, UnknownStateError } from "./error.js";
 import { compactDecrypt, CompactEncrypt, SignJWT } from "jose";
 import { Storage, StorageAdapter } from "./storage/storage.js";
 import { keys } from "./keys.js";
@@ -54,13 +58,7 @@ export function authorizer<
     input: Result,
     req: Request,
   ): Promise<Response>;
-  error?(
-    error:
-      | MissingParameterError
-      | UnauthorizedClientError
-      | UnknownProviderError,
-    req: Request,
-  ): Promise<Response>;
+  error?(error: UnknownStateError, req: Request): Promise<Response>;
   allow(
     clientID: string,
     audience: string | undefined,
@@ -87,21 +85,10 @@ export function authorizer<
 
   const auth: Omit<AdapterOptions<any>, "name"> = {
     async success(ctx: Context, properties: any) {
-      const authorization =
-        ctx.get("authorization") || (await auth.get(ctx, "authorization"));
-      if (!authorization || !authorization.redirect_uri) {
-        return auth.forward(
-          ctx,
-          await input.error!(new UnknownStateError(), ctx.req.raw),
-        );
-      }
       return await input.success(
         {
           async session(type, properties) {
-            const authorization =
-              ctx.get("authorization") ||
-              (await auth.get(ctx, "authorization"));
-            auth.unset(ctx, "authorization");
+            const authorization = await getAuthorization(ctx);
             if (authorization.response_type === "token") {
               const location = new URL(authorization.redirect_uri);
               const tokens = await generateTokens(ctx, {
@@ -116,7 +103,6 @@ export function authorizer<
               }).toString();
               return ctx.redirect(location.toString(), 302);
             }
-
             if (authorization.response_type === "code") {
               const code = crypto.randomUUID();
               await Storage.set(
@@ -135,9 +121,9 @@ export function authorizer<
               location.searchParams.set("state", authorization.state || "");
               return ctx.redirect(location.toString(), 302);
             }
-            return ctx.text(
+            throw new OauthError(
+              "invalid_request",
               `Unsupported response_type: ${authorization.response_type}`,
-              400,
             );
           },
         },
@@ -175,6 +161,13 @@ export function authorizer<
       deleteCookie(ctx, key);
     },
   };
+
+  async function getAuthorization(ctx: Context) {
+    const match =
+      (await auth.get(ctx, "authorization")) || ctx.get("authorization");
+    if (!match) throw new UnknownStateError();
+    return match as AuthorizationState;
+  }
 
   async function encrypt(value: any) {
     return await new CompactEncrypt(
@@ -255,7 +248,7 @@ export function authorizer<
 
   const app = new Hono<{
     Variables: {
-      authorization: any;
+      authorization: AuthorizationState;
     };
   }>();
 
@@ -387,7 +380,9 @@ export function authorizer<
   app.get("/authorize", async (c) => {
     const provider = c.req.query("provider");
     if (!provider) return c.text("Missing provider", 400);
-    let authorization = (await auth.get(c, "authorization")) || {};
+    let authorization = await getAuthorization(c).catch(
+      () => ({}) as AuthorizationState,
+    );
     const response_type =
       c.req.query("response_type") || authorization.response_type;
     const redirect_uri =
@@ -439,15 +434,16 @@ export function authorizer<
   });
 
   app.onError(async (err, c) => {
-    if (
-      err instanceof MissingParameterError ||
-      err instanceof UnauthorizedClientError ||
-      err instanceof UnknownProviderError
-    ) {
+    if (err instanceof UnknownStateError) {
       return auth.forward(c, await error(err, c.req.raw));
     }
-
-    return c.text(err.message, 500);
+    const authorization = await getAuthorization(c);
+    const url = new URL(authorization.redirect_uri);
+    if (err instanceof OauthError) {
+      url.searchParams.set("error", err.error);
+      url.searchParams.set("error_description", err.description);
+    }
+    return c.redirect(url.toString());
   });
 
   return app;

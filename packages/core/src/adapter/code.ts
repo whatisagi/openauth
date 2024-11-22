@@ -1,9 +1,7 @@
 import { Adapter } from "./adapter.js";
-import { getCookie } from "hono/cookie";
-import { MissingParameterError, UnknownStateError } from "../error.js";
 
-interface AdapterState {
-  claims: Record<string, string>;
+interface AdapterState<Claims extends Record<string, string>> {
+  claims: Claims;
   code: string;
 }
 
@@ -34,7 +32,6 @@ export function CodeAdapter<
       const claims = (await c.req
         .formData()
         .then((claims) => Object.fromEntries(claims))) as Claims;
-      console.log("claims", claims);
       await ctx.set(c, "adapter", 60 * 10, {
         claims,
         code,
@@ -43,23 +40,14 @@ export function CodeAdapter<
     });
 
     routes.post("/verify", async (c) => {
-      const authorization = getCookie(c, "authorization");
-      if (!authorization) throw new UnknownStateError();
-      const state = await ctx.get(c, "adapter");
-      if (!state) throw new UnknownStateError();
-      if (!state.code || !state.claims) {
-        return ctx.forward(
-          c,
-          await config.invalid(state.code, state.claims, c.req.raw),
-        );
-      }
+      const state = await ctx.get<AdapterState<Claims>>(c, "adapter");
+      if (!state) return c.redirect("../authorize");
       const form = await c.req.formData();
       const compare = form.get("code")?.toString();
-      if (!compare) throw new MissingParameterError("code");
-      if (state.code !== compare) {
+      if (!state.code || !compare || state.code !== compare) {
         return ctx.forward(
           c,
-          await config.invalid(compare, state.claims, c.req.raw),
+          await config.invalid(compare || "", state.claims, c.req.raw),
         );
       }
       await ctx.unset(c, "adapter");

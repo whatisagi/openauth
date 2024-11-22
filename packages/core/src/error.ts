@@ -1,12 +1,22 @@
-export class UnknownProviderError extends Error {
-  constructor(public provider?: string) {
-    super("Unknown provider: " + provider);
+export class OauthError extends Error {
+  constructor(
+    public error:
+      | "invalid_request"
+      | "invalid_grant"
+      | "unauthorized_client"
+      | "access_denied"
+      | "unsupported_grant_type"
+      | "server_error"
+      | "temporarily_unavailable",
+    public description: string,
+  ) {
+    super(error + " - " + description);
   }
 }
 
-export class MissingParameterError extends Error {
+export class MissingParameterError extends OauthError {
   constructor(public parameter: string) {
-    super("Missing parameter: " + parameter);
+    super("invalid_request", "Missing parameter: " + parameter);
   }
 }
 
@@ -15,15 +25,6 @@ export class UnknownStateError extends Error {
     super(
       "The browser was in an unknown state. This could be because certain cookies expired or the browser was switched in the middle of an authentication flow",
     );
-  }
-}
-
-export class UnauthorizedClientError extends Error {
-  constructor(
-    public client: string,
-    public redirect_uri: string,
-  ) {
-    super("Unauthorized client");
   }
 }
 

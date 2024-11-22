@@ -1,7 +1,7 @@
 import type { OAuth2Tokens } from "arctic";
 import { Context } from "hono";
 import { Adapter } from "./adapter.js";
-import { UnknownStateError } from "../error.js";
+import { OauthError, UnknownStateError } from "../error.js";
 
 export interface ArcticAdapterOptions {
   scopes: string[];
@@ -40,7 +40,6 @@ export function ArcticAdapter(
   return function (routes, ctx) {
     routes.get("/authorize", async (c) => {
       const client = getClient(c);
-      client.validateAuthorizationCode;
       const state = crypto.randomUUID();
       await ctx.set(c, "adapter", 60 * 10, {
         state,
@@ -51,11 +50,12 @@ export function ArcticAdapter(
     routes.get("/callback", async (c) => {
       const client = getClient(c);
       const adapter = (await ctx.get(c, "adapter")) as AdapterState;
-      if (!adapter) throw new UnknownStateError();
+      if (!adapter) return c.redirect("../authorize");
       const code = c.req.query("code");
       const state = c.req.query("state");
       if (!code) throw new Error("Missing code");
-      if (state !== adapter.state) throw new UnknownStateError();
+      if (state !== adapter.state)
+        throw new OauthError("invalid_request", "Invalid state");
       const tokens = await client.validateAuthorizationCode(code);
       return ctx.success(c, {
         tokenset: tokens,
