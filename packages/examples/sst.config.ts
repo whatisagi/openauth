@@ -33,6 +33,7 @@ export default $config({
         pk: "string",
         sk: "string",
       },
+      ttl: "expiry",
       primaryIndex: {
         hashKey: "pk",
         rangeKey: "sk",

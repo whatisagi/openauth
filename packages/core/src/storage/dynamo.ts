@@ -57,19 +57,26 @@ export function DynamoStorage(options: DynamoStorageOptions) {
           [sk]: { S: keySk },
         },
       };
-
       const result = await dynamo("GetItem", params);
       if (!result.Item) return;
+      if (result.Item.expiry && result.Item.expiry.N < Date.now() / 1000) {
+        return;
+      }
       return JSON.parse(result.Item.value.S);
     },
 
-    async set(key: string[], value: any) {
+    async set(key: string[], value: any, ttl) {
       const parsed = parseKey(key);
       const params = {
         TableName: tableName,
         Item: {
           [pk]: { S: parsed.pk },
           [sk]: { S: parsed.sk },
+          ...(ttl
+            ? {
+                expiry: { N: (Math.floor(Date.now() / 1000) + ttl).toString() },
+              }
+            : {}),
           value: { S: JSON.stringify(value) },
         },
       };
@@ -94,6 +101,7 @@ export function DynamoStorage(options: DynamoStorageOptions) {
         prefix.length >= 2 ? joinKey(prefix.slice(0, 2)) : prefix[0];
       const prefixSk = prefix.length > 2 ? joinKey(prefix.slice(2)) : "";
       let lastEvaluatedKey = undefined;
+      const now = Date.now() / 1000;
       while (true) {
         const params = {
           TableName: tableName,
@@ -114,6 +122,9 @@ export function DynamoStorage(options: DynamoStorageOptions) {
         const result = await dynamo("Query", params);
 
         for (const item of result.Items || []) {
+          if (item.expiry && item.expiry.N < now) {
+            continue;
+          }
           yield [joinKey([item[pk].S, item[sk].S]), JSON.parse(item.value.S)];
         }
 
