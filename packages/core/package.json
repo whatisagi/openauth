@@ -1,6 +1,6 @@
 {
   "name": "@openauthjs/core",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "type": "module",
   "devDependencies": {
     "@tsconfig/node20": "20.1.4",
