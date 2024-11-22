@@ -34,7 +34,7 @@ export const handler = handle(
           email: value.id.email as string,
         });
       }
-      return Response.json(value);
+      throw new Error("Unknown provider");
     },
   }),
 );
