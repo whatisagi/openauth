@@ -1,6 +1,4 @@
-import { v1 } from "@standard-schema/spec";
-import { jwtVerify, JSONWebKeySet, createLocalJWKSet } from "jose";
-import process from "node:process";
+import type { v1 } from "@standard-schema/spec";
 
 export type SubjectSchema = Record<string, v1.StandardSchema>;
 

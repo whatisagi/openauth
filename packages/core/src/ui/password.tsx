@@ -8,17 +8,9 @@ import {
   PasswordRegisterError,
 } from "../adapter/password.js";
 import { Header, Layout } from "./base.js";
-import { css } from "./css.js";
 import "./form.js";
 import { FormError } from "./form.js";
 
-css`
-  .password-footer {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.75rem;
-  }
-`;
 export function PasswordLogin(props: {
   error?: PasswordLoginError;
   form?: FormData;
@@ -40,12 +32,12 @@ export function PasswordLogin(props: {
       />
 
       {/* Form */}
-      <form class="form" method="post">
+      <form data-component="form" method="post">
         {props.error?.type !== undefined && (
           <FormError error={copy[props.error.type]} />
         )}
         <input
-          class="form-input"
+          data-component="input"
           type="email"
           name="email"
           required
@@ -54,14 +46,14 @@ export function PasswordLogin(props: {
           value={props.form?.get("email")?.toString()}
         />
         <input
-          class="form-input"
+          data-component="input"
           autofocus={props.error?.type === "invalid_password"}
           required
           type="password"
           name="password"
           placeholder="Password"
         />
-        <button class="button">Continue</button>
+        <button data-component="button">Continue</button>
         <div data-component="form-footer">
           <span>
             Don't have an account?{" "}
@@ -102,12 +94,12 @@ export function PasswordRegister(props: {
   return (
     <Layout>
       <Header title={"Welcome to the app"} logo={"A"} />
-      <form class="form" method="post">
+      <form data-component="form" method="post">
         {props.error?.type !== undefined && (
           <FormError error={copy[props.error.type]} />
         )}
         <input
-          class="form-input"
+          data-component="input"
           autofocus={!props.error || emailError}
           type="email"
           name="email"
@@ -116,7 +108,7 @@ export function PasswordRegister(props: {
           placeholder="Email"
         />
         <input
-          class="form-input"
+          data-component="input"
           autofocus={passwordError}
           type="password"
           name="password"
@@ -125,7 +117,7 @@ export function PasswordRegister(props: {
           value={!passwordError ? props.form?.get("password")?.toString() : ""}
         />
         <input
-          class="form-input"
+          data-component="input"
           type="password"
           name="repeat"
           required
@@ -133,9 +125,14 @@ export function PasswordRegister(props: {
           value={!passwordError ? props.form?.get("password")?.toString() : ""}
           placeholder="Repeat password"
         />
-        <button class="button">Continue</button>
-        <div class="hint">
-          Already have an account? <a href="authorize">Login</a>
+        <button data-component="button">Continue</button>
+        <div data-component="form-footer">
+          <span>
+            Already have an account?{" "}
+            <a data-component="link" href="authorize">
+              Login
+            </a>
+          </span>
         </div>
       </form>
     </Layout>
@@ -179,7 +176,7 @@ export function PasswordChange(props: {
       />
 
       {/* Form */}
-      <form class="form" method="post">
+      <form data-component="form" method="post">
         {props.error?.type !== undefined && (
           <FormError error={copy[props.error.type]} />
         )}
@@ -187,7 +184,7 @@ export function PasswordChange(props: {
           <>
             <input type="hidden" name="action" value="code" />
             <input
-              class="form-input"
+              data-component="input"
               autofocus
               type="email"
               name="email"
@@ -201,7 +198,7 @@ export function PasswordChange(props: {
           <>
             <input type="hidden" name="action" value="verify" />
             <input
-              class="form-input"
+              data-component="input"
               autofocus
               name="code"
               minLength={6}
@@ -216,7 +213,7 @@ export function PasswordChange(props: {
           <>
             <input type="hidden" name="action" value="update" />
             <input
-              class="form-input"
+              data-component="input"
               autofocus
               type="password"
               name="password"
@@ -227,7 +224,7 @@ export function PasswordChange(props: {
               }
             />
             <input
-              class="form-input"
+              data-component="input"
               type="password"
               name="repeat"
               required
@@ -238,16 +235,22 @@ export function PasswordChange(props: {
             />
           </>
         )}
-        <button class="button">Continue</button>
+        <button data-component="button">Continue</button>
       </form>
       {props.state.type === "code" && (
         <form method="post">
           <input type="hidden" name="action" value="code" />
           <input type="hidden" name="email" value={props.state.email} />
           {props.state.type === "code" && (
-            <p className="hint">
-              Didn't get code? <button>Resend</button>
-            </p>
+            <div data-component="form-footer">
+              <span>
+                Back to{" "}
+                <a data-component="link" href="authorize">
+                  login
+                </a>
+              </span>
+              <button data-component="link">Resend code</button>
+            </div>
           )}
         </form>
       )}

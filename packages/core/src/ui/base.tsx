@@ -1,5 +1,5 @@
 import { PropsWithChildren } from "hono/jsx";
-import { render } from "./css.js";
+import css from "./ui.css" assert { type: "text" };
 
 export function Layout(props: PropsWithChildren) {
   return (
@@ -7,11 +7,12 @@ export function Layout(props: PropsWithChildren) {
       <head>
         <title>OpenAuthJS</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <style src="https://cdnjs.cloudflare.com/ajax/libs/modern-normalize/3.0.1/modern-normalize.min.css" />
-        <style dangerouslySetInnerHTML={{ __html: render() }} />
+        <style dangerouslySetInnerHTML={{ __html: css }} />
       </head>
       <body>
-        <div data-component="root">{props.children}</div>
+        <div data-component="root">
+          <div data-component="center">{props.children}</div>
+        </div>
       </body>
     </html>
   );

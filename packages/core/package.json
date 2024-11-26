@@ -3,8 +3,7 @@
   "version": "0.0.4",
   "type": "module",
   "scripts": {
-    "build:code": "tsc",
-    "build:style": "bun build ./src/ui/ui.css --loader=.css:text --outfile ./dist/ui/ui.js",
+    "build": "bun run script/build.ts"
   },
   "devDependencies": {
     "@tsconfig/node20": "20.1.4",
@@ -14,10 +13,14 @@
     "arctic": "2.2.2"
   },
   "exports": {
-    ".": "./dist/index.js",
-    "./adapter/*": "./dist/adapter/*.js",
-    "./storage/*": "./dist/storage/*.js",
-    "./ui/*": "./dist/ui/*.js"
+    ".": {
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./*": {
+      "import": "./dist/esm/*.js",
+      "types": "./dist/types/*.d.ts"
+    }
   },
   "peerDependencies": {
     "hono": "^4.0.0",

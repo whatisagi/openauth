@@ -1,6 +1,6 @@
 import { createLocalJWKSet, errors, JSONWebKeySet, jwtVerify } from "jose";
 import { SubjectSchema } from "./session.js";
-import { v1 } from "@standard-schema/spec";
+import type { v1 } from "@standard-schema/spec";
 import {
   InvalidAuthorizationCodeError,
   InvalidRefreshTokenError,

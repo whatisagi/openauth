@@ -3,10 +3,11 @@
   "compilerOptions": {
     "outDir": "dist",
     "declaration": true,
+    "skipLibCheck": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
   },
-  "exclude": ["test", "dist"]
+  "include": ["src"],
 }
