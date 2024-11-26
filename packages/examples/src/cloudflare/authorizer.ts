@@ -1,12 +1,12 @@
 import { authorizer } from "@openauthjs/core";
-import { CodeAdapter } from "@openauthjs/core/adapter/code";
-import { CodeUI } from "@openauthjs/core/ui/code";
 import { CloudflareStorage } from "@openauthjs/core/storage/cloudflare";
 import {
   type ExecutionContext,
   type KVNamespace,
 } from "@cloudflare/workers-types";
 import { subjects } from "../subjects.js";
+import { PasswordAdapter } from "@openauthjs/core/adapter/password";
+import { PasswordUI } from "@openauthjs/core/ui/password";
 
 interface Env {
   AuthKV: KVNamespace;
@@ -20,12 +20,18 @@ export default {
         namespace: env.AuthKV,
       }),
       providers: {
-        code: CodeAdapter<{ email: string }>(CodeUI({})),
+        password: PasswordAdapter(
+          PasswordUI({
+            sendCode: async (email, code) => {
+              console.log(email, code);
+            },
+          }),
+        ),
       },
       allow: async () => true,
       success: async (ctx, value) => {
         return ctx.session("user", {
-          email: value.claims.email,
+          email: value.email,
         });
       },
     }).fetch(request, env, ctx);

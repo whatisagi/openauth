@@ -1,4 +1,5 @@
 import type { Context, Hono } from "hono";
+import { StorageAdapter } from "../storage/storage.js";
 
 export type Adapter<Properties = any> = (
   route: AdapterRoute,
@@ -20,6 +21,7 @@ export interface AdapterOptions<Properties> {
   ) => Promise<void>;
   get: <T>(ctx: Context, key: string) => Promise<T>;
   unset: (ctx: Context, key: string) => Promise<void>;
+  storage: StorageAdapter;
 }
 export class AdapterError extends Error {}
 export class AdapterUnknownError extends AdapterError {}

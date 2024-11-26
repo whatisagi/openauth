@@ -1,7 +1,25 @@
 import { joinKey, StorageAdapter } from "./storage.js";
+import { existsSync, readFileSync } from "fs";
+import { writeFile } from "fs/promises";
 
-export function MemoryStorage(): StorageAdapter {
+export interface MemoryStorageOptions {
+  persist?: string;
+}
+export function MemoryStorage(input?: MemoryStorageOptions): StorageAdapter {
   const store = [] as [string, Record<string, any>][];
+
+  if (input?.persist) {
+    if (existsSync(input.persist)) {
+      const file = readFileSync(input?.persist);
+      store.push(...JSON.parse(file.toString()));
+    }
+  }
+
+  async function save() {
+    if (!input?.persist) return;
+    const file = JSON.stringify(store);
+    await writeFile(input.persist, file);
+  }
 
   function search(key: string) {
     let left = 0;
@@ -32,6 +50,7 @@ export function MemoryStorage(): StorageAdapter {
       const joined = joinKey(key);
       const match = search(joined);
       store[match.index] = [joined, value];
+      await save();
     },
     async remove(key: string[]) {
       const joined = joinKey(key);
@@ -39,6 +58,7 @@ export function MemoryStorage(): StorageAdapter {
       if (match.found) {
         store.splice(match.index, 1);
       }
+      await save();
     },
     async *scan(prefix: string[]) {
       for (const [key, value] of store) {

@@ -1,40 +1,39 @@
 import { PropsWithChildren } from "hono/jsx";
+import { render } from "./css.js";
 
 export function Layout(props: PropsWithChildren) {
   return (
     <html>
       <head>
         <title>OpenAuthJS</title>
-        <script src="https://cdn.tailwindcss.com"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style src="https://cdnjs.cloudflare.com/ajax/libs/modern-normalize/3.0.1/modern-normalize.min.css" />
+        <style dangerouslySetInnerHTML={{ __html: render() }} />
       </head>
       <body>
-        <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 p-4">
-          <div className="w-full max-w-md space-y-8">{props.children}</div>
-        </div>
+        <div data-component="root">{props.children}</div>
       </body>
     </html>
   );
 }
 
-export function Header(props: {
-  logo: string;
-  title: string;
-  description: string;
-}) {
+export function Header(
+  props: PropsWithChildren<{
+    logo: string;
+    title: string;
+    description?: string;
+  }>,
+) {
   return (
-    <>
-      {/* Logo */}
-      <div className="flex justify-center">
-        <div className="w-12 h-12 bg-green-700 rounded flex items-center justify-center text-white font-bold text-2xl">
-          {props.logo}
-        </div>
+    <div data-component="header">
+      <div data-slot="logo">{props.logo}</div>
+      <div>
+        <h1 data-slot="title">{props.title}</h1>
+        {props.description && (
+          <p data-slot="description">{props.description}</p>
+        )}
       </div>
-
-      {/* Heading */}
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl font-semibold text-white">{props.title}</h1>
-        <p className="text-slate-400">{props.description}</p>
-      </div>
-    </>
+      {props.children}
+    </div>
   );
 }

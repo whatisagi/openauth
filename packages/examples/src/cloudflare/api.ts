@@ -31,7 +31,7 @@ export default {
         }
       case "/authorize":
         return Response.redirect(
-          client.authorize("code", redirectURI, "code"),
+          client.authorize("password", redirectURI, "code"),
           302,
         );
       case "/":

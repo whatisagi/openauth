@@ -101,6 +101,7 @@ export function authorizer<
                 refresh_token: tokens.refresh,
                 state: authorization.state || "",
               }).toString();
+              await auth.unset(ctx, "authorization");
               return ctx.redirect(location.toString(), 302);
             }
             if (authorization.response_type === "code") {
@@ -119,6 +120,7 @@ export function authorizer<
               const location = new URL(authorization.redirect_uri);
               location.searchParams.set("code", code);
               location.searchParams.set("state", authorization.state || "");
+              await auth.unset(ctx, "authorization");
               return ctx.redirect(location.toString(), 302);
             }
             throw new OauthError(
@@ -154,12 +156,13 @@ export function authorizer<
       const raw = getCookie(ctx, key);
       if (!raw) return;
       return decrypt(raw).catch((ex) => {
-        console.error(ex);
+        console.error("failed to decrypt", key, ex);
       });
     },
     async unset(ctx: Context, key: string) {
       deleteCookie(ctx, key);
     },
+    storage: input.storage,
   };
 
   async function getAuthorization(ctx: Context) {
@@ -419,7 +422,7 @@ export function authorizer<
       client_id,
       audience,
     };
-    await auth.set(c, "authorization", 60 * 10, authorization);
+    await auth.set(c, "authorization", 60 * 60 * 24, authorization);
     c.set("authorization", authorization);
 
     if (input.start) {

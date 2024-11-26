@@ -12,7 +12,7 @@ const app = new Hono()
   .get("/authorize", async (c) => {
     const origin = new URL(c.req.url).origin;
     return c.redirect(
-      client.authorize("code", origin + "/callback", "code"),
+      client.authorize("password", origin + "/callback", "code"),
       302,
     );
   })

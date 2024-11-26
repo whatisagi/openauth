@@ -2,17 +2,28 @@ import { authorizer } from "@openauthjs/core";
 import { MemoryStorage } from "@openauthjs/core/storage/memory";
 import { TwitchAdapter } from "@openauthjs/core/adapter/twitch";
 import { GoogleOidcAdapter } from "@openauthjs/core/adapter/google";
+import { PasswordAdapter } from "@openauthjs/core/adapter/password";
+import { PasswordUI } from "@openauthjs/core/ui/password";
 import { subjects } from "../subjects.js";
 
 export default authorizer({
   subjects,
-  storage: MemoryStorage(),
+  storage: MemoryStorage({
+    persist: "./persist.json",
+  }),
   providers: {
     twitch: TwitchAdapter({
       clientID: process.env.TWITCH_CLIENT_ID!,
       clientSecret: process.env.TWITCH_CLIENT_SECRET!,
       scopes: ["user_read", "user:read:email"],
     }),
+    password: PasswordAdapter(
+      PasswordUI({
+        sendCode: async (email, code) => {
+          console.log(email, code);
+        },
+      }),
+    ),
     google: GoogleOidcAdapter({
       clientID:
         "43908644348-ficcruqi5btsf2kgt3bjgvqveemh103m.apps.googleusercontent.com",
@@ -31,6 +42,12 @@ export default authorizer({
       console.log(response);
       return ctx.session("user", {
         email: response.data[0].email,
+      });
+    }
+
+    if (value.provider === "password") {
+      return ctx.session("user", {
+        email: value.email,
       });
     }
 

@@ -2,6 +2,10 @@
   "name": "@openauthjs/core",
   "version": "0.0.4",
   "type": "module",
+  "scripts": {
+    "build:code": "tsc",
+    "build:style": "bun build ./src/ui/ui.css --loader=.css:text --outfile ./dist/ui/ui.js",
+  },
   "devDependencies": {
     "@tsconfig/node20": "20.1.4",
     "hono": "4.6.9",
