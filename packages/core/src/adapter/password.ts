@@ -23,23 +23,21 @@ export interface PasswordConfig {
   sendCode: (email: string, code: string) => Promise<void>;
 }
 
-interface AdapterState {
-  code?: string;
-  email?: string;
-  redirect: string;
-}
-
 export type PasswordChangeState =
   | {
       type: "start";
+      redirect: string;
     }
   | {
       type: "code";
       code: string;
       email: string;
+      redirect: string;
     }
   | {
       type: "update";
+      redirect: string;
+      email: string;
     };
 
 export type PasswordChangeError =
@@ -152,70 +150,59 @@ export function PasswordAdapter(config: PasswordConfig) {
       const redirect =
         c.req.query("redirect_uri") ||
         c.req.url.replace(/change.*/, "authorize");
-      await ctx.set<AdapterState>(c, "adapter", 60 * 60 * 24, {
+      const state: PasswordChangeState = {
+        type: "start",
         redirect,
-      });
-      return ctx.forward(
-        c,
-        await config.change(c.req.raw, {
-          type: "start",
-        }),
-      );
+      };
+      await ctx.set(c, "adapter", 60 * 60 * 24, state);
+      return ctx.forward(c, await config.change(c.req.raw, state));
     });
 
     routes.post("/change", async (c) => {
       const fd = await c.req.formData();
       const action = fd.get("action")?.toString();
-      const adapter = await ctx.get<AdapterState>(c, "adapter");
+      const adapter = await ctx.get<PasswordChangeState>(c, "adapter");
       if (!adapter) throw new UnknownStateError();
+      console.log(adapter);
 
-      async function error(
-        state: PasswordChangeState,
-        err: PasswordChangeError,
+      async function transition(
+        next: PasswordChangeState,
+        err?: PasswordChangeError,
       ) {
-        return ctx.forward(c, await config.change(c.req.raw, state, err, fd));
+        await ctx.set<PasswordChangeState>(c, "adapter", 60 * 60 * 24, next);
+        return ctx.forward(c, await config.change(c.req.raw, next, err, fd));
       }
 
       if (action === "code") {
         const email = fd.get("email")?.toString();
-        if (!email) return error({ type: "start" }, { type: "invalid_email" });
+        if (!email)
+          return transition(
+            { type: "start", redirect: adapter.redirect },
+            { type: "invalid_email" },
+          );
         const code = generate();
-        await ctx.set<AdapterState>(c, "adapter", 60 * 60 * 24, {
-          ...adapter,
-          email,
-          code,
-        });
         await config.sendCode(email, code);
-        return ctx.forward(
-          c,
-          await config.change(
-            c.req.raw,
-            { type: "code", code, email },
-            undefined,
-            fd,
-          ),
-        );
+
+        return transition({
+          type: "code",
+          code,
+          email,
+          redirect: adapter.redirect,
+        });
       }
 
-      if (action === "verify") {
+      if (action === "verify" && adapter.type === "code") {
         const code = fd.get("code")?.toString();
         if (!code || code !== adapter.code)
-          return error(
-            { type: "code", code: adapter.code!, email: adapter.email! },
-            { type: "invalid_code" },
-          );
-        return ctx.forward(
-          c,
-          await config.change(c.req.raw, { type: "update" }, undefined, fd),
-        );
+          return transition(adapter, { type: "invalid_code" });
+        return transition({
+          type: "update",
+          email: adapter.email,
+          redirect: adapter.redirect,
+        });
       }
 
-      if (action === "update") {
-        if (!adapter.email)
-          return ctx.forward(
-            c,
-            await config.change(c.req.raw, { type: "start" }),
-          );
+      if (action === "update" && adapter.type === "update") {
         const existing = await Storage.get(ctx.storage, [
           "email",
           adapter.email,
@@ -225,10 +212,9 @@ export function PasswordAdapter(config: PasswordConfig) {
 
         const password = fd.get("password")?.toString();
         const repeat = fd.get("repeat")?.toString();
-        if (!password)
-          return error({ type: "update" }, { type: "invalid_password" });
+        if (!password) return transition(adapter, { type: "invalid_password" });
         if (password !== repeat)
-          return error({ type: "update" }, { type: "password_mismatch" });
+          return transition(adapter, { type: "password_mismatch" });
 
         await Storage.set(
           ctx.storage,
@@ -238,6 +224,8 @@ export function PasswordAdapter(config: PasswordConfig) {
 
         return c.redirect(adapter.redirect, 302);
       }
+
+      return transition({ type: "start", redirect: adapter.redirect });
     });
   } satisfies Adapter<{ email: string }>;
 }

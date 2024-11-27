@@ -11,30 +11,42 @@ import { Header, Layout } from "./base.js";
 import "./form.js";
 import { FormError } from "./form.js";
 
+const DEFAULT_COPY = {
+  error_email_taken: "There is already an account with this email.",
+  error_invalid_code: "Code is incorrect.",
+  error_invalid_email: "Email is not valid.",
+  error_invalid_password: "Password is incorrect.",
+  error_password_mismatch: "Passwords do not match.",
+  register_title: "Welcome to the app",
+  register_description: "Sign in with your email",
+  login_title: "Welcome to the app",
+  login_description: "Sign in with your email",
+} satisfies {
+  [key in `error_${
+    | PasswordLoginError["type"]
+    | PasswordRegisterError["type"]
+    | PasswordChangeError["type"]}`]: string;
+} & Record<string, string>;
+
+export type PasswordUICopy = typeof DEFAULT_COPY;
+
 export function PasswordLogin(props: {
   error?: PasswordLoginError;
   form?: FormData;
-  copy?: {
-    [key in PasswordLoginError["type"]]: string;
-  };
+  copy: PasswordUICopy;
 }) {
-  const copy: typeof props.copy = {
-    invalid_password: "Password is incorrect.",
-    invalid_email: "Email is not valid.",
-    ...props.copy,
-  };
   return (
     <Layout>
       <Header
-        title={"Welcome to the app"}
-        description="Sign in with your email"
+        title={props.copy.login_title}
+        description={props.copy.login_description}
         logo={"A"}
       />
 
       {/* Form */}
       <form data-component="form" method="post">
         {props.error?.type !== undefined && (
-          <FormError error={copy[props.error.type]} />
+          <FormError error={props.copy[`error_${props.error.type}`]} />
         )}
         <input
           data-component="input"
@@ -73,18 +85,8 @@ export function PasswordLogin(props: {
 export function PasswordRegister(props: {
   error?: PasswordRegisterError;
   form?: FormData;
-  copy?: {
-    [key in PasswordRegisterError["type"]]: string;
-  };
+  copy: PasswordUICopy;
 }) {
-  const copy: typeof props.copy = {
-    invalid_email: "Email is not valid.",
-    invalid_password: "Password is not valid.",
-    email_taken: "There is already an account with that email.",
-    password_mismatch: "Passwords do not match.",
-    ...props.copy,
-  };
-
   const emailError = ["invalid_email", "email_taken"].includes(
     props.error?.type || "",
   );
@@ -93,10 +95,10 @@ export function PasswordRegister(props: {
   );
   return (
     <Layout>
-      <Header title={"Welcome to the app"} logo={"A"} />
+      <Header title={props.copy.register_title} logo={"A"} />
       <form data-component="form" method="post">
         {props.error?.type !== undefined && (
-          <FormError error={copy[props.error.type]} />
+          <FormError error={props.copy[`error_${props.error.type}`]} />
         )}
         <input
           data-component="input"
@@ -143,27 +145,8 @@ export function PasswordChange(props: {
   state: PasswordChangeState;
   error?: PasswordChangeError;
   form?: FormData;
-  copy?: {
-    [key in PasswordChangeError["type"]]: string;
-  } & {
-    description?: {
-      [key in PasswordChangeState["type"]]: string;
-    };
-  };
+  copy: PasswordUICopy;
 }) {
-  const copy: typeof props.copy = {
-    invalid_email: "Email is not valid.",
-    invalid_code: "Code is not valid.",
-    invalid_password: "Password is not valid.",
-    password_mismatch: "Passwords do not match.",
-    description: {
-      start: "Confirm your email to change your password.",
-      code: "Enter the code sent to your email",
-      update: "Enter a new password.",
-      ...props.copy?.description,
-    },
-    ...props.copy,
-  };
   const passwordError = ["invalid_password", "password_mismatch"].includes(
     props.error?.type || "",
   );
@@ -172,13 +155,13 @@ export function PasswordChange(props: {
       <Header
         title={"Change your password"}
         logo={"A"}
-        description={copy.description?.[props.state.type]}
+        description={props.copy.error_password_mismatch}
       />
 
       {/* Form */}
-      <form data-component="form" method="post">
+      <form data-component="form" method="post" replace>
         {props.error?.type !== undefined && (
-          <FormError error={copy[props.error.type]} />
+          <FormError error={props.copy[`error_${props.error.type}`]} />
         )}
         {props.state.type === "start" && (
           <>
@@ -259,9 +242,15 @@ export function PasswordChange(props: {
 }
 
 export interface PasswordUIOptions {
-  sendCode: (email: string, code: string) => Promise<void>;
+  sendCode: PasswordConfig["sendCode"];
+  copy?: Partial<PasswordUICopy>;
 }
+
 export function PasswordUI(input: PasswordUIOptions) {
+  const copy = {
+    ...DEFAULT_COPY,
+    ...input.copy,
+  };
   return {
     sendCode: input.sendCode,
     login: async (_req, error, form) =>
@@ -269,6 +258,7 @@ export function PasswordUI(input: PasswordUIOptions) {
         PasswordLogin({
           error,
           form,
+          copy,
         }),
         {
           status: error ? 401 : 200,
@@ -282,6 +272,7 @@ export function PasswordUI(input: PasswordUIOptions) {
         PasswordRegister({
           error,
           form,
+          copy,
         }),
         {
           headers: {
@@ -295,6 +286,7 @@ export function PasswordUI(input: PasswordUIOptions) {
           state,
           error,
           form,
+          copy,
         }),
         {
           status: error ? 400 : 200,

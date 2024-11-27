@@ -437,6 +437,7 @@ export function authorizer<
   });
 
   app.onError(async (err, c) => {
+    console.error(err);
     if (err instanceof UnknownStateError) {
       return auth.forward(c, await error(err, c.req.raw));
     }

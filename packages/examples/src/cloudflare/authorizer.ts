@@ -9,7 +9,7 @@ import { PasswordAdapter } from "@openauthjs/core/adapter/password";
 import { PasswordUI } from "@openauthjs/core/ui/password";
 
 interface Env {
-  AuthKV: KVNamespace;
+  CloudflareAuthKV: KVNamespace;
 }
 
 export default {
@@ -17,7 +17,7 @@ export default {
     return authorizer({
       subjects,
       storage: CloudflareStorage({
-        namespace: env.AuthKV,
+        namespace: env.CloudflareAuthKV,
       }),
       providers: {
         password: PasswordAdapter(
