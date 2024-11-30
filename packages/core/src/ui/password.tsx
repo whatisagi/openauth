@@ -9,7 +9,7 @@ import {
 } from "../adapter/password.js";
 import { Header, Layout } from "./base.js";
 import "./form.js";
-import { FormError } from "./form.js";
+import { FormAlert } from "./form.js";
 
 const DEFAULT_COPY = {
   error_email_taken: "There is already an account with this email.",
@@ -21,6 +21,18 @@ const DEFAULT_COPY = {
   register_description: "Sign in with your email",
   login_title: "Welcome to the app",
   login_description: "Sign in with your email",
+  register: "Register",
+  register_prompt: "Don't have an account?",
+  login_prompt: "Already have an account?",
+  login: "Login",
+  change_prompt: "Forgot password?",
+  code_resend: "Resend code",
+  code_return: "Back to",
+  logo: "A",
+  input_email: "Email",
+  input_password: "Password",
+  input_code: "Code",
+  input_repeat: "Repeat password",
 } satisfies {
   [key in `error_${
     | PasswordLoginError["type"]
@@ -40,19 +52,21 @@ export function PasswordLogin(props: {
       <Header
         title={props.copy.login_title}
         description={props.copy.login_description}
-        logo={"A"}
+        logo={props.copy.logo}
       />
       {/* Form */}
       <form data-component="form" method="post">
-        <FormError
-          error={props.error?.type && props.copy?.[`error_${props.error.type}`]}
+        <FormAlert
+          message={
+            props.error?.type && props.copy?.[`error_${props.error.type}`]
+          }
         />
         <input
           data-component="input"
           type="email"
           name="email"
           required
-          placeholder="Email"
+          placeholder={props.copy.input_email}
           autofocus={!props.error}
           value={props.form?.get("email")?.toString()}
         />
@@ -67,13 +81,13 @@ export function PasswordLogin(props: {
         <button data-component="button">Continue</button>
         <div data-component="form-footer">
           <span>
-            Don't have an account?{" "}
+            {props.copy.register_prompt}{" "}
             <a data-component="link" href="register">
-              Register
+              {props.copy.register}
             </a>
           </span>
           <a data-component="link" href="change">
-            Forgot password?
+            {props.copy.change_prompt}
           </a>
         </div>
       </form>
@@ -96,8 +110,10 @@ export function PasswordRegister(props: {
     <Layout>
       <Header title={props.copy.register_title} logo={"A"} />
       <form data-component="form" method="post">
-        <FormError
-          error={props.error?.type && props.copy?.[`error_${props.error.type}`]}
+        <FormAlert
+          message={
+            props.error?.type && props.copy?.[`error_${props.error.type}`]
+          }
         />
         <input
           data-component="input"
@@ -106,14 +122,14 @@ export function PasswordRegister(props: {
           name="email"
           value={!emailError ? props.form?.get("email")?.toString() : ""}
           required
-          placeholder="Email"
+          placeholder={props.copy.input_email}
         />
         <input
           data-component="input"
           autofocus={passwordError}
           type="password"
           name="password"
-          placeholder="Password"
+          placeholder={props.copy.input_password}
           required
           value={!passwordError ? props.form?.get("password")?.toString() : ""}
         />
@@ -123,15 +139,14 @@ export function PasswordRegister(props: {
           name="repeat"
           required
           autofocus={passwordError}
-          value={!passwordError ? props.form?.get("password")?.toString() : ""}
-          placeholder="Repeat password"
+          placeholder={props.copy.input_repeat}
         />
         <button data-component="button">Continue</button>
         <div data-component="form-footer">
           <span>
-            Already have an account?{" "}
+            {props.copy.login_prompt}{" "}
             <a data-component="link" href="authorize">
-              Login
+              {props.copy.login}
             </a>
           </span>
         </div>
@@ -151,16 +166,14 @@ export function PasswordChange(props: {
   );
   return (
     <Layout>
-      <Header
-        title={"Change your password"}
-        logo={"A"}
-        description={props.copy.error_password_mismatch}
-      />
+      <Header title={"Change your password"} logo={"A"} />
 
       {/* Form */}
       <form data-component="form" method="post" replace>
-        <FormError
-          error={props.error?.type && props.copy?.[`error_${props.error.type}`]}
+        <FormAlert
+          message={
+            props.error?.type && props.copy?.[`error_${props.error.type}`]
+          }
         />
         {props.state.type === "start" && (
           <>
@@ -172,7 +185,7 @@ export function PasswordChange(props: {
               name="email"
               required
               value={props.form?.get("email")?.toString()}
-              placeholder="Email"
+              placeholder={props.copy.input_email}
             />
           </>
         )}
@@ -186,8 +199,7 @@ export function PasswordChange(props: {
               minLength={6}
               maxLength={6}
               required
-              value={props.state.code}
-              placeholder="Code"
+              placeholder={props.copy.input_code}
             />
           </>
         )}
@@ -199,7 +211,7 @@ export function PasswordChange(props: {
               autofocus
               type="password"
               name="password"
-              placeholder="Password"
+              placeholder={props.copy.input_password}
               required
               value={
                 !passwordError ? props.form?.get("password")?.toString() : ""
@@ -213,7 +225,7 @@ export function PasswordChange(props: {
               value={
                 !passwordError ? props.form?.get("password")?.toString() : ""
               }
-              placeholder="Repeat password"
+              placeholder={props.copy.input_repeat}
             />
           </>
         )}
@@ -226,12 +238,12 @@ export function PasswordChange(props: {
           {props.state.type === "code" && (
             <div data-component="form-footer">
               <span>
-                Back to{" "}
+                {props.copy.code_return}{" "}
                 <a data-component="link" href="authorize">
-                  login
+                  {props.copy.login.toLowerCase()}
                 </a>
               </span>
-              <button data-component="link">Resend code</button>
+              <button data-component="link">{props.copy.code_resend}</button>
             </div>
           )}
         </form>
@@ -252,7 +264,7 @@ export function PasswordUI(input: PasswordUIOptions) {
   };
   return {
     sendCode: input.sendCode,
-    login: async (_req, error, form) =>
+    login: async (_req, form, error) =>
       new Response(
         PasswordLogin({
           error,
@@ -266,7 +278,7 @@ export function PasswordUI(input: PasswordUIOptions) {
           },
         },
       ),
-    register: async (_req, error, form) =>
+    register: async (_req, form, error) =>
       new Response(
         PasswordRegister({
           error,
@@ -279,7 +291,7 @@ export function PasswordUI(input: PasswordUIOptions) {
           },
         },
       ),
-    change: async (_req, state, error, form) => {
+    change: async (_req, state, form, error) => {
       return new Response(
         PasswordChange({
           state,

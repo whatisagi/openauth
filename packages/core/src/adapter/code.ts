@@ -1,17 +1,38 @@
+import { Context } from "hono";
 import { Adapter } from "./adapter.js";
 
-interface AdapterState<Claims extends Record<string, string>> {
-  claims: Claims;
-  code: string;
-}
+export type CodeAdapterState =
+  | {
+      type: "start";
+    }
+  | {
+      type: "code";
+      resend?: boolean;
+      code: string;
+      claims: Record<string, string>;
+    };
+
+export type CodeAdapterError =
+  | {
+      type: "invalid_code";
+    }
+  | {
+      type: "invalid_claim";
+      key: string;
+      value: string;
+    };
 
 export function CodeAdapter<
   Claims extends Record<string, string> = Record<string, string>,
 >(config: {
   length?: number;
-  start: (req: Request) => Promise<Response>;
-  send: (code: string, claims: Claims, req: Request) => Promise<Response>;
-  invalid: (code: string, claims: Claims, req: Request) => Promise<Response>;
+  request: (
+    req: Request,
+    state: CodeAdapterState,
+    form?: FormData,
+    error?: CodeAdapterError,
+  ) => Promise<Response>;
+  sendCode: (claims: Claims, code: string) => Promise<void | CodeAdapterError>;
 }) {
   const length = config.length || 6;
   function generate() {
@@ -23,35 +44,64 @@ export function CodeAdapter<
   }
 
   return function (routes, ctx) {
-    routes.get("/authorize", async (c) =>
-      ctx.forward(c, await config.start(c.req.raw)),
-    );
-
-    routes.post("/submit", async (c) => {
-      const code = generate();
-      const claims = (await c.req
-        .formData()
-        .then((claims) => Object.fromEntries(claims))) as Claims;
-      await ctx.set(c, "adapter", 60 * 10, {
-        claims,
-        code,
+    async function transition(
+      c: Context,
+      next: CodeAdapterState,
+      fd?: FormData,
+      err?: CodeAdapterError,
+    ) {
+      await ctx.set<CodeAdapterState>(c, "adapter", 60 * 60 * 24, next);
+      return ctx.forward(c, await config.request(c.req.raw, next, fd, err));
+    }
+    routes.get("/authorize", async (c) => {
+      return transition(c, {
+        type: "start",
       });
-      return ctx.forward(c, await config.send(code, claims, c.req.raw));
     });
 
-    routes.post("/verify", async (c) => {
-      const state = await ctx.get<AdapterState<Claims>>(c, "adapter");
-      if (!state) return c.redirect("../authorize");
-      const form = await c.req.formData();
-      const compare = form.get("code")?.toString();
-      if (!state.code || !compare || state.code !== compare) {
-        return ctx.forward(
+    routes.post("/authorize", async (c) => {
+      const code = generate();
+      const fd = await c.req.formData();
+      const state = await ctx.get<CodeAdapterState>(c, "adapter");
+      const action = fd.get("action")?.toString();
+
+      if (action === "request" || action === "resend") {
+        const claims = Object.fromEntries(fd) as Claims;
+        delete claims.action;
+        const err = await config.sendCode(claims, code);
+        if (err) return transition(c, { type: "start" }, fd, err);
+        return transition(
           c,
-          await config.invalid(compare || "", state.claims, c.req.raw),
+          {
+            type: "code",
+            resend: action === "resend",
+            claims,
+            code,
+          },
+          fd,
         );
       }
-      await ctx.unset(c, "adapter");
-      return ctx.forward(c, await ctx.success(c, { claims: state.claims }));
+
+      if (fd.get("action")?.toString() === "verify" && state.type === "code") {
+        const fd = await c.req.formData();
+        const compare = fd.get("code")?.toString();
+        if (!state.code || !compare || state.code !== compare) {
+          return transition(
+            c,
+            {
+              ...state,
+              resend: false,
+            },
+            fd,
+            { type: "invalid_code" },
+          );
+        }
+        await ctx.unset(c, "adapter");
+        return ctx.forward(
+          c,
+          await ctx.success(c, { claims: state.claims as Claims }),
+        );
+      }
     });
   } satisfies Adapter<{ claims: Claims }>;
 }

@@ -1,8 +1,11 @@
 /** @jsxImportSource hono/jsx */
 
-export function FormError(props: { error?: string }) {
+export function FormAlert(props: {
+  message?: string;
+  color?: "danger" | "success";
+}) {
   return (
-    <div data-component="form-error">
+    <div data-component="form-alert" data-color={props.color}>
       <svg
         data-slot="icon"
         xmlns="http://www.w3.org/2000/svg"
@@ -18,7 +21,7 @@ export function FormError(props: { error?: string }) {
           d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
         />
       </svg>
-      <span data-slot="message">{props.error}</span>
+      <span data-slot="message">{props.message}</span>
     </div>
   );
 }

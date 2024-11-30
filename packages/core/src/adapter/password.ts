@@ -12,19 +12,19 @@ export interface PasswordConfig {
   hasher?: PasswordHasher<any>;
   login: (
     req: Request,
-    error?: PasswordLoginError,
     form?: FormData,
+    error?: PasswordLoginError,
   ) => Promise<Response>;
   register: (
     req: Request,
-    error?: PasswordRegisterError,
     form?: FormData,
+    error?: PasswordRegisterError,
   ) => Promise<Response>;
   change: (
     req: Request,
     state: PasswordChangeState,
-    error?: PasswordChangeError,
     form?: FormData,
+    error?: PasswordChangeError,
   ) => Promise<Response>;
   sendCode: (email: string, code: string) => Promise<void>;
 }
@@ -99,7 +99,7 @@ export function PasswordAdapter(config: PasswordConfig) {
     routes.post("/authorize", async (c) => {
       const fd = await c.req.formData();
       async function error(err: PasswordLoginError) {
-        return ctx.forward(c, await config.login(c.req.raw, err, fd));
+        return ctx.forward(c, await config.login(c.req.raw, fd, err));
       }
       const email = fd.get("email")?.toString()?.toLowerCase();
       if (!email) return error({ type: "invalid_email" });
@@ -139,7 +139,7 @@ export function PasswordAdapter(config: PasswordConfig) {
       const repeat = fd.get("repeat")?.toString();
 
       async function error(err: PasswordRegisterError) {
-        return ctx.forward(c, await config.register(c.req.raw, err, fd));
+        return ctx.forward(c, await config.register(c.req.raw, fd, err));
       }
       if (!email) return error({ type: "invalid_email" });
       if (!password) return error({ type: "invalid_password" });
@@ -184,7 +184,7 @@ export function PasswordAdapter(config: PasswordConfig) {
         err?: PasswordChangeError,
       ) {
         await ctx.set<PasswordChangeState>(c, "adapter", 60 * 60 * 24, next);
-        return ctx.forward(c, await config.change(c.req.raw, next, err, fd));
+        return ctx.forward(c, await config.change(c.req.raw, next, fd, err));
       }
 
       if (action === "code") {

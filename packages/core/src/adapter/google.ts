@@ -5,8 +5,8 @@ export function GoogleAdapter(config: Oauth2WrappedConfig) {
   return Oauth2Adapter({
     ...config,
     endpoint: {
-      authorization: "https://id.twitch.tv/oauth2/authorize",
-      token: "https://id.twitch.tv/oauth2/token",
+      authorization: "https://accounts.google.com/o/oauth2/v2/auth",
+      token: "https://oauth2.googleapis.com/token",
     },
   });
 }

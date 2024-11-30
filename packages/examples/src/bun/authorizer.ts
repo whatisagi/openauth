@@ -5,6 +5,8 @@ import { GoogleOidcAdapter } from "@openauthjs/core/adapter/google";
 import { PasswordAdapter } from "@openauthjs/core/adapter/password";
 import { PasswordUI } from "@openauthjs/core/ui/password";
 import { subjects } from "../subjects.js";
+import { CodeAdapter } from "@openauthjs/core/adapter/code";
+import { CodeUI } from "@openauthjs/core/ui/code";
 
 export default authorizer({
   subjects,
@@ -24,6 +26,13 @@ export default authorizer({
         },
       }),
     ),
+    code: CodeAdapter<{ email: string }>(
+      CodeUI({
+        sendCode: async (code, claims) => {
+          console.log(code, claims);
+        },
+      }),
+    ),
     google: GoogleOidcAdapter({
       clientID:
         "43908644348-ficcruqi5btsf2kgt3bjgvqveemh103m.apps.googleusercontent.com",
@@ -39,7 +48,6 @@ export default authorizer({
           "Content-Type": "application/json",
         },
       }).then((r) => r.json() as any);
-      console.log(response);
       return ctx.session("user", {
         email: response.data[0].email,
       });
