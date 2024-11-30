@@ -2,7 +2,7 @@ export interface StorageAdapter {
   get(key: string[]): Promise<Record<string, any> | undefined>;
   remove(key: string[]): Promise<void>;
   set(key: string[], value: any, ttl?: number): Promise<void>;
-  scan(prefix: string[]): AsyncIterable<[string, any]>;
+  scan(prefix: string[]): AsyncIterable<[string[], any]>;
 }
 
 const SEPERATOR = String.fromCharCode(0x1f);
@@ -39,7 +39,7 @@ export namespace Storage {
   export function scan<T>(
     adapter: StorageAdapter,
     key: string[],
-  ): AsyncIterable<[string, T]> {
+  ): AsyncIterable<[string[], T]> {
     return adapter.scan(encode(key));
   }
 }

@@ -11,7 +11,13 @@ export type AdapterReturn = ReturnType<Adapter>;
 export type AdapterRoute = Hono;
 export interface AdapterOptions<Properties> {
   name: string;
-  success: (ctx: Context, properties: Properties) => Promise<Response>;
+  success: (
+    ctx: Context,
+    properties: Properties,
+    opts?: {
+      invalidate?: (subject: string) => Promise<void>;
+    },
+  ) => Promise<Response>;
   forward: (ctx: Context, response: Response) => Response;
   set: <T>(
     ctx: Context,
@@ -21,6 +27,7 @@ export interface AdapterOptions<Properties> {
   ) => Promise<void>;
   get: <T>(ctx: Context, key: string) => Promise<T>;
   unset: (ctx: Context, key: string) => Promise<void>;
+  invalidate: (subject: string) => Promise<void>;
   storage: StorageAdapter;
 }
 export class AdapterError extends Error {}

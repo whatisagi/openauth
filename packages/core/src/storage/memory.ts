@@ -1,4 +1,4 @@
-import { joinKey, StorageAdapter } from "./storage.js";
+import { joinKey, splitKey, StorageAdapter } from "./storage.js";
 import { existsSync, readFileSync } from "fs";
 import { writeFile } from "fs/promises";
 
@@ -63,7 +63,7 @@ export function MemoryStorage(input?: MemoryStorageOptions): StorageAdapter {
     async *scan(prefix: string[]) {
       for (const [key, value] of store) {
         if (key.startsWith(joinKey(prefix))) {
-          yield [key, value];
+          yield [splitKey(key), value];
         }
       }
     },

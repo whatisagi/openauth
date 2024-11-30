@@ -19,6 +19,10 @@ export default {
       storage: CloudflareStorage({
         namespace: env.CloudflareAuthKV,
       }),
+      ttl: {
+        access: 30,
+        refresh: 60 * 60 * 24 * 30,
+      },
       providers: {
         password: PasswordAdapter(
           PasswordUI({

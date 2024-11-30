@@ -84,11 +84,12 @@ export function authorizer<
   const primaryKey = allKeys.then((all) => all[0]);
 
   const auth: Omit<AdapterOptions<any>, "name"> = {
-    async success(ctx: Context, properties: any) {
+    async success(ctx: Context, properties: any, opts) {
       return await input.success(
         {
           async session(type, properties) {
             const authorization = await getAuthorization(ctx);
+            await opts?.invalidate?.(await resolveSubject(type, properties));
             if (authorization.response_type === "token") {
               const location = new URL(authorization.redirect_uri);
               const tokens = await generateTokens(ctx, {
@@ -161,6 +162,14 @@ export function authorizer<
     },
     async unset(ctx: Context, key: string) {
       deleteCookie(ctx, key);
+    },
+    async invalidate(subject: string) {
+      for await (const [key] of Storage.scan(this.storage, [
+        "oauth:refresh",
+        subject,
+      ])) {
+        await Storage.remove(this.storage, key);
+      }
     },
     storage: input.storage,
   };

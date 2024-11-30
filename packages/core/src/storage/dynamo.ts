@@ -125,7 +125,7 @@ export function DynamoStorage(options: DynamoStorageOptions) {
           if (item.expiry && item.expiry.N < now) {
             continue;
           }
-          yield [joinKey([item[pk].S, item[sk].S]), JSON.parse(item.value.S)];
+          yield [[item[pk].S, item[sk].S], JSON.parse(item.value.S)];
         }
 
         if (!result.LastEvaluatedKey) break;

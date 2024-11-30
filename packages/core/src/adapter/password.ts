@@ -1,9 +1,15 @@
-import { MissingParameterError, UnknownStateError } from "../error.js";
+import { UnknownStateError } from "../error.js";
 import { Storage } from "../storage/storage.js";
 import { Adapter } from "./adapter.js";
 
+export interface PasswordHasher<T> {
+  hash(password: string): Promise<T>;
+  verify(password: string, compare: T): Promise<boolean>;
+}
+
 export interface PasswordConfig {
   length?: number;
+  hasher?: PasswordHasher<any>;
   login: (
     req: Request,
     error?: PasswordLoginError,
@@ -77,6 +83,7 @@ export type PasswordRegisterError =
     };
 
 export function PasswordAdapter(config: PasswordConfig) {
+  const hasher = config.hasher ?? ScryptHasher();
   function generate() {
     const buffer = crypto.getRandomValues(new Uint8Array(6));
     const otp = Array.from(buffer)
@@ -94,7 +101,7 @@ export function PasswordAdapter(config: PasswordConfig) {
       async function error(err: PasswordLoginError) {
         return ctx.forward(c, await config.login(c.req.raw, err, fd));
       }
-      const email = fd.get("email")?.toString();
+      const email = fd.get("email")?.toString()?.toLowerCase();
       if (!email) return error({ type: "invalid_email" });
       const hash = await Storage.get<HashedPassword>(ctx.storage, [
         "email",
@@ -102,15 +109,23 @@ export function PasswordAdapter(config: PasswordConfig) {
         "password",
       ]);
       const password = fd.get("password")?.toString();
-      if (
-        !password ||
-        !hash ||
-        !(await verifyPassword({ password, compare: hash }))
-      )
+      if (!password || !hash || !(await hasher.verify(password, hash)))
         return error({ type: "invalid_password" });
-      return ctx.success(c, {
-        email: email,
-      });
+      return ctx.success(
+        c,
+        {
+          email: email,
+        },
+        {
+          invalidate: async (subject) => {
+            await Storage.set(
+              ctx.storage,
+              ["email", email, "subject"],
+              subject,
+            );
+          },
+        },
+      );
     });
 
     routes.get("/register", async (c) => {
@@ -119,7 +134,7 @@ export function PasswordAdapter(config: PasswordConfig) {
 
     routes.post("/register", async (c) => {
       const fd = await c.req.formData();
-      const email = fd.get("email")?.toString();
+      const email = fd.get("email")?.toString()?.toLowerCase();
       const password = fd.get("password")?.toString();
       const repeat = fd.get("repeat")?.toString();
 
@@ -138,7 +153,7 @@ export function PasswordAdapter(config: PasswordConfig) {
       await Storage.set(
         ctx.storage,
         ["email", email, "password"],
-        await hashPassword(password),
+        await hasher.hash(password),
       );
 
       return ctx.success(c, {
@@ -163,7 +178,6 @@ export function PasswordAdapter(config: PasswordConfig) {
       const action = fd.get("action")?.toString();
       const adapter = await ctx.get<PasswordChangeState>(c, "adapter");
       if (!adapter) throw new UnknownStateError();
-      console.log(adapter);
 
       async function transition(
         next: PasswordChangeState,
@@ -174,7 +188,7 @@ export function PasswordAdapter(config: PasswordConfig) {
       }
 
       if (action === "code") {
-        const email = fd.get("email")?.toString();
+        const email = fd.get("email")?.toString()?.toLowerCase();
         if (!email)
           return transition(
             { type: "start", redirect: adapter.redirect },
@@ -219,8 +233,15 @@ export function PasswordAdapter(config: PasswordConfig) {
         await Storage.set(
           ctx.storage,
           ["email", adapter.email, "password"],
-          await hashPassword(password),
+          await hasher.hash(password),
         );
+        const subject = await Storage.get<string>(ctx.storage, [
+          "email",
+          adapter.email,
+          "subject",
+        ]);
+        console.log("invalidating", subject, "for", adapter.email);
+        if (subject) await ctx.invalidate(subject);
 
         return c.redirect(adapter.redirect, 302);
       }
@@ -233,60 +254,132 @@ export function PasswordAdapter(config: PasswordConfig) {
 import * as jose from "jose";
 import { TextEncoder } from "util";
 
-interface HashedPassword {
+interface HashedPassword {}
+
+export function PBKDF2Hasher(opts?: { interations?: number }): PasswordHasher<{
   hash: string;
   salt: string;
   iterations: number;
-}
-
-async function hashPassword(password: string): Promise<HashedPassword> {
-  const encoder = new TextEncoder();
-  const bytes = encoder.encode(password);
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const params = {
-    name: "PBKDF2",
-    hash: "SHA-256",
-    salt: salt,
-    iterations: 600000, // High iteration count for security
-  };
-  const keyMaterial = await crypto.subtle.importKey(
-    "raw",
-    bytes,
-    "PBKDF2",
-    false,
-    ["deriveBits"],
-  );
-  const hash = await crypto.subtle.deriveBits(params, keyMaterial, 256);
-  const hashBase64 = jose.base64url.encode(new Uint8Array(hash));
-  const saltBase64 = jose.base64url.encode(salt);
+}> {
+  const iterations = opts?.interations ?? 600000;
   return {
-    hash: hashBase64,
-    salt: saltBase64,
-    iterations: params.iterations,
+    async hash(password) {
+      const encoder = new TextEncoder();
+      const bytes = encoder.encode(password);
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        bytes,
+        "PBKDF2",
+        false,
+        ["deriveBits"],
+      );
+      const hash = await crypto.subtle.deriveBits(
+        {
+          name: "PBKDF2",
+          hash: "SHA-256",
+          salt: salt,
+          iterations,
+        },
+        keyMaterial,
+        256,
+      );
+      const hashBase64 = jose.base64url.encode(new Uint8Array(hash));
+      const saltBase64 = jose.base64url.encode(salt);
+      return {
+        hash: hashBase64,
+        salt: saltBase64,
+        iterations,
+      };
+    },
+    async verify(password, compare) {
+      const encoder = new TextEncoder();
+      const passwordBytes = encoder.encode(password);
+      const salt = jose.base64url.decode(compare.salt);
+      const params = {
+        name: "PBKDF2",
+        hash: "SHA-256",
+        salt,
+        iterations: compare.iterations,
+      };
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        passwordBytes,
+        "PBKDF2",
+        false,
+        ["deriveBits"],
+      );
+      const hash = await crypto.subtle.deriveBits(params, keyMaterial, 256);
+      const hashBase64 = jose.base64url.encode(new Uint8Array(hash));
+      return hashBase64 === compare.hash;
+    },
   };
 }
+import crypto, { timingSafeEqual } from "crypto";
 
-async function verifyPassword(input: {
-  password: string;
-  compare: HashedPassword;
-}): Promise<boolean> {
-  const encoder = new TextEncoder();
-  const passwordBytes = encoder.encode(input.password);
-  const salt = jose.base64url.decode(input.compare.salt);
-  const params = {
-    name: "PBKDF2",
-    hash: "SHA-256",
-    salt,
-    iterations: input.compare.iterations,
+export function ScryptHasher(opts?: {
+  N?: number;
+  r?: number;
+  p?: number;
+}): PasswordHasher<{
+  hash: string;
+  salt: string;
+  N: number;
+  r: number;
+  p: number;
+}> {
+  const N = opts?.N ?? 16384;
+  const r = opts?.r ?? 8;
+  const p = opts?.p ?? 1;
+
+  return {
+    async hash(password) {
+      const salt = crypto.randomBytes(16);
+      const keyLength = 32; // 256 bits
+
+      const derivedKey = await new Promise<Buffer>((resolve, reject) => {
+        crypto.scrypt(
+          password,
+          salt,
+          keyLength,
+          { N, r, p },
+          (err, derivedKey) => {
+            if (err) reject(err);
+            else resolve(derivedKey);
+          },
+        );
+      });
+
+      const hashBase64 = derivedKey.toString("base64");
+      const saltBase64 = salt.toString("base64");
+
+      return {
+        hash: hashBase64,
+        salt: saltBase64,
+        N,
+        r,
+        p,
+      };
+    },
+
+    async verify(password, compare) {
+      const salt = Buffer.from(compare.salt, "base64");
+      const keyLength = 32; // 256 bits
+
+      const derivedKey = await new Promise<Buffer>((resolve, reject) => {
+        crypto.scrypt(
+          password,
+          salt,
+          keyLength,
+          { N: compare.N, r: compare.r, p: compare.p },
+          (err, derivedKey) => {
+            if (err) reject(err);
+            else resolve(derivedKey);
+          },
+        );
+      });
+
+      return timingSafeEqual(derivedKey, Buffer.from(compare.hash, "base64"));
+    },
   };
-  const keyMaterial = await crypto.subtle.importKey(
-    "raw",
-    passwordBytes,
-    "PBKDF2",
-    false,
-    ["deriveBits"],
-  );
-  const hash = await crypto.subtle.deriveBits(params, keyMaterial, 256);
-  const hashBase64 = jose.base64url.encode(new Uint8Array(hash));
-  return hashBase64 === input.compare.hash;
 }

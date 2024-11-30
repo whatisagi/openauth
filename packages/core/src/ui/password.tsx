@@ -42,12 +42,11 @@ export function PasswordLogin(props: {
         description={props.copy.login_description}
         logo={"A"}
       />
-
       {/* Form */}
       <form data-component="form" method="post">
-        {props.error?.type !== undefined && (
-          <FormError error={props.copy[`error_${props.error.type}`]} />
-        )}
+        <FormError
+          error={props.error?.type && props.copy?.[`error_${props.error.type}`]}
+        />
         <input
           data-component="input"
           type="email"
@@ -97,9 +96,9 @@ export function PasswordRegister(props: {
     <Layout>
       <Header title={props.copy.register_title} logo={"A"} />
       <form data-component="form" method="post">
-        {props.error?.type !== undefined && (
-          <FormError error={props.copy[`error_${props.error.type}`]} />
-        )}
+        <FormError
+          error={props.error?.type && props.copy?.[`error_${props.error.type}`]}
+        />
         <input
           data-component="input"
           autofocus={!props.error || emailError}
@@ -160,9 +159,9 @@ export function PasswordChange(props: {
 
       {/* Form */}
       <form data-component="form" method="post" replace>
-        {props.error?.type !== undefined && (
-          <FormError error={props.copy[`error_${props.error.type}`]} />
-        )}
+        <FormError
+          error={props.error?.type && props.copy?.[`error_${props.error.type}`]}
+        />
         {props.state.type === "start" && (
           <>
             <input type="hidden" name="action" value="code" />

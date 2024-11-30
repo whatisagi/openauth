@@ -1,5 +1,5 @@
 import type { KVNamespace } from "@cloudflare/workers-types";
-import { joinKey, StorageAdapter } from "./storage.js";
+import { joinKey, splitKey, StorageAdapter } from "./storage.js";
 
 interface CloudflareStorageOptions {
   namespace: KVNamespace;
@@ -35,7 +35,7 @@ export function CloudflareStorage(
         for (const key of result.keys) {
           const value = await options.namespace.get(key.name, "json");
           if (value !== null) {
-            yield [key.name, value];
+            yield [splitKey(key.name), value];
           }
         }
         if (result.list_complete) {

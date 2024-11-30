@@ -12,7 +12,7 @@ export default {
     process.env.OPENAUTH_ISSUER = env.OPENAUTH_ISSUER;
     const client = createClient({
       clientID: "123",
-      fetch: (input, init) => env.Auth.fetch(input, init),
+      fetch: (input, init) => env.CloudflareAuth.fetch(input, init),
     });
     const url = new URL(request.url);
     const redirectURI = url.origin + "/callback";
