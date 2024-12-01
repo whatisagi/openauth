@@ -1,11 +1,11 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.0.4/schema.json",
   "changelog": "@changesets/cli/changelog",
-  "commit": false,
+  "commit": true,
   "fixed": [["@openauthjs/core"]],
   "linked": [],
   "access": "public",
-  "baseBranch": "dev",
+  "baseBranch": "master",
   "updateInternalDependencies": "patch",
   "ignore": ["@openauthjs/examples"]
 }
