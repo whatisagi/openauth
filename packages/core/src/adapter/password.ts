@@ -91,163 +91,167 @@ export function PasswordAdapter(config: PasswordConfig) {
       .join("");
     return otp;
   }
-  return function (routes, ctx) {
-    routes.get("/authorize", async (c) =>
-      ctx.forward(c, await config.login(c.req.raw)),
-    );
-
-    routes.post("/authorize", async (c) => {
-      const fd = await c.req.formData();
-      async function error(err: PasswordLoginError) {
-        return ctx.forward(c, await config.login(c.req.raw, fd, err));
-      }
-      const email = fd.get("email")?.toString()?.toLowerCase();
-      if (!email) return error({ type: "invalid_email" });
-      const hash = await Storage.get<HashedPassword>(ctx.storage, [
-        "email",
-        email,
-        "password",
-      ]);
-      const password = fd.get("password")?.toString();
-      if (!password || !hash || !(await hasher.verify(password, hash)))
-        return error({ type: "invalid_password" });
-      return ctx.success(
-        c,
-        {
-          email: email,
-        },
-        {
-          invalidate: async (subject) => {
-            await Storage.set(
-              ctx.storage,
-              ["email", email, "subject"],
-              subject,
-            );
-          },
-        },
-      );
-    });
-
-    routes.get("/register", async (c) => {
-      return ctx.forward(c, await config.register(c.req.raw));
-    });
-
-    routes.post("/register", async (c) => {
-      const fd = await c.req.formData();
-      const email = fd.get("email")?.toString()?.toLowerCase();
-      const password = fd.get("password")?.toString();
-      const repeat = fd.get("repeat")?.toString();
-
-      async function error(err: PasswordRegisterError) {
-        return ctx.forward(c, await config.register(c.req.raw, fd, err));
-      }
-      if (!email) return error({ type: "invalid_email" });
-      if (!password) return error({ type: "invalid_password" });
-      if (password !== repeat) return error({ type: "password_mismatch" });
-      const existing = await Storage.get(ctx.storage, [
-        "email",
-        email,
-        "password",
-      ]);
-      if (existing) return error({ type: "email_taken" });
-      await Storage.set(
-        ctx.storage,
-        ["email", email, "password"],
-        await hasher.hash(password),
+  return {
+    type: "password",
+    init(routes, ctx) {
+      routes.get("/authorize", async (c) =>
+        ctx.forward(c, await config.login(c.req.raw)),
       );
 
-      return ctx.success(c, {
-        email: email,
-      });
-    });
-
-    routes.get("/change", async (c) => {
-      const redirect =
-        c.req.query("redirect_uri") ||
-        c.req.url.replace(/change.*/, "authorize");
-      const state: PasswordChangeState = {
-        type: "start",
-        redirect,
-      };
-      await ctx.set(c, "adapter", 60 * 60 * 24, state);
-      return ctx.forward(c, await config.change(c.req.raw, state));
-    });
-
-    routes.post("/change", async (c) => {
-      const fd = await c.req.formData();
-      const action = fd.get("action")?.toString();
-      const adapter = await ctx.get<PasswordChangeState>(c, "adapter");
-      if (!adapter) throw new UnknownStateError();
-
-      async function transition(
-        next: PasswordChangeState,
-        err?: PasswordChangeError,
-      ) {
-        await ctx.set<PasswordChangeState>(c, "adapter", 60 * 60 * 24, next);
-        return ctx.forward(c, await config.change(c.req.raw, next, fd, err));
-      }
-
-      if (action === "code") {
+      routes.post("/authorize", async (c) => {
+        const fd = await c.req.formData();
+        async function error(err: PasswordLoginError) {
+          return ctx.forward(c, await config.login(c.req.raw, fd, err));
+        }
         const email = fd.get("email")?.toString()?.toLowerCase();
-        if (!email)
-          return transition(
-            { type: "start", redirect: adapter.redirect },
-            { type: "invalid_email" },
-          );
-        const code = generate();
-        await config.sendCode(email, code);
-
-        return transition({
-          type: "code",
-          code,
-          email,
-          redirect: adapter.redirect,
-        });
-      }
-
-      if (action === "verify" && adapter.type === "code") {
-        const code = fd.get("code")?.toString();
-        if (!code || code !== adapter.code)
-          return transition(adapter, { type: "invalid_code" });
-        return transition({
-          type: "update",
-          email: adapter.email,
-          redirect: adapter.redirect,
-        });
-      }
-
-      if (action === "update" && adapter.type === "update") {
-        const existing = await Storage.get(ctx.storage, [
+        if (!email) return error({ type: "invalid_email" });
+        const hash = await Storage.get<HashedPassword>(ctx.storage, [
           "email",
-          adapter.email,
+          email,
           "password",
         ]);
-        if (!existing) return c.redirect(adapter.redirect, 302);
+        const password = fd.get("password")?.toString();
+        if (!password || !hash || !(await hasher.verify(password, hash)))
+          return error({ type: "invalid_password" });
+        return ctx.success(
+          c,
+          {
+            email: email,
+          },
+          {
+            invalidate: async (subject) => {
+              await Storage.set(
+                ctx.storage,
+                ["email", email, "subject"],
+                subject,
+              );
+            },
+          },
+        );
+      });
 
+      routes.get("/register", async (c) => {
+        return ctx.forward(c, await config.register(c.req.raw));
+      });
+
+      routes.post("/register", async (c) => {
+        const fd = await c.req.formData();
+        const email = fd.get("email")?.toString()?.toLowerCase();
         const password = fd.get("password")?.toString();
         const repeat = fd.get("repeat")?.toString();
-        if (!password) return transition(adapter, { type: "invalid_password" });
-        if (password !== repeat)
-          return transition(adapter, { type: "password_mismatch" });
 
+        async function error(err: PasswordRegisterError) {
+          return ctx.forward(c, await config.register(c.req.raw, fd, err));
+        }
+        if (!email) return error({ type: "invalid_email" });
+        if (!password) return error({ type: "invalid_password" });
+        if (password !== repeat) return error({ type: "password_mismatch" });
+        const existing = await Storage.get(ctx.storage, [
+          "email",
+          email,
+          "password",
+        ]);
+        if (existing) return error({ type: "email_taken" });
         await Storage.set(
           ctx.storage,
-          ["email", adapter.email, "password"],
+          ["email", email, "password"],
           await hasher.hash(password),
         );
-        const subject = await Storage.get<string>(ctx.storage, [
-          "email",
-          adapter.email,
-          "subject",
-        ]);
-        console.log("invalidating", subject, "for", adapter.email);
-        if (subject) await ctx.invalidate(subject);
 
-        return c.redirect(adapter.redirect, 302);
-      }
+        return ctx.success(c, {
+          email: email,
+        });
+      });
 
-      return transition({ type: "start", redirect: adapter.redirect });
-    });
+      routes.get("/change", async (c) => {
+        const redirect =
+          c.req.query("redirect_uri") ||
+          c.req.url.replace(/change.*/, "authorize");
+        const state: PasswordChangeState = {
+          type: "start",
+          redirect,
+        };
+        await ctx.set(c, "adapter", 60 * 60 * 24, state);
+        return ctx.forward(c, await config.change(c.req.raw, state));
+      });
+
+      routes.post("/change", async (c) => {
+        const fd = await c.req.formData();
+        const action = fd.get("action")?.toString();
+        const adapter = await ctx.get<PasswordChangeState>(c, "adapter");
+        if (!adapter) throw new UnknownStateError();
+
+        async function transition(
+          next: PasswordChangeState,
+          err?: PasswordChangeError,
+        ) {
+          await ctx.set<PasswordChangeState>(c, "adapter", 60 * 60 * 24, next);
+          return ctx.forward(c, await config.change(c.req.raw, next, fd, err));
+        }
+
+        if (action === "code") {
+          const email = fd.get("email")?.toString()?.toLowerCase();
+          if (!email)
+            return transition(
+              { type: "start", redirect: adapter.redirect },
+              { type: "invalid_email" },
+            );
+          const code = generate();
+          await config.sendCode(email, code);
+
+          return transition({
+            type: "code",
+            code,
+            email,
+            redirect: adapter.redirect,
+          });
+        }
+
+        if (action === "verify" && adapter.type === "code") {
+          const code = fd.get("code")?.toString();
+          if (!code || code !== adapter.code)
+            return transition(adapter, { type: "invalid_code" });
+          return transition({
+            type: "update",
+            email: adapter.email,
+            redirect: adapter.redirect,
+          });
+        }
+
+        if (action === "update" && adapter.type === "update") {
+          const existing = await Storage.get(ctx.storage, [
+            "email",
+            adapter.email,
+            "password",
+          ]);
+          if (!existing) return c.redirect(adapter.redirect, 302);
+
+          const password = fd.get("password")?.toString();
+          const repeat = fd.get("repeat")?.toString();
+          if (!password)
+            return transition(adapter, { type: "invalid_password" });
+          if (password !== repeat)
+            return transition(adapter, { type: "password_mismatch" });
+
+          await Storage.set(
+            ctx.storage,
+            ["email", adapter.email, "password"],
+            await hasher.hash(password),
+          );
+          const subject = await Storage.get<string>(ctx.storage, [
+            "email",
+            adapter.email,
+            "subject",
+          ]);
+          console.log("invalidating", subject, "for", adapter.email);
+          if (subject) await ctx.invalidate(subject);
+
+          return c.redirect(adapter.redirect, 302);
+        }
+
+        return transition({ type: "start", redirect: adapter.redirect });
+      });
+    },
   } satisfies Adapter<{ email: string }>;
 }
 

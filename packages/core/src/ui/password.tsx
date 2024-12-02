@@ -2,7 +2,6 @@
 
 import {
   PasswordChangeError,
-  PasswordChangeState,
   PasswordConfig,
   PasswordLoginError,
   PasswordRegisterError,
@@ -10,6 +9,7 @@ import {
 import { Header, Layout } from "./base.js";
 import "./form.js";
 import { FormAlert } from "./form.js";
+import { Theme } from "./theme.js";
 
 const DEFAULT_COPY = {
   error_email_taken: "There is already an account with this email.",
@@ -42,219 +42,10 @@ const DEFAULT_COPY = {
 
 export type PasswordUICopy = typeof DEFAULT_COPY;
 
-export function PasswordLogin(props: {
-  error?: PasswordLoginError;
-  form?: FormData;
-  copy: PasswordUICopy;
-}) {
-  return (
-    <Layout>
-      <Header
-        title={props.copy.login_title}
-        description={props.copy.login_description}
-        logo={props.copy.logo}
-      />
-      {/* Form */}
-      <form data-component="form" method="post">
-        <FormAlert
-          message={
-            props.error?.type && props.copy?.[`error_${props.error.type}`]
-          }
-        />
-        <input
-          data-component="input"
-          type="email"
-          name="email"
-          required
-          placeholder={props.copy.input_email}
-          autofocus={!props.error}
-          value={props.form?.get("email")?.toString()}
-        />
-        <input
-          data-component="input"
-          autofocus={props.error?.type === "invalid_password"}
-          required
-          type="password"
-          name="password"
-          placeholder="Password"
-        />
-        <button data-component="button">Continue</button>
-        <div data-component="form-footer">
-          <span>
-            {props.copy.register_prompt}{" "}
-            <a data-component="link" href="register">
-              {props.copy.register}
-            </a>
-          </span>
-          <a data-component="link" href="change">
-            {props.copy.change_prompt}
-          </a>
-        </div>
-      </form>
-    </Layout>
-  ) as string;
-}
-
-export function PasswordRegister(props: {
-  error?: PasswordRegisterError;
-  form?: FormData;
-  copy: PasswordUICopy;
-}) {
-  const emailError = ["invalid_email", "email_taken"].includes(
-    props.error?.type || "",
-  );
-  const passwordError = ["invalid_password", "password_mismatch"].includes(
-    props.error?.type || "",
-  );
-  return (
-    <Layout>
-      <Header title={props.copy.register_title} logo={"A"} />
-      <form data-component="form" method="post">
-        <FormAlert
-          message={
-            props.error?.type && props.copy?.[`error_${props.error.type}`]
-          }
-        />
-        <input
-          data-component="input"
-          autofocus={!props.error || emailError}
-          type="email"
-          name="email"
-          value={!emailError ? props.form?.get("email")?.toString() : ""}
-          required
-          placeholder={props.copy.input_email}
-        />
-        <input
-          data-component="input"
-          autofocus={passwordError}
-          type="password"
-          name="password"
-          placeholder={props.copy.input_password}
-          required
-          value={!passwordError ? props.form?.get("password")?.toString() : ""}
-        />
-        <input
-          data-component="input"
-          type="password"
-          name="repeat"
-          required
-          autofocus={passwordError}
-          placeholder={props.copy.input_repeat}
-        />
-        <button data-component="button">Continue</button>
-        <div data-component="form-footer">
-          <span>
-            {props.copy.login_prompt}{" "}
-            <a data-component="link" href="authorize">
-              {props.copy.login}
-            </a>
-          </span>
-        </div>
-      </form>
-    </Layout>
-  ) as string;
-}
-
-export function PasswordChange(props: {
-  state: PasswordChangeState;
-  error?: PasswordChangeError;
-  form?: FormData;
-  copy: PasswordUICopy;
-}) {
-  const passwordError = ["invalid_password", "password_mismatch"].includes(
-    props.error?.type || "",
-  );
-  return (
-    <Layout>
-      <Header title={"Change your password"} logo={"A"} />
-
-      {/* Form */}
-      <form data-component="form" method="post" replace>
-        <FormAlert
-          message={
-            props.error?.type && props.copy?.[`error_${props.error.type}`]
-          }
-        />
-        {props.state.type === "start" && (
-          <>
-            <input type="hidden" name="action" value="code" />
-            <input
-              data-component="input"
-              autofocus
-              type="email"
-              name="email"
-              required
-              value={props.form?.get("email")?.toString()}
-              placeholder={props.copy.input_email}
-            />
-          </>
-        )}
-        {props.state.type === "code" && (
-          <>
-            <input type="hidden" name="action" value="verify" />
-            <input
-              data-component="input"
-              autofocus
-              name="code"
-              minLength={6}
-              maxLength={6}
-              required
-              placeholder={props.copy.input_code}
-            />
-          </>
-        )}
-        {props.state.type === "update" && (
-          <>
-            <input type="hidden" name="action" value="update" />
-            <input
-              data-component="input"
-              autofocus
-              type="password"
-              name="password"
-              placeholder={props.copy.input_password}
-              required
-              value={
-                !passwordError ? props.form?.get("password")?.toString() : ""
-              }
-            />
-            <input
-              data-component="input"
-              type="password"
-              name="repeat"
-              required
-              value={
-                !passwordError ? props.form?.get("password")?.toString() : ""
-              }
-              placeholder={props.copy.input_repeat}
-            />
-          </>
-        )}
-        <button data-component="button">Continue</button>
-      </form>
-      {props.state.type === "code" && (
-        <form method="post">
-          <input type="hidden" name="action" value="code" />
-          <input type="hidden" name="email" value={props.state.email} />
-          {props.state.type === "code" && (
-            <div data-component="form-footer">
-              <span>
-                {props.copy.code_return}{" "}
-                <a data-component="link" href="authorize">
-                  {props.copy.login.toLowerCase()}
-                </a>
-              </span>
-              <button data-component="link">{props.copy.code_resend}</button>
-            </div>
-          )}
-        </form>
-      )}
-    </Layout>
-  ) as string;
-}
-
 export interface PasswordUIOptions {
   sendCode: PasswordConfig["sendCode"];
   copy?: Partial<PasswordUICopy>;
+  theme?: Theme;
 }
 
 export function PasswordUI(input: PasswordUIOptions) {
@@ -264,48 +55,203 @@ export function PasswordUI(input: PasswordUIOptions) {
   };
   return {
     sendCode: input.sendCode,
-    login: async (_req, form, error) =>
-      new Response(
-        PasswordLogin({
-          error,
-          form,
-          copy,
-        }),
-        {
-          status: error ? 401 : 200,
-          headers: {
-            "Content-Type": "text/html",
-          },
-        },
-      ),
-    register: async (_req, form, error) =>
-      new Response(
-        PasswordRegister({
-          error,
-          form,
-          copy,
-        }),
-        {
-          headers: {
-            "Content-Type": "text/html",
-          },
-        },
-      ),
-    change: async (_req, state, form, error) => {
-      return new Response(
-        PasswordChange({
-          state,
-          error,
-          form,
-          copy,
-        }),
-        {
-          status: error ? 400 : 200,
-          headers: {
-            "Content-Type": "text/html",
-          },
-        },
+    login: async (_req, form, error) => {
+      const jsx = (
+        <Layout theme={input.theme}>
+          <Header
+            title={copy.login_title}
+            description={copy.login_description}
+            theme={input.theme}
+          />
+          {/* Form */}
+          <form data-component="form" method="post">
+            <FormAlert message={error?.type && copy?.[`error_${error.type}`]} />
+            <input
+              data-component="input"
+              type="email"
+              name="email"
+              required
+              placeholder={copy.input_email}
+              autofocus={!error}
+              value={form?.get("email")?.toString()}
+            />
+            <input
+              data-component="input"
+              autofocus={error?.type === "invalid_password"}
+              required
+              type="password"
+              name="password"
+              placeholder="Password"
+            />
+            <button data-component="button">Continue</button>
+            <div data-component="form-footer">
+              <span>
+                {copy.register_prompt}{" "}
+                <a data-component="link" href="register">
+                  {copy.register}
+                </a>
+              </span>
+              <a data-component="link" href="change">
+                {copy.change_prompt}
+              </a>
+            </div>
+          </form>
+        </Layout>
       );
+      return new Response(jsx.toString(), {
+        status: error ? 401 : 200,
+        headers: {
+          "Content-Type": "text/html",
+        },
+      });
+    },
+    register: async (_req, form, error) => {
+      const emailError = ["invalid_email", "email_taken"].includes(
+        error?.type || "",
+      );
+      const passwordError = ["invalid_password", "password_mismatch"].includes(
+        error?.type || "",
+      );
+      const jsx = (
+        <Layout theme={input.theme}>
+          <Header title={copy.register_title} theme={input.theme} />
+          <form data-component="form" method="post">
+            <FormAlert message={error?.type && copy?.[`error_${error.type}`]} />
+            <input
+              data-component="input"
+              autofocus={!error || emailError}
+              type="email"
+              name="email"
+              value={!emailError ? form?.get("email")?.toString() : ""}
+              required
+              placeholder={copy.input_email}
+            />
+            <input
+              data-component="input"
+              autofocus={passwordError}
+              type="password"
+              name="password"
+              placeholder={copy.input_password}
+              required
+              value={!passwordError ? form?.get("password")?.toString() : ""}
+            />
+            <input
+              data-component="input"
+              type="password"
+              name="repeat"
+              required
+              autofocus={passwordError}
+              placeholder={copy.input_repeat}
+            />
+            <button data-component="button">Continue</button>
+            <div data-component="form-footer">
+              <span>
+                {copy.login_prompt}{" "}
+                <a data-component="link" href="authorize">
+                  {copy.login}
+                </a>
+              </span>
+            </div>
+          </form>
+        </Layout>
+      ) as string;
+      return new Response(jsx.toString(), {
+        headers: {
+          "Content-Type": "text/html",
+        },
+      });
+    },
+    change: async (_req, state, form, error) => {
+      const passwordError = ["invalid_password", "password_mismatch"].includes(
+        error?.type || "",
+      );
+      const jsx = (
+        <Layout theme={input.theme}>
+          <Header title={"Change your password"} theme={input.theme} />
+          {/* Form */}
+          <form data-component="form" method="post" replace>
+            <FormAlert message={error?.type && copy?.[`error_${error.type}`]} />
+            {state.type === "start" && (
+              <>
+                <input type="hidden" name="action" value="code" />
+                <input
+                  data-component="input"
+                  autofocus
+                  type="email"
+                  name="email"
+                  required
+                  value={form?.get("email")?.toString()}
+                  placeholder={copy.input_email}
+                />
+              </>
+            )}
+            {state.type === "code" && (
+              <>
+                <input type="hidden" name="action" value="verify" />
+                <input
+                  data-component="input"
+                  autofocus
+                  name="code"
+                  minLength={6}
+                  maxLength={6}
+                  required
+                  placeholder={copy.input_code}
+                />
+              </>
+            )}
+            {state.type === "update" && (
+              <>
+                <input type="hidden" name="action" value="update" />
+                <input
+                  data-component="input"
+                  autofocus
+                  type="password"
+                  name="password"
+                  placeholder={copy.input_password}
+                  required
+                  value={
+                    !passwordError ? form?.get("password")?.toString() : ""
+                  }
+                />
+                <input
+                  data-component="input"
+                  type="password"
+                  name="repeat"
+                  required
+                  value={
+                    !passwordError ? form?.get("password")?.toString() : ""
+                  }
+                  placeholder={copy.input_repeat}
+                />
+              </>
+            )}
+            <button data-component="button">Continue</button>
+          </form>
+          {state.type === "code" && (
+            <form method="post">
+              <input type="hidden" name="action" value="code" />
+              <input type="hidden" name="email" value={state.email} />
+              {state.type === "code" && (
+                <div data-component="form-footer">
+                  <span>
+                    {copy.code_return}{" "}
+                    <a data-component="link" href="authorize">
+                      {copy.login.toLowerCase()}
+                    </a>
+                  </span>
+                  <button data-component="link">{copy.code_resend}</button>
+                </div>
+              )}
+            </form>
+          )}
+        </Layout>
+      );
+      return new Response(jsx.toString(), {
+        status: error ? 400 : 200,
+        headers: {
+          "Content-Type": "text/html",
+        },
+      });
     },
   } satisfies PasswordConfig;
 }

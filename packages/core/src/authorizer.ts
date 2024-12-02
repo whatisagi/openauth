@@ -15,7 +15,6 @@ export interface OnSuccessResponder<
 }
 
 interface AuthorizationState {
-  provider: string;
   redirect_uri: string;
   response_type: string;
   state: string;
@@ -27,7 +26,13 @@ export type Prettify<T> = {
   [K in keyof T]: T[K];
 } & {};
 
-import { OauthError, UnknownStateError } from "./error.js";
+import {
+  MissingParameterError,
+  MissingProviderError,
+  OauthError,
+  UnauthorizedClientError,
+  UnknownStateError,
+} from "./error.js";
 import { compactDecrypt, CompactEncrypt, SignJWT } from "jose";
 import { Storage, StorageAdapter } from "./storage/storage.js";
 import { keys } from "./keys.js";
@@ -52,6 +57,10 @@ export function authorizer<
     access?: number;
     refresh?: number;
   };
+  select?: (
+    providers: Record<string, string>,
+    req: Request,
+  ) => Promise<Response>;
   start?(req: Request): Promise<void>;
   success(
     response: OnSuccessResponder<SubjectPayload<Sessions>>,
@@ -60,9 +69,11 @@ export function authorizer<
   ): Promise<Response>;
   error?(error: UnknownStateError, req: Request): Promise<Response>;
   allow(
-    clientID: string,
-    audience: string | undefined,
-    redirect: string,
+    input: {
+      clientID: string;
+      redirectURI: string;
+      audience?: string;
+    },
     req: Request,
   ): Promise<boolean>;
 }) {
@@ -270,7 +281,7 @@ export function authorizer<
       c.set("provider", name);
       await next();
     });
-    value(route, {
+    value.init(route, {
       name,
       ...auth,
     });
@@ -390,11 +401,10 @@ export function authorizer<
   });
 
   app.get("/authorize", async (c) => {
-    const provider = c.req.query("provider");
-    if (!provider) return c.text("Missing provider", 400);
     let authorization = await getAuthorization(c).catch(
       () => ({}) as AuthorizationState,
     );
+    const provider = c.req.query("provider");
     const response_type =
       c.req.query("response_type") || authorization.response_type;
     const redirect_uri =
@@ -403,28 +413,19 @@ export function authorizer<
     const client_id = c.req.query("client_id") || authorization.client_id;
     const audience = c.req.query("audience") || authorization.audience;
 
-    if (!provider) {
-      c.status(400);
-      return c.text("Missing provider");
-    }
-
     if (!redirect_uri) {
-      c.status(400);
-      return c.text("Missing redirect_uri");
+      return c.text("Missing redirect_uri", { status: 400 });
     }
 
     if (!response_type) {
-      c.status(400);
-      return c.text("Missing response_type");
+      throw new MissingParameterError("response_type");
     }
 
     if (!client_id) {
-      c.status(400);
-      return c.text("Missing client_id");
+      throw new MissingParameterError("client_id");
     }
 
     authorization = {
-      provider,
       response_type,
       redirect_uri,
       state,
@@ -438,7 +439,33 @@ export function authorizer<
       await input.start(c.req.raw);
     }
 
-    return c.redirect(`/${provider}/authorize`);
+    if (
+      !(await input.allow(
+        {
+          clientID: client_id,
+          redirectURI: redirect_uri,
+          audience,
+        },
+        c.req.raw,
+      ))
+    )
+      throw new UnauthorizedClientError(client_id, redirect_uri);
+
+    if (provider) return c.redirect(`/${provider}/authorize`);
+    if (input.select)
+      return auth.forward(
+        c,
+        await input.select(
+          Object.fromEntries(
+            Object.entries(input.providers).map(([key, value]) => [
+              key,
+              value.type,
+            ]),
+          ),
+          c.req.raw,
+        ),
+      );
+    throw new MissingProviderError();
   });
 
   app.all("/*", async (c) => {
@@ -452,10 +479,12 @@ export function authorizer<
     }
     const authorization = await getAuthorization(c);
     const url = new URL(authorization.redirect_uri);
-    if (err instanceof OauthError) {
-      url.searchParams.set("error", err.error);
-      url.searchParams.set("error_description", err.description);
-    }
+    const oauth =
+      err instanceof OauthError
+        ? err
+        : new OauthError("server_error", err.message);
+    url.searchParams.set("error", oauth.error);
+    url.searchParams.set("error_description", oauth.description);
     return c.redirect(url.toString());
   });
 

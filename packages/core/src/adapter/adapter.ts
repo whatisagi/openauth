@@ -1,14 +1,13 @@
 import type { Context, Hono } from "hono";
 import { StorageAdapter } from "../storage/storage.js";
 
-export type Adapter<Properties = any> = (
-  route: AdapterRoute,
-  options: AdapterOptions<Properties>,
-) => void;
-
-export type AdapterReturn = ReturnType<Adapter>;
-
 export type AdapterRoute = Hono;
+
+export interface Adapter<Properties = any> {
+  type: string;
+  init: (route: AdapterRoute, options: AdapterOptions<Properties>) => void;
+}
+
 export interface AdapterOptions<Properties> {
   name: string;
   success: (

@@ -5,6 +5,7 @@
   "scripts": {
     "build": "bun run script/build.ts"
   },
+  "sideEffects": false,
   "devDependencies": {
     "@tsconfig/node20": "20.1.4",
     "@types/node": "22.10.1",
@@ -21,6 +22,10 @@
     "./*": {
       "import": "./dist/esm/*.js",
       "types": "./dist/types/*.d.ts"
+    },
+    "./ui": {
+      "import": "./dist/esm/ui/index.js",
+      "types": "./dist/types/ui/index.d.ts"
     }
   },
   "peerDependencies": {
