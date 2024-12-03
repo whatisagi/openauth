@@ -1,6 +1,6 @@
 /** @jsxImportSource hono/jsx */
 
-import { Header, Layout } from "./base.js";
+import { Layout } from "./base.js";
 import { Theme } from "./theme.js";
 
 export interface SelectProps {
@@ -17,8 +17,7 @@ export interface SelectProps {
 export function Select(props?: SelectProps) {
   return async (providers: Record<string, string>, _req: Request) => {
     const jsx = (
-      <Layout size="small" theme={props?.theme}>
-        <Header title="Welcome to Terminal" theme={props?.theme} />
+      <Layout theme={props?.theme}>
         <div data-component="form">
           {Object.entries(providers).map(([key, type]) => {
             const match = props?.providers?.[key];

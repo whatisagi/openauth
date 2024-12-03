@@ -6,7 +6,7 @@ import {
   PasswordLoginError,
   PasswordRegisterError,
 } from "../adapter/password.js";
-import { Header, Layout } from "./base.js";
+import { Layout } from "./base.js";
 import "./form.js";
 import { FormAlert } from "./form.js";
 import { Theme } from "./theme.js";
@@ -58,12 +58,6 @@ export function PasswordUI(input: PasswordUIOptions) {
     login: async (_req, form, error) => {
       const jsx = (
         <Layout theme={input.theme}>
-          <Header
-            title={copy.login_title}
-            description={copy.login_description}
-            theme={input.theme}
-          />
-          {/* Form */}
           <form data-component="form" method="post">
             <FormAlert message={error?.type && copy?.[`error_${error.type}`]} />
             <input
@@ -114,7 +108,6 @@ export function PasswordUI(input: PasswordUIOptions) {
       );
       const jsx = (
         <Layout theme={input.theme}>
-          <Header title={copy.register_title} theme={input.theme} />
           <form data-component="form" method="post">
             <FormAlert message={error?.type && copy?.[`error_${error.type}`]} />
             <input
@@ -167,8 +160,6 @@ export function PasswordUI(input: PasswordUIOptions) {
       );
       const jsx = (
         <Layout theme={input.theme}>
-          <Header title={"Change your password"} theme={input.theme} />
-          {/* Form */}
           <form data-component="form" method="post" replace>
             <FormAlert message={error?.type && copy?.[`error_${error.type}`]} />
             {state.type === "start" && (

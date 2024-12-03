@@ -2,7 +2,7 @@
 
 import { CodeAdapterOptions } from "../adapter/code.js";
 import { UnknownStateError } from "../error.js";
-import { Header, Layout } from "./base.js";
+import { Layout } from "./base.js";
 import { FormAlert } from "./form.js";
 import { Theme } from "./theme.js";
 
@@ -13,16 +13,10 @@ export function CodeUI(props: {
   return {
     sendCode: props.sendCode,
     length: 6,
-    request: async (req, state, form, error) => {
+    request: async (_req, state, _form, error) => {
       if (state.type === "start") {
         const jsx = (
           <Layout theme={props.theme}>
-            <Header
-              title={"Welcome to the app"}
-              description={"Sign in to get started"}
-              theme={props.theme}
-            />
-
             {/* Form */}
             <form data-component="form" method="post">
               {error?.type === "invalid_claim" && (
@@ -54,31 +48,46 @@ export function CodeUI(props: {
       if (state.type === "code") {
         const jsx = (
           <Layout theme={props.theme}>
-            <Header
-              title={"Welcome to the app"}
-              description={"Sign in to get started"}
-              theme={props.theme}
-            />
-
-            {/* Form */}
-            <form data-component="form" method="post">
-              {error?.type === "invalid_claim" && (
-                <FormAlert message={"Email address is not valid"} />
+            <form data-component="form" class="form" method="post">
+              {error?.type === "invalid_code" && (
+                <FormAlert message={"Invalid code"} />
               )}
-              <input type="hidden" name="action" value="request" />
+              {state.type === "code" && (
+                <FormAlert
+                  message={"Code resent to " + state.claims.email}
+                  color="success"
+                />
+              )}
+              <input type="hidden" name="action" value="verify" />
               <input
                 data-component="input"
                 autofocus
-                type="email"
-                name="email"
+                minLength={6}
+                maxLength={6}
+                type="text"
+                name="code"
                 required
-                placeholder="Email"
+                placeholder="Code"
               />
               <button data-component="button">Continue</button>
             </form>
-            <p data-component="form-footer">
-              We&apos;ll send a pin code to your email
-            </p>
+            <form method="post">
+              {Object.entries(state.claims).map(([key, value]) => (
+                <input
+                  key={key}
+                  type="hidden"
+                  name={key}
+                  value={value}
+                  className="hidden"
+                />
+              ))}
+              <input type="hidden" name="action" value="request" />
+              <div data-component="form-footer">
+                <span>
+                  Didn't get code? <button data-component="link">Resend</button>
+                </span>
+              </div>
+            </form>
           </Layout>
         );
         return new Response(jsx.toString(), {

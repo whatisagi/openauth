@@ -11,11 +11,18 @@ import { GoogleAdapter } from "@openauthjs/core/adapter/google";
 import { subjects } from "../subjects.js";
 import { Theme } from "@openauthjs/core/ui/theme";
 
-const theme: Theme = {
+// 1. use drop in UI as is
+// 2. configure theme (colors, fonts, etc)
+// 3. add custom css
+// 4. copy pastes the ui (structure changes, copy changes)
+// 5. ejecting not using ui
+
+const terminal: Theme = {
+  title: "terminal",
+  favicon: "https://www.terminal.shop/favicon.svg",
   logo: {
-    dark: "https://pbs.twimg.com/profile_images/1782913043279564800/qzq989sC_400x400.jpg",
-    light:
-      "https://pbs.twimg.com/profile_images/1782913043279564800/qzq989sC_400x400.jpg",
+    dark: "https://www.terminal.shop/images/logo-white.svg",
+    light: "https://www.terminal.shop/images/logo-black.svg",
   },
   background: {
     dark: "rgb(0, 0, 0)",
@@ -25,7 +32,38 @@ const theme: Theme = {
     dark: "#ff5e00",
     light: "#ff5e00",
   },
+  font: {
+    family: "Geist Mono, monospace",
+  },
+  css: `
+    @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100;200;300;400;500;600;700;800;900&display=swap');
+  `,
 };
+
+const sst: Theme = {
+  title: "SST",
+  logo: {
+    dark: "https://avatars.githubusercontent.com/u/66570915?s=200&v=4",
+    light: "https://avatars.githubusercontent.com/u/66570915?s=200&v=4",
+  },
+  background: {
+    dark: "#1a1a2d",
+    light: "rgb(255, 255, 255)",
+  },
+  primary: {
+    dark: "#f3663f",
+    light: "#f3663f",
+  },
+  font: {
+    family: "Rubik, sans-serif",
+  },
+  css: `
+    @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@100;200;300;400;500;600;700;800;900&display=swap');
+  `,
+};
+
+// const theme = sst;
+const theme = terminal;
 
 export default authorizer({
   subjects,
