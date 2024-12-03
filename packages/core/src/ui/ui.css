@@ -3,12 +3,16 @@
 :root {
   --color-background-dark: #0e0e11;
   --color-background-light: #ffffff;
-  --color-brand: #6772e5;
+  --color-primary-dark: #6772e5;
+  --color-primary-light: #6772e5;
   --border-radius: 0;
 
   --color-background: var(--color-background-dark);
+  --color-primary: var(--color-primary-dark);
+
   @media (prefers-color-scheme: light) {
     --color-background: var(--color-background-light);
+    --color-primary: var(--color-primary-light);
   }
 
   --color-high: oklch(
@@ -119,7 +123,7 @@
   }
 
   &:user-invalid:not(:focus) {
-    border-color: oklch(from var(--color-brand) l c 25);
+    border-color: oklch(from var(--color-primary) l c 25);
   }
 }
 
@@ -134,8 +138,8 @@
   gap: 0.75rem;
   align-items: center;
   justify-content: center;
-  background: var(--color-brand);
-  color: oklch(from var(--color-brand) calc(round(1 - round(l / 1.4))) 0 0);
+  background: var(--color-primary);
+  color: oklch(from var(--color-primary) calc(round(1 - round(l / 1.4))) 0 0);
 
   &[data-color="ghost"] {
     background: transparent;

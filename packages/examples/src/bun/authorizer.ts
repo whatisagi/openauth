@@ -9,56 +9,9 @@ import { TwitchAdapter } from "@openauthjs/core/adapter/twitch";
 import { GithubAdapter } from "@openauthjs/core/adapter/github";
 import { GoogleAdapter } from "@openauthjs/core/adapter/google";
 import { subjects } from "../subjects.js";
-import { Theme } from "@openauthjs/core/ui/theme";
+import { Theme, THEME_INCEL } from "@openauthjs/core/ui/theme";
 
-// 1. use drop in UI as is
-// 2. configure theme (colors, fonts, etc)
-// 3. add custom css
-// 4. copy pastes the ui (structure changes, copy changes)
-// 5. ejecting not using ui
-
-const terminal: Theme = {
-  title: "terminal",
-  radius: "none",
-  favicon: "https://www.terminal.shop/favicon.svg",
-  logo: {
-    dark: "https://www.terminal.shop/images/logo-white.svg",
-    light: "https://www.terminal.shop/images/logo-black.svg",
-  },
-  brand: "#ff5e00",
-  background: {
-    dark: "rgb(0, 0, 0)",
-    light: "rgb(255, 255, 255)",
-  },
-  font: {
-    family: "Geist Mono, monospace",
-  },
-  css: `
-    @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100;200;300;400;500;600;700;800;900&display=swap');
-  `,
-};
-
-const sst: Theme = {
-  title: "SST",
-  logo: {
-    dark: "https://sst.dev/favicon.svg",
-    light: "https://sst.dev/favicon.svg",
-  },
-  background: {
-    dark: "#1a1a2d",
-    light: "rgb(255, 255, 255)",
-  },
-  brand: "#f3663f",
-  font: {
-    family: "Rubik, sans-serif",
-  },
-  css: `
-    @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@100;200;300;400;500;600;700;800;900&display=swap');
-  `,
-};
-
-// const theme = sst;
-const theme = terminal;
+const theme = THEME_INCEL;
 
 export default authorizer({
   subjects,

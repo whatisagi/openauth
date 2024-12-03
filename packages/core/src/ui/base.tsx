@@ -8,6 +8,14 @@ export function Layout(
     theme: Theme | undefined;
   }>,
 ) {
+  function get(key: "primary" | "background" | "logo", mode: "light" | "dark") {
+    if (!props.theme) return;
+    if (!props.theme[key]) return;
+    if (typeof props.theme[key] === "string") return props.theme[key];
+
+    return props.theme[key][mode] as string | undefined;
+  }
+
   const radius = (() => {
     if (props.theme?.radius === "none") return "0";
     if (props.theme?.radius === "sm") return "1";
@@ -16,12 +24,14 @@ export function Layout(
     if (props.theme?.radius === "full") return "1000000000001";
     return "1";
   })();
+
   return (
     <html
       style={{
-        "--color-background-light": props.theme?.background?.light,
-        "--color-background-dark": props.theme?.background?.dark,
-        "--color-brand": props.theme?.brand,
+        "--color-background-light": get("background", "light"),
+        "--color-background-dark": get("background", "dark"),
+        "--color-primary-light": get("primary", "light"),
+        "--color-primary-dark": get("primary", "dark"),
         "--font-family": props.theme?.font?.family,
         "--font-scale": props.theme?.font?.scale,
         "--border-radius": radius,
@@ -41,12 +51,12 @@ export function Layout(
           <div data-component="center" data-size={props.size}>
             <img
               data-component="logo"
-              src={props.theme?.logo?.light}
+              src={get("logo", "light")}
               data-mode="light"
             />
             <img
               data-component="logo"
-              src={props.theme?.logo?.dark}
+              src={get("logo", "dark")}
               data-mode="dark"
             />
             {props.children}
