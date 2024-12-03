@@ -19,18 +19,16 @@ import { Theme } from "@openauthjs/core/ui/theme";
 
 const terminal: Theme = {
   title: "terminal",
+  radius: "none",
   favicon: "https://www.terminal.shop/favicon.svg",
   logo: {
     dark: "https://www.terminal.shop/images/logo-white.svg",
     light: "https://www.terminal.shop/images/logo-black.svg",
   },
+  brand: "#ff5e00",
   background: {
     dark: "rgb(0, 0, 0)",
     light: "rgb(255, 255, 255)",
-  },
-  primary: {
-    dark: "#ff5e00",
-    light: "#ff5e00",
   },
   font: {
     family: "Geist Mono, monospace",
@@ -43,17 +41,14 @@ const terminal: Theme = {
 const sst: Theme = {
   title: "SST",
   logo: {
-    dark: "https://avatars.githubusercontent.com/u/66570915?s=200&v=4",
-    light: "https://avatars.githubusercontent.com/u/66570915?s=200&v=4",
+    dark: "https://sst.dev/favicon.svg",
+    light: "https://sst.dev/favicon.svg",
   },
   background: {
     dark: "#1a1a2d",
     light: "rgb(255, 255, 255)",
   },
-  primary: {
-    dark: "#f3663f",
-    light: "#f3663f",
-  },
+  brand: "#f3663f",
   font: {
     family: "Rubik, sans-serif",
   },

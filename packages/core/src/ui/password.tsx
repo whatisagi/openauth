@@ -99,7 +99,7 @@ export function PasswordUI(input: PasswordUIOptions) {
         },
       });
     },
-    register: async (_req, form, error) => {
+    register: async (_req, state, form, error) => {
       const emailError = ["invalid_email", "email_taken"].includes(
         error?.type || "",
       );
@@ -110,41 +110,64 @@ export function PasswordUI(input: PasswordUIOptions) {
         <Layout theme={input.theme}>
           <form data-component="form" method="post">
             <FormAlert message={error?.type && copy?.[`error_${error.type}`]} />
-            <input
-              data-component="input"
-              autofocus={!error || emailError}
-              type="email"
-              name="email"
-              value={!emailError ? form?.get("email")?.toString() : ""}
-              required
-              placeholder={copy.input_email}
-            />
-            <input
-              data-component="input"
-              autofocus={passwordError}
-              type="password"
-              name="password"
-              placeholder={copy.input_password}
-              required
-              value={!passwordError ? form?.get("password")?.toString() : ""}
-            />
-            <input
-              data-component="input"
-              type="password"
-              name="repeat"
-              required
-              autofocus={passwordError}
-              placeholder={copy.input_repeat}
-            />
-            <button data-component="button">Continue</button>
-            <div data-component="form-footer">
-              <span>
-                {copy.login_prompt}{" "}
-                <a data-component="link" href="authorize">
-                  {copy.login}
-                </a>
-              </span>
-            </div>
+            {state.type === "start" && (
+              <>
+                <input type="hidden" name="action" value="register" />
+                <input
+                  data-component="input"
+                  autofocus={!error || emailError}
+                  type="email"
+                  name="email"
+                  value={!emailError ? form?.get("email")?.toString() : ""}
+                  required
+                  placeholder={copy.input_email}
+                />
+                <input
+                  data-component="input"
+                  autofocus={passwordError}
+                  type="password"
+                  name="password"
+                  placeholder={copy.input_password}
+                  required
+                  value={
+                    !passwordError ? form?.get("password")?.toString() : ""
+                  }
+                />
+                <input
+                  data-component="input"
+                  type="password"
+                  name="repeat"
+                  required
+                  autofocus={passwordError}
+                  placeholder={copy.input_repeat}
+                />
+                <button data-component="button">Continue</button>
+                <div data-component="form-footer">
+                  <span>
+                    {copy.login_prompt}{" "}
+                    <a data-component="link" href="authorize">
+                      {copy.login}
+                    </a>
+                  </span>
+                </div>
+              </>
+            )}
+
+            {state.type === "code" && (
+              <>
+                <input type="hidden" name="action" value="verify" />
+                <input
+                  data-component="input"
+                  autofocus
+                  name="code"
+                  minLength={6}
+                  maxLength={6}
+                  required
+                  placeholder={copy.input_code}
+                />
+                <button data-component="button">Continue</button>
+              </>
+            )}
           </form>
         </Layout>
       ) as string;

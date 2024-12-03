@@ -17,6 +17,7 @@ export interface PasswordConfig {
   ) => Promise<Response>;
   register: (
     req: Request,
+    state: PasswordRegisterState,
     form?: FormData,
     error?: PasswordRegisterError,
   ) => Promise<Response>;
@@ -28,6 +29,34 @@ export interface PasswordConfig {
   ) => Promise<Response>;
   sendCode: (email: string, code: string) => Promise<void>;
 }
+
+export type PasswordRegisterState =
+  | {
+      type: "start";
+    }
+  | {
+      type: "code";
+      code: string;
+      email: string;
+      password: string;
+    };
+
+export type PasswordRegisterError =
+  | {
+      type: "invalid_code";
+    }
+  | {
+      type: "email_taken";
+    }
+  | {
+      type: "invalid_email";
+    }
+  | {
+      type: "invalid_password";
+    }
+  | {
+      type: "password_mismatch";
+    };
 
 export type PasswordChangeState =
   | {
@@ -66,20 +95,6 @@ export type PasswordLoginError =
     }
   | {
       type: "invalid_email";
-    };
-
-export type PasswordRegisterError =
-  | {
-      type: "email_taken";
-    }
-  | {
-      type: "invalid_email";
-    }
-  | {
-      type: "invalid_password";
-    }
-  | {
-      type: "password_mismatch";
     };
 
 export function PasswordAdapter(config: PasswordConfig) {
@@ -131,36 +146,81 @@ export function PasswordAdapter(config: PasswordConfig) {
       });
 
       routes.get("/register", async (c) => {
-        return ctx.forward(c, await config.register(c.req.raw));
+        const state: PasswordRegisterState = {
+          type: "start",
+        };
+        await ctx.set(c, "adapter", 60 * 60 * 24, state);
+        return ctx.forward(c, await config.register(c.req.raw, state));
       });
 
       routes.post("/register", async (c) => {
         const fd = await c.req.formData();
         const email = fd.get("email")?.toString()?.toLowerCase();
-        const password = fd.get("password")?.toString();
-        const repeat = fd.get("repeat")?.toString();
+        const action = fd.get("action")?.toString();
+        const adapter = await ctx.get<PasswordRegisterState>(c, "adapter");
 
-        async function error(err: PasswordRegisterError) {
-          return ctx.forward(c, await config.register(c.req.raw, fd, err));
+        async function transition(
+          next: PasswordRegisterState,
+          err?: PasswordRegisterError,
+        ) {
+          await ctx.set<PasswordRegisterState>(
+            c,
+            "adapter",
+            60 * 60 * 24,
+            next,
+          );
+          return ctx.forward(
+            c,
+            await config.register(c.req.raw, next, fd, err),
+          );
         }
-        if (!email) return error({ type: "invalid_email" });
-        if (!password) return error({ type: "invalid_password" });
-        if (password !== repeat) return error({ type: "password_mismatch" });
-        const existing = await Storage.get(ctx.storage, [
-          "email",
-          email,
-          "password",
-        ]);
-        if (existing) return error({ type: "email_taken" });
-        await Storage.set(
-          ctx.storage,
-          ["email", email, "password"],
-          await hasher.hash(password),
-        );
 
-        return ctx.success(c, {
-          email: email,
-        });
+        if (action === "register" && adapter.type === "start") {
+          const password = fd.get("password")?.toString();
+          const repeat = fd.get("repeat")?.toString();
+          if (!email) return transition(adapter, { type: "invalid_email" });
+          if (!password)
+            return transition(adapter, { type: "invalid_password" });
+          if (password !== repeat)
+            return transition(adapter, { type: "password_mismatch" });
+          const existing = await Storage.get(ctx.storage, [
+            "email",
+            email,
+            "password",
+          ]);
+          if (existing) return transition(adapter, { type: "email_taken" });
+          const code = generate();
+          await config.sendCode(email, code);
+          return transition({
+            type: "code",
+            code,
+            password: await hasher.hash(password),
+            email,
+          });
+        }
+
+        if (action === "verify" && adapter.type === "code") {
+          const code = fd.get("code")?.toString();
+          if (!code || code !== adapter.code)
+            return transition(adapter, { type: "invalid_code" });
+          const existing = await Storage.get(ctx.storage, [
+            "email",
+            adapter.email,
+            "password",
+          ]);
+          if (existing)
+            return transition({ type: "start" }, { type: "email_taken" });
+          await Storage.set(
+            ctx.storage,
+            ["email", adapter.email, "password"],
+            adapter.password,
+          );
+          return ctx.success(c, {
+            email: adapter.email,
+          });
+        }
+
+        return transition({ type: "start" });
       });
 
       routes.get("/change", async (c) => {

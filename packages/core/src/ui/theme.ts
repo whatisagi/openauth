@@ -1,10 +1,8 @@
 export interface Theme {
   title?: string;
   favicon?: string;
-  primary?: {
-    dark: string;
-    light: string;
-  };
+  radius?: "none" | "sm" | "md" | "lg" | "full";
+  brand: string;
   secondary?: {
     dark: string;
     light: string;

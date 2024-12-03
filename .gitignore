@@ -2,3 +2,4 @@ node_modules
 .sst
 .env
 dist
+persist.json

@@ -3,14 +3,12 @@
 :root {
   --color-background-dark: #0e0e11;
   --color-background-light: #ffffff;
-  --color-primary-dark: #6772e5;
-  --color-primary-light: #6772e5;
+  --color-brand: #6772e5;
+  --border-radius: 0;
 
   --color-background: var(--color-background-dark);
-  --color-primary: var(--color-primary-dark);
   @media (prefers-color-scheme: light) {
     --color-background: var(--color-background-light);
-    --color-primary: var(--color-primary-light);
   }
 
   --color-high: oklch(
@@ -66,12 +64,8 @@
 }
 
 [data-component="link"] {
-  color: var(--color-primary);
-  text-decoration: none;
-
-  &:hover {
-    color: oklch(from var(--color-primary) calc(l + 0.08) c h);
-  }
+  text-decoration: underline;
+  font-weight: 600;
 }
 
 [data-component="label"] {
@@ -102,33 +96,30 @@
 
 [data-component="input"] {
   width: 100%;
-  background-color: var(--color-primary);
   height: 2.5rem;
   padding: 0 1rem;
   border: 1px solid transparent;
-  background: oklch(from var(--color-background) calc(l + 0.03) c h);
-  border-color: oklch(
-    from var(--color-background) calc(max(l + 0.1, 0.25)) c h
+  --background: oklch(
+    from var(--color-background) calc(l + (-0.06 * round(l / 1.4) + 0.03)) c h
   );
-  border-radius: 0.25rem;
+  background: var(--background);
+  border-color: oklch(
+    from var(--color-background)
+      calc(clamp(0.22, l + (-0.12 * round(l / 1.4) + 0.06), 0.88)) c h
+  );
+  border-radius: calc(var(--border-radius) * 0.25rem);
   font-size: var(--font-size-sm);
   outline: none;
 
   &:focus {
-    border-color: var(--color-primary);
+    border-color: oklch(
+      from var(--color-background)
+        calc(clamp(0.3, l + (-0.2 * round(l / 1.4) + 0.1), 0.7)) c h
+    );
   }
 
   &:user-invalid:not(:focus) {
-    border-color: oklch(from var(--color-primary) l c 25);
-  }
-
-  @media (prefers-color-scheme: light) {
-    background: oklch(from var(--color-background) calc(l - 0.015) c h);
-    border-color: oklch(from var(--color-background) calc(max(l - 0.1, 0)) c h);
-
-    &:focus {
-      background: transparent;
-    }
+    border-color: oklch(from var(--color-brand) l c 25);
   }
 }
 
@@ -138,20 +129,22 @@
   border: 0;
   font-weight: 500;
   font-size: var(--font-size-sm);
-  border-radius: 0.25rem;
+  border-radius: calc(var(--border-radius) * 0.25rem);
   display: flex;
   gap: 0.75rem;
   align-items: center;
   justify-content: center;
-  /* color: oklch(from var(--background) round(1 - round(l / 1.4)) 0 0); */
-  background: var(--color-primary);
-  color: oklch(from var(--color-primary) calc(round(1 - round(l / 1.4))) 0 0);
+  background: var(--color-brand);
+  color: oklch(from var(--color-brand) calc(round(1 - round(l / 1.4))) 0 0);
 
   &[data-color="ghost"] {
     background: transparent;
     color: var(--color-high);
     border: 1px solid
-      oklch(from var(--color-background) calc(max(l + 0.1, 0.22)) c h);
+      oklch(
+        from var(--color-background)
+          calc(clamp(0.22, l + (-0.12 * round(l / 1.4) + 0.06), 0.88)) c h
+      );
   }
 
   [data-slot="icon"] {
@@ -178,7 +171,7 @@
   display: flex;
   align-items: center;
   padding: 0 1rem;
-  border-radius: 0.25rem;
+  border-radius: calc(var(--border-radius) * 0.25rem);
   background: oklch(0.28 0.06 7.91);
   color: oklch(0.78 0.16 22.29);
   text-align: left;
