@@ -78,7 +78,6 @@ Adapters take some configuration - since this is a third party identity provider
 ```ts
 import { PasswordAdapter } from "@openauthjs/core/adapter/password";
 
-```ts
 const app = authorizer({
   providers: {
     github: ...,
