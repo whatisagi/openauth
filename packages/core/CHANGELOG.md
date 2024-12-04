@@ -1,5 +1,12 @@
 # @openauthjs/core
 
+## 0.0.12
+
+### Patch Changes
+
+- 7550717: test
+- 6d23543: sync
+
 ## 0.0.11
 
 ### Patch Changes
