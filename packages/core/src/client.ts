@@ -56,20 +56,27 @@ export function createClient(input: {
 
   const result = {
     authorize(
-      provider: string,
       redirectURI: string,
       response: "code" | "token",
+      opts?: {
+        provider?: string;
+      },
     ) {
       const result = new URL(issuer + "/authorize");
-      result.searchParams.set("provider", provider);
+      if (opts?.provider) result.searchParams.set("provider", opts.provider);
       result.searchParams.set("client_id", input.clientID);
       result.searchParams.set("redirect_uri", redirectURI);
       result.searchParams.set("response_type", response);
       return result.toString();
     },
-    async pkce(provider: string, redirectURI: string) {
+    async pkce(
+      redirectURI: string,
+      opts?: {
+        provider?: string;
+      },
+    ) {
       const result = new URL(issuer + "/authorize");
-      result.searchParams.set("provider", provider);
+      if (opts?.provider) result.searchParams.set("provider", opts.provider);
       result.searchParams.set("client_id", input.clientID);
       result.searchParams.set("redirect_uri", redirectURI);
       result.searchParams.set("response_type", "code");

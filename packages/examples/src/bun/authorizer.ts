@@ -28,7 +28,6 @@ export default authorizer({
         sendCode: async (email, code) => {
           console.log(email, code);
         },
-        theme,
       }),
     ),
     code: CodeAdapter<{ email: string }>(

@@ -15,7 +15,7 @@ const auth = authorizer({
   subjects,
   allow: async () => true,
   success: async (ctx) => {
-    return ctx.session("user", {
+    return ctx.subject("user", {
       userID: "123",
     });
   },

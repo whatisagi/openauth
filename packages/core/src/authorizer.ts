@@ -8,7 +8,7 @@ import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 export interface OnSuccessResponder<
   T extends { type: string; properties: any },
 > {
-  session<Type extends T["type"]>(
+  subject<Type extends T["type"]>(
     type: Type,
     properties: Extract<T, { type: Type }>["properties"],
   ): Promise<Response>;
@@ -103,7 +103,7 @@ export function authorizer<
     async success(ctx: Context, properties: any, opts) {
       return await input.success(
         {
-          async session(type, properties) {
+          async subject(type, properties) {
             const authorization = await getAuthorization(ctx);
             await opts?.invalidate?.(await resolveSubject(type, properties));
             if (authorization.response_type === "token") {
@@ -459,7 +459,7 @@ export function authorizer<
       });
       return input.success(
         {
-          async session(type, properties) {
+          async subject(type, properties) {
             const tokens = await generateTokens(c, {
               type: type as string,
               properties,
