@@ -461,7 +461,6 @@ export function authorizer<
       client_id,
       audience,
     } as AuthorizationState;
-    await auth.set(c, "authorization", 60 * 60 * 24, authorization);
     c.set("authorization", authorization);
 
     if (!redirect_uri) {
@@ -491,7 +490,7 @@ export function authorizer<
       ))
     )
       throw new UnauthorizedClientError(client_id, redirect_uri);
-
+    await auth.set(c, "authorization", 60 * 60 * 24, authorization);
     if (provider) return c.redirect(`/${provider}/authorize`);
     if (input.select)
       return auth.forward(
