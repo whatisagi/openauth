@@ -41,6 +41,7 @@ import { compactDecrypt, CompactEncrypt, SignJWT } from "jose";
 import { Storage, StorageAdapter } from "./storage/storage.js";
 import { keys } from "./keys.js";
 import { validatePKCE } from "./pkce.js";
+import { Select } from "./ui/select.js";
 
 export const aws = awsHandle;
 
@@ -95,6 +96,7 @@ export function authorizer<
 
   const ttlAccess = input.ttl?.access ?? 60 * 60 * 24 * 30;
   const ttlRefresh = input.ttl?.refresh ?? 60 * 60 * 24 * 365;
+  const select = input.select ?? Select();
 
   const allKeys = keys(input.storage);
   const primaryKey = allKeys.then((all) => all[0]);
@@ -536,20 +538,18 @@ export function authorizer<
       throw new UnauthorizedClientError(client_id, redirect_uri);
     await auth.set(c, "authorization", 60 * 60 * 24, authorization);
     if (provider) return c.redirect(`/${provider}/authorize`);
-    if (input.select)
-      return auth.forward(
-        c,
-        await input.select(
-          Object.fromEntries(
-            Object.entries(input.providers).map(([key, value]) => [
-              key,
-              value.type,
-            ]),
-          ),
-          c.req.raw,
+    return auth.forward(
+      c,
+      await select(
+        Object.fromEntries(
+          Object.entries(input.providers).map(([key, value]) => [
+            key,
+            value.type,
+          ]),
         ),
-      );
-    throw new MissingProviderError();
+        c.req.raw,
+      ),
+    );
   });
 
   app.all("/*", async (c) => {

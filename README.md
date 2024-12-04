@@ -41,18 +41,11 @@ The `authorizer` function requires a few things:
 
 ```ts
 const app = authorizer({
-  providers: {
-    ...
-  },
+  providers: { ... },
   storage,
   subjects,
-  select: async () => {
-    ...
-  },
   allow: async () => true,
-  success: async (ctx, value) => {
-    ...
-  }
+  success: async (ctx, value) => { ... }
 })
 ```
 
