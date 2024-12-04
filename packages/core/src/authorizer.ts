@@ -448,17 +448,20 @@ export function authorizer<
   });
 
   app.get("/authorize", async (c) => {
-    let authorization = await getAuthorization(c).catch(
-      () => ({}) as AuthorizationState,
-    );
     const provider = c.req.query("provider");
-    const response_type =
-      c.req.query("response_type") || authorization.response_type;
-    const redirect_uri =
-      c.req.query("redirect_uri") || authorization.redirect_uri;
-    const state = c.req.query("state") || authorization.state;
-    const client_id = c.req.query("client_id") || authorization.client_id;
-    const audience = c.req.query("audience") || authorization.audience;
+    const response_type = c.req.query("response_type");
+    const redirect_uri = c.req.query("redirect_uri");
+    const state = c.req.query("state");
+    const client_id = c.req.query("client_id");
+    const audience = c.req.query("audience");
+    const authorization = {
+      response_type,
+      redirect_uri,
+      state,
+      client_id,
+      audience,
+    };
+    await auth.set(c, "authorization", 60 * 60 * 24, authorization);
 
     if (!redirect_uri) {
       return c.text("Missing redirect_uri", { status: 400 });
@@ -471,16 +474,6 @@ export function authorizer<
     if (!client_id) {
       throw new MissingParameterError("client_id");
     }
-
-    authorization = {
-      response_type,
-      redirect_uri,
-      state,
-      client_id,
-      audience,
-    };
-    await auth.set(c, "authorization", 60 * 60 * 24, authorization);
-    c.set("authorization", authorization);
 
     if (input.start) {
       await input.start(c.req.raw);

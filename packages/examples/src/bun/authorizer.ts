@@ -9,7 +9,7 @@ import { TwitchAdapter } from "@openauthjs/core/adapter/twitch";
 import { GithubAdapter } from "@openauthjs/core/adapter/github";
 import { GoogleAdapter } from "@openauthjs/core/adapter/google";
 import { subjects } from "../subjects.js";
-import { Theme, THEME_VERCEL } from "@openauthjs/core/ui/theme";
+import { THEME_VERCEL } from "@openauthjs/core/ui/theme";
 import { Adapter } from "@openauthjs/core/adapter/adapter";
 
 const theme = THEME_VERCEL;
