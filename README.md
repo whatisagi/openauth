@@ -108,3 +108,20 @@ const app = authorizer({
 
 In this case we are just going to log the code but you would send it over email. Now let's look at the `success` callback - this is what gets triggered when a user has successfully authenticated.
 
+```ts
+const app = authorizer({
+  providers: {
+    ...
+  },
+  async success(ctx, value) {
+    if (value.provider === "password") {
+      console.log(value.email);
+    }
+
+    if (value.provider === "github") {
+      console.log(value.tokenset.access);
+    }
+  }
+})
+```
+
