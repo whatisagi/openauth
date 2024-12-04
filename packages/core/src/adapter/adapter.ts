@@ -6,6 +6,11 @@ export type AdapterRoute = Hono;
 export interface Adapter<Properties = any> {
   type: string;
   init: (route: AdapterRoute, options: AdapterOptions<Properties>) => void;
+  client?: (input: {
+    clientID: string;
+    clientSecret: string;
+    params: Record<string, string>;
+  }) => Promise<Properties>;
 }
 
 export interface AdapterOptions<Properties> {

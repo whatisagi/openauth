@@ -10,6 +10,7 @@ import { GithubAdapter } from "@openauthjs/core/adapter/github";
 import { GoogleAdapter } from "@openauthjs/core/adapter/google";
 import { subjects } from "../subjects.js";
 import { Theme, THEME_VERCEL } from "@openauthjs/core/ui/theme";
+import { Adapter } from "@openauthjs/core/adapter/adapter";
 
 const theme = THEME_VERCEL;
 
@@ -53,10 +54,25 @@ export default authorizer({
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
       scopes: ["user:email"],
     }),
+    client: {
+      type: "client",
+      init() {},
+      async client(input) {
+        return {
+          email: "foo",
+        };
+      },
+    } as Adapter<{ email: string }>,
   },
   allow: async () => true,
   success: async (ctx, value) => {
     if (value.provider === "password") {
+      return ctx.session("user", {
+        email: value.email,
+      });
+    }
+
+    if (value.provider === "client") {
       return ctx.session("user", {
         email: value.email,
       });

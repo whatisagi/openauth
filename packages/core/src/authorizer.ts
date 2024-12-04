@@ -398,6 +398,53 @@ export function authorizer<
         refresh_token: tokens.refresh,
       });
     }
+
+    if (grantType === "client_credentials") {
+      const provider = form.get("provider");
+      if (!provider)
+        return c.json({ error: "missing `provider` form value" }, 400);
+      const match = input.providers[provider.toString()];
+      if (!match)
+        return c.json({ error: "invalid `provider` query parameter" }, 400);
+      if (!match.client)
+        return c.json(
+          { error: "this provider does not support client_credentials" },
+          400,
+        );
+      const clientID = form.get("client_id");
+      const clientSecret = form.get("client_secret");
+      if (!clientID)
+        return c.json({ error: "missing `client_id` form value" }, 400);
+      if (!clientSecret)
+        return c.json({ error: "missing `client_secret` form value" }, 400);
+      const response = await match.client({
+        clientID: clientID.toString(),
+        clientSecret: clientSecret.toString(),
+        params: Object.fromEntries(form) as Record<string, string>,
+      });
+      return input.success(
+        {
+          async session(type, properties) {
+            const tokens = await generateTokens(c, {
+              type: type as string,
+              properties,
+              clientID: response.clientID,
+            });
+            return c.json({
+              access_token: tokens.access,
+              refresh_token: tokens.refresh,
+            });
+          },
+        },
+        {
+          provider: provider.toString(),
+          ...response,
+        },
+        c.req.raw,
+      );
+    }
+
+    throw new Error("Invalid grant_type");
   });
 
   app.get("/authorize", async (c) => {
