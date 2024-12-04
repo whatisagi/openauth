@@ -77,6 +77,7 @@ export function Oauth2Adapter(config: Oauth2Config) {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
+            Accept: "application/json",
           },
           body: body.toString(),
         }).then((r) => r.json());
