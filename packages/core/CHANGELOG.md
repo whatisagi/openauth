@@ -1,5 +1,11 @@
 # @openauthjs/core
 
+## 0.0.11
+
+### Patch Changes
+
+- ce807a5: test
+
 ## 0.0.10
 
 ### Patch Changes
