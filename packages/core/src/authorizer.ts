@@ -460,8 +460,9 @@ export function authorizer<
       state,
       client_id,
       audience,
-    };
+    } as AuthorizationState;
     await auth.set(c, "authorization", 60 * 60 * 24, authorization);
+    c.set("authorization", authorization);
 
     if (!redirect_uri) {
       return c.text("Missing redirect_uri", { status: 400 });
