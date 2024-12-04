@@ -23,10 +23,15 @@ const auth = authorizer({
     access: 1,
   },
   providers: {
-    dummy: (routes, ctx) => {
-      routes.get("/authorize", async (c) => {
-        return ctx.forward(c, await ctx.success(c, {}));
-      });
+    dummy: {
+      type: "dummy",
+      init(route, ctx) {
+        route.get("/authorize", async (c) => {
+          return ctx.success(c, {
+            email: "foo@bar.com",
+          });
+        });
+      },
     },
   },
 });
@@ -37,10 +42,9 @@ test("code flow", async () => {
     clientID: "123",
     fetch: (a, b) => Promise.resolve(auth.request(a, b)),
   });
-  const authorization = client.authorize(
+  const [verifier, authorization] = await client.pkce(
     "dummy",
     "https://client.example.com/callback",
-    "code",
   );
   let response = await auth.request(authorization);
   expect(response.status).toBe(302);
@@ -56,6 +60,7 @@ test("code flow", async () => {
   const tokens = await client.exchange(
     code!,
     "https://client.example.com/callback",
+    verifier,
   );
   expect(tokens.access).toBeTruthy();
   expect(tokens.refresh).toBeTruthy();

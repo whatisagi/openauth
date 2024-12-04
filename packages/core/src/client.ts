@@ -6,6 +6,7 @@ import {
   InvalidRefreshTokenError,
   InvalidSessionError,
 } from "./error.js";
+import { generatePKCE } from "./pkce.js";
 
 export interface WellKnown {
   jwks_uri: string;
@@ -66,7 +67,18 @@ export function createClient(input: {
       result.searchParams.set("response_type", response);
       return result.toString();
     },
-    async exchange(code: string, redirectURI: string) {
+    async pkce(provider: string, redirectURI: string) {
+      const result = new URL(issuer + "/authorize");
+      result.searchParams.set("provider", provider);
+      result.searchParams.set("client_id", input.clientID);
+      result.searchParams.set("redirect_uri", redirectURI);
+      result.searchParams.set("response_type", "code");
+      const pkce = await generatePKCE();
+      result.searchParams.set("code_challenge_method", "S256");
+      result.searchParams.set("code_challenge", pkce.challenge);
+      return [pkce.verifier, result.toString()];
+    },
+    async exchange(code: string, redirectURI: string, verifier?: string) {
       const tokens = await f(issuer + "/token", {
         method: "POST",
         headers: {
@@ -77,6 +89,7 @@ export function createClient(input: {
           redirect_uri: redirectURI,
           grant_type: "authorization_code",
           client_id: input.clientID,
+          code_verifier: verifier || "",
         }).toString(),
       });
       const json = (await tokens.json()) as any;

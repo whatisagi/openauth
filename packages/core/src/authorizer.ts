@@ -20,6 +20,10 @@ interface AuthorizationState {
   state: string;
   client_id: string;
   audience?: string;
+  pkce?: {
+    challenge: string;
+    method: "S256";
+  };
 }
 
 export type Prettify<T> = {
@@ -36,6 +40,7 @@ import {
 import { compactDecrypt, CompactEncrypt, SignJWT } from "jose";
 import { Storage, StorageAdapter } from "./storage/storage.js";
 import { keys } from "./keys.js";
+import { validatePKCE } from "./pkce.js";
 
 export const aws = awsHandle;
 
@@ -126,6 +131,7 @@ export function authorizer<
                   properties,
                   redirectURI: authorization.redirect_uri,
                   clientID: authorization.client_id,
+                  pkce: authorization.pkce,
                 },
                 60,
               );
@@ -326,6 +332,7 @@ export function authorizer<
         properties: any;
         clientID: string;
         redirectURI: string;
+        pkce?: AuthorizationState["pkce"];
       }>(input.storage, key);
       if (!payload) {
         return c.json(
@@ -355,6 +362,34 @@ export function authorizer<
           },
           403,
         );
+      }
+
+      if (payload.pkce) {
+        const codeVerifier = form.get("code_verifier")?.toString();
+        if (!codeVerifier)
+          return c.json(
+            {
+              error: "invalid_grant",
+              error_description: "Missing code_verifier",
+            },
+            400,
+          );
+
+        if (
+          !(await validatePKCE(
+            codeVerifier,
+            payload.pkce.challenge,
+            payload.pkce.method,
+          ))
+        ) {
+          return c.json(
+            {
+              error: "invalid_grant",
+              error_description: "Code verifier does not match",
+            },
+            400,
+          );
+        }
       }
       const tokens = await generateTokens(c, payload);
       return c.json({
@@ -454,12 +489,21 @@ export function authorizer<
     const state = c.req.query("state");
     const client_id = c.req.query("client_id");
     const audience = c.req.query("audience");
-    const authorization = {
+    const code_challenge = c.req.query("code_challenge");
+    const code_challenge_method = c.req.query("code_challenge_method");
+    const authorization: AuthorizationState = {
       response_type,
       redirect_uri,
       state,
       client_id,
       audience,
+      pkce:
+        code_challenge && code_challenge_method
+          ? {
+              challenge: code_challenge,
+              method: code_challenge_method,
+            }
+          : undefined,
     } as AuthorizationState;
     c.set("authorization", authorization);
 
