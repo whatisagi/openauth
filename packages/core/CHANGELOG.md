@@ -1,5 +1,11 @@
 # @openauthjs/core
 
+## 0.0.10
+
+### Patch Changes
+
+- 75bce02: fix oauth2 accept
+
 ## 0.0.9
 
 ### Patch Changes
