@@ -1,5 +1,11 @@
 # @openauthjs/core
 
+## 0.0.14
+
+### Patch Changes
+
+- c1b8f70: add pkce
+
 ## 0.0.13
 
 ### Patch Changes
