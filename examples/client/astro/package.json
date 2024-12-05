@@ -1,5 +1,5 @@
 {
-  "name": "@openauthjs/examples-client-astro",
+  "name": "@openauthjs/example-client-astro",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
