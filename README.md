@@ -1,4 +1,16 @@
-# OpenAuth
+<p align="center">
+  <picture>
+    <source srcset="https://raw.githubusercontent.com/openauthjs/identity/main/logo-dark.svg" media="(prefers-color-scheme: dark)">
+    <source srcset="https://raw.githubusercontent.com/openauthjs/identity/main/logo-light.svg" media="(prefers-color-scheme: light)">
+    <img src="https://raw.githubusercontent.com/openauthjs/identity/main/logo-light.svg" alt="OpenAuth logo">
+  </picture>
+</p>
+<p align="center">
+  <a href="https://sst.dev/discord"><img alt="Discord" src="https://img.shields.io/discord/983865673656705025?style=flat-square&label=Discord" /></a>
+  <a href="https://www.npmjs.com/package/@openauthjs/core"><img alt="npm" src="https://img.shields.io/npm/v/%40openauthjs%2Fcore?style=flat-square" /></a>
+</p>
+
+---
 
 OpenAuth is a standards based auth provider for web apps, mobile apps, single pages apps, APIs, or 3rd party clients.
 
