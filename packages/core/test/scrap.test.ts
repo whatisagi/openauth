@@ -43,7 +43,6 @@ test("code flow", async () => {
     fetch: (a, b) => Promise.resolve(auth.request(a, b)),
   });
   const [verifier, authorization] = await client.pkce(
-    "dummy",
     "https://client.example.com/callback",
   );
   let response = await auth.request(authorization);

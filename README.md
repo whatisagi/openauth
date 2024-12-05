@@ -167,22 +167,6 @@ const app = authorizer({
 })
 ```
 
-Finally we have the `allow` callback. Typically you'll want to make sure the `redirect_uri` passed into it is for a valid domain so people don't hijack your auth server for apps you did not authorize. You can do something like this or `allow: async () => true` is fine for testing.
-
-```ts
-const app = authorizer({
-  providers: { ... },
-  subjects,
-  async success(ctx, value) { ... },
-  storage,
-  async allow(input) {
-    const url = new URL(input.redirectURI);
-    if (url.hostname !== "myapp.com") throw new Error("Invalid redirect");
-    return true;
-  }
-})
-```
-
 And now we are ready to deploy! Here's how you do that depending on your infrastructure.
 
 ```ts

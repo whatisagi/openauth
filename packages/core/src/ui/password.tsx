@@ -9,7 +9,6 @@ import {
 import { Layout } from "./base.js";
 import "./form.js";
 import { FormAlert } from "./form.js";
-import { Theme } from "./theme.js";
 
 const DEFAULT_COPY = {
   error_email_taken: "There is already an account with this email.",
@@ -45,7 +44,6 @@ export type PasswordUICopy = typeof DEFAULT_COPY;
 export interface PasswordUIOptions {
   sendCode: PasswordConfig["sendCode"];
   copy?: Partial<PasswordUICopy>;
-  theme?: Theme;
 }
 
 export function PasswordUI(input: PasswordUIOptions) {
@@ -57,7 +55,7 @@ export function PasswordUI(input: PasswordUIOptions) {
     sendCode: input.sendCode,
     login: async (_req, form, error) => {
       const jsx = (
-        <Layout theme={input.theme}>
+        <Layout>
           <form data-component="form" method="post">
             <FormAlert message={error?.type && copy?.[`error_${error.type}`]} />
             <input
@@ -107,7 +105,7 @@ export function PasswordUI(input: PasswordUIOptions) {
         error?.type || "",
       );
       const jsx = (
-        <Layout theme={input.theme}>
+        <Layout>
           <form data-component="form" method="post">
             <FormAlert message={error?.type && copy?.[`error_${error.type}`]} />
             {state.type === "start" && (
@@ -182,7 +180,7 @@ export function PasswordUI(input: PasswordUIOptions) {
         error?.type || "",
       );
       const jsx = (
-        <Layout theme={input.theme}>
+        <Layout>
           <form data-component="form" method="post" replace>
             <FormAlert message={error?.type && copy?.[`error_${error.type}`]} />
             {state.type === "start" && (
