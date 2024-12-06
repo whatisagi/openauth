@@ -1,5 +1,5 @@
 {
-  "name": "@openauthjs/core",
+  "name": "@openauthjs/openauth",
   "version": "0.0.15",
   "type": "module",
   "scripts": {

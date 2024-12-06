@@ -10,6 +10,6 @@
   },
   "dependencies": {
     "astro": "5.0.2",
-    "@openauthjs/core": "workspace:*"
+    "@openauthjs/openauth": "workspace:*"
   }
 }

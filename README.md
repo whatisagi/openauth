@@ -7,7 +7,7 @@
 </p>
 <p align="center">
   <a href="https://sst.dev/discord"><img alt="Discord" src="https://img.shields.io/discord/983865673656705025?style=flat-square&label=Discord" /></a>
-  <a href="https://www.npmjs.com/package/@openauthjs/core"><img alt="npm" src="https://img.shields.io/npm/v/%40openauthjs%2Fcore?style=flat-square" /></a>
+  <a href="https://www.npmjs.com/package/@openauthjs/openauth"><img alt="npm" src="https://img.shields.io/npm/v/%40openauthjs%2Fcore?style=flat-square" /></a>
 </p>
 
 ---
@@ -47,10 +47,10 @@ We'll show how to deploy the auth server and then a sample app that uses it.
 
 ### Auth server
 
-Start by importing the `authorizer` function from the `@openauthjs/core` package.
+Start by importing the `authorizer` function from the `@openauthjs/openauth` package.
 
 ```ts
-import { authorizer } from "@openauthjs/core";
+import { authorizer } from "@openauthjs/openauth";
 ```
 
 OpenAuth is built on top of [Hono](https://github.com/honojs/hono) which is a minimal web framework that can run anywhere. The `authorizer` function creates a Hono app with all of the auth server implemented that you can then deploy to AWS Lambda, Cloudflare Workers, or in a container running under Node.js or Bun.
@@ -69,7 +69,7 @@ const app = authorizer({
 First we need to define some providers that are enabled - these are either third party identity providers like Google, GitHub, etc or built in flows like email/password or pin code. You can also implement your own. Let's try the GitHub provider.
 
 ```ts
-import { GithubAdapter } from "@openauthjs/core/adapter/github";
+import { GithubAdapter } from "@openauthjs/openauth/adapter/github";
 
 const app = authorizer({
   providers: {
@@ -86,7 +86,7 @@ const app = authorizer({
 Adapters take some configuration - since this is a third party identity provider there is no UI to worry about and all it needs is a client ID, secret and some scopes. Let's add the password provider which is a bit more complicated.
 
 ```ts
-import { PasswordAdapter } from "@openauthjs/core/adapter/password";
+import { PasswordAdapter } from "@openauthjs/openauth/adapter/password";
 
 const app = authorizer({
   providers: {
@@ -100,8 +100,8 @@ const app = authorizer({
 The password adapter is quite complicated as username/password involve a lot of flows so there are a lot of callbacks to implement. However you can opt into the default UI which has all of this already implemented for you. The only thing you have to specify is how to send a code for forgot password/email verification. In this case we'll log the code but you would send this over email.
 
 ```ts
-import { PasswordAdapter } from "@openauthjs/core/adapter/password";
-import { PasswordUI } from "@openauthjs/core/ui/password";
+import { PasswordAdapter } from "@openauthjs/openauth/adapter/password";
+import { PasswordUI } from "@openauthjs/openauth/ui/password";
 
 const app = authorizer({
   providers: {
@@ -174,7 +174,7 @@ Note all of this is typesafe - based on the configured providers you will receiv
 Next we have the `storage` field which defines where things like refresh tokens and password hashes are stored. If on AWS we recommend DynamoDB, if on Cloudflare we recommend Cloudflare KV. We also have a MemoryStore used for testing.
 
 ```ts
-import { MemoryStorage } from "@openauthjs/core/storage/memory";
+import { MemoryStorage } from "@openauthjs/openauth/storage/memory";
 
 const app = authorizer({
   providers: { ... },
@@ -210,7 +210,7 @@ You now have a centralized auth server. Test it out by visiting `/.well-known/oa
 Since this is a standard OAuth server you can use any libraries for OAuth and it will work. OpenAuth does provide some light tooling for this although even a manual flow is pretty simple. You can create a client like this:
 
 ```ts
-import { createClient } form "@openauthjs/core"
+import { createClient } form "@openauthjs/openauth"
 
 const client = createClient("my-client", {
   issuer: "https://auth.myserver.com" // this is the url for your auth server

@@ -1,4 +1,4 @@
-import type { SubjectPayload } from "@openauthjs/core/session";
+import type { SubjectPayload } from "@openauthjs/openauth/session";
 import { subjects } from "./auth";
 
 declare global {

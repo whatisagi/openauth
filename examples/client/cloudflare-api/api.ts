@@ -1,5 +1,5 @@
 import type { Service } from "@cloudflare/workers-types";
-import { createClient } from "@openauthjs/core";
+import { createClient } from "@openauthjs/openauth";
 import { subjects } from "../../subjects";
 
 interface Env {

@@ -1,4 +1,4 @@
-import { createClient } from "@openauthjs/core";
+import { createClient } from "@openauthjs/openauth";
 import type { APIContext } from "astro";
 export { subjects } from "../../../subjects";
 

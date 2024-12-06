@@ -1,10 +1,10 @@
-import { authorizer } from "@openauthjs/core";
+import { authorizer } from "@openauthjs/openauth";
 import { handle } from "hono/aws-lambda";
-import { DynamoStorage } from "@openauthjs/core/storage/dynamo";
+import { DynamoStorage } from "@openauthjs/openauth/storage/dynamo";
 import { subjects } from "../../subjects.js";
 import { Resource } from "sst";
-import { PasswordAdapter } from "@openauthjs/core/adapter/password";
-import { PasswordUI } from "@openauthjs/core/ui/password";
+import { PasswordAdapter } from "@openauthjs/openauth/adapter/password";
+import { PasswordUI } from "@openauthjs/openauth/ui/password";
 
 const app = authorizer({
   storage: DynamoStorage({
@@ -17,7 +17,7 @@ const app = authorizer({
         sendCode: async (email, code) => {
           console.log(email, code);
         },
-      }),
+      })
     ),
   },
   success: async (ctx, value) => {

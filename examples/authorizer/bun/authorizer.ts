@@ -1,7 +1,7 @@
-import { authorizer } from "@openauthjs/core";
-import { MemoryStorage } from "@openauthjs/core/storage/memory";
-import { PasswordAdapter } from "@openauthjs/core/adapter/password";
-import { PasswordUI } from "@openauthjs/core/ui/password";
+import { authorizer } from "@openauthjs/openauth";
+import { MemoryStorage } from "@openauthjs/openauth/storage/memory";
+import { PasswordAdapter } from "@openauthjs/openauth/adapter/password";
+import { PasswordUI } from "@openauthjs/openauth/ui/password";
 import { subjects } from "../../subjects.js";
 
 export default authorizer({
