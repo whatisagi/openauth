@@ -1,5 +1,6 @@
 {
   "name": "@openauthjs/example-authorizer-bun",
+  "version": "0.0.0",
   "dependencies": {
     "@openauthjs/openauth": "workspace:*"
   }
