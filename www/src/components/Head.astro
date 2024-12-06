@@ -5,7 +5,7 @@ import Default from '@astrojs/starlight/components/Head.astro'
 const { title } = Astro.props.entry.data;
 const slug = Astro.props.entry.slug;
 
-const ogImageUrl = new URL("/social-share.png", Astro.url.origin).href;
+const ogImageUrl = `${Astro.site.href}social-share.png`;
 ---
 
 { slug === "" && (

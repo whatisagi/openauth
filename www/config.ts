@@ -1,4 +1,4 @@
 export default {
-  github: "https://github.com/openauthjs/openauthjs",
+  github: "https://github.com/openauthjs/openauth",
   discord: "https://sst.dev/discord",
 };
