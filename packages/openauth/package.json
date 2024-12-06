@@ -7,6 +7,7 @@
   },
   "sideEffects": false,
   "devDependencies": {
+    "@cloudflare/workers-types": "4.20241205.0",
     "@tsconfig/node20": "20.1.4",
     "@types/node": "22.10.1",
     "arctic": "2.2.2",
