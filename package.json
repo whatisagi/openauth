@@ -8,7 +8,7 @@
     "examples/client/*"
   ],
   "scripts": {
-    "build": "bun run --filter=\"@openauthjs/openauth\" build"
+    "release": "bun run --filter=\"@openauthjs/openauth\" build && changeset publish"
   },
   "devDependencies": {
     "@types/bun": "latest"
