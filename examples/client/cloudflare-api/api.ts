@@ -35,7 +35,7 @@ export default {
         return Response.redirect(client.authorize(redirectURI, "code"), 302);
       case "/":
         const cookies = new URLSearchParams(
-          request.headers.get("cookie")?.replaceAll("; ", "&"),
+          request.headers.get("cookie")?.replaceAll("; ", "&")
         );
         try {
           const verified = await client.verify(
@@ -43,7 +43,7 @@ export default {
             cookies.get("access_token")!,
             {
               refresh: cookies.get("refresh_token") || undefined,
-            },
+            }
           );
           const resp = Response.json(verified.subject);
           setSession(resp, verified.access, verified.refresh);
@@ -61,18 +61,18 @@ export default {
 function setSession(
   response: Response,
   accessToken?: string,
-  refreshToken?: string,
+  refreshToken?: string
 ) {
   if (accessToken) {
     response.headers.append(
       "Set-Cookie",
-      `access_token=${accessToken}; HttpOnly; SameSite=Strict; Path=/; Max-Age=2147483647`,
+      `access_token=${accessToken}; HttpOnly; SameSite=Strict; Path=/; Max-Age=2147483647`
     );
   }
   if (refreshToken) {
     response.headers.append(
       "Set-Cookie",
-      `refresh_token=${refreshToken}; HttpOnly; SameSite=Strict; Path=/; Max-Age=2147483647`,
+      `refresh_token=${refreshToken}; HttpOnly; SameSite=Strict; Path=/; Max-Age=2147483647`
     );
   }
 }
