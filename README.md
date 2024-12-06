@@ -21,7 +21,7 @@ OpenAuth is a standards-based auth provider for web apps, mobile apps, single pa
 
 ## Quick Start
 
-If you just want to get started as fast as possible you check jump straight into the [code examples](https://github.com/openauthjs/openauthjs/tree/main/examples) folder and copy paste away. There are also SST components for deploying everything OpenAuth needs.
+If you just want to get started as fast as possible you check jump straight into the [code examples](https://github.com/openauthjs/openauthjs/tree/master/examples) folder and copy paste away. There are also SST components for deploying everything OpenAuth needs.
 
 ## Approach
 
