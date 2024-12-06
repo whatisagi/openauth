@@ -3,3 +3,4 @@
 .env
 dist
 persist.json
+.DS_Store

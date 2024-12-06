@@ -12,11 +12,11 @@
 
 ---
 
-OpenAuth is a standards based auth provider for web apps, mobile apps, single pages apps, APIs, or 3rd party clients.
+OpenAuth is a standards-based auth provider for web apps, mobile apps, single pages apps, APIs, or 3rd party clients.
 
 - **Universal**: You can deploy it as a standalone service or embed it into an existing application. It works with any framework or platform.
 - **Self-hosted**: It runs entirely on your infrastructure and can be deployed on Node.js, Bun, AWS Lambda, or Cloudflare Workers.
-- **Standards based**: It implements the OAuth 2.0 spec and is based on web standards. So any OAuth client can use it.
+- **Standards-based**: It implements the OAuth 2.0 spec and is based on web standards. So any OAuth client can use it.
 - **Customizable**: It comes with prebuilt themeable UI that you can customize or opt out of.
 
 ## Quick Start

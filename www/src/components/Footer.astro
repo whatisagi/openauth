@@ -1,0 +1,10 @@
+---
+import Default from '@astrojs/starlight/components/Hero.astro';
+
+const { template } = Astro.props.entry.data;
+---
+
+{ template === "splash"
+    ? null
+    : <Default {...Astro.props}><slot /></Default>
+}
