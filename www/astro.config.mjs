@@ -1,5 +1,6 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import config from "./config";
 
 // https://astro.build/config
 export default defineConfig({
@@ -12,20 +13,22 @@ export default defineConfig({
 			description: "Universal, standards-based auth provider.",
 			head: [
 				{
-					tag: "meta",
+					tag: 'link',
 					attrs: {
-						property: "og:image",
-						content: "/social-share.png",
+						rel: 'icon',
+						href: '/favicon.ico',
+						sizes: '48x48',
 					},
 				},
 			],
 			social: {
-				discord: "https://sst.dev/discord",
-				github: "https://github.com/openauthjs/openauthjs",
+				github: config.github,
+				discord: config.discord,
 			},
 			pagefind: false,
 			components: {
 				Hero: "./src/components/Hero.astro",
+				Head: "./src/components/Head.astro",
 				Footer: "./src/components/Footer.astro",
 			},
 			customCss: [
