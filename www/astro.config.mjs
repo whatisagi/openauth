@@ -5,6 +5,7 @@ import config from "./config";
 // https://astro.build/config
 export default defineConfig({
   site: "https://openauthjs.github.io/openauth/",
+  base: "openauth",
 	devToolbar: {
 		enabled: false,
 	},
