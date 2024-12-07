@@ -13,7 +13,7 @@ export interface SelectProps {
 }
 
 export function Select(props?: SelectProps) {
-  return async (providers: Record<string, string>, _req: Request) => {
+  return async (providers: Record<string, string>, _req: Request): Promise<Response> => {
     const jsx = (
       <Layout>
         <div data-component="form">

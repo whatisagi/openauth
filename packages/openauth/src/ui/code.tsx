@@ -11,7 +11,7 @@ export function CodeUI(props: {
   return {
     sendCode: props.sendCode,
     length: 6,
-    request: async (_req, state, _form, error) => {
+    request: async (_req, state, _form, error): Promise<Response> => {
       if (state.type === "start") {
         const jsx = (
           <Layout>

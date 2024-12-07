@@ -33,10 +33,9 @@ const DEFAULT_COPY = {
   input_code: "Code",
   input_repeat: "Repeat password",
 } satisfies {
-  [key in `error_${
-    | PasswordLoginError["type"]
-    | PasswordRegisterError["type"]
-    | PasswordChangeError["type"]}`]: string;
+  [key in `error_${| PasswordLoginError["type"]
+  | PasswordRegisterError["type"]
+  | PasswordChangeError["type"]}`]: string;
 } & Record<string, string>;
 
 export type PasswordUICopy = typeof DEFAULT_COPY;
@@ -53,7 +52,7 @@ export function PasswordUI(input: PasswordUIOptions) {
   };
   return {
     sendCode: input.sendCode,
-    login: async (_req, form, error) => {
+    login: async (_req, form, error): Promise<Response> => {
       const jsx = (
         <Layout>
           <form data-component="form" method="post">
@@ -97,7 +96,7 @@ export function PasswordUI(input: PasswordUIOptions) {
         },
       });
     },
-    register: async (_req, state, form, error) => {
+    register: async (_req, state, form, error): Promise<Response> => {
       const emailError = ["invalid_email", "email_taken"].includes(
         error?.type || "",
       );
@@ -175,7 +174,7 @@ export function PasswordUI(input: PasswordUIOptions) {
         },
       });
     },
-    change: async (_req, state, form, error) => {
+    change: async (_req, state, form, error): Promise<Response> => {
       const passwordError = ["invalid_password", "password_mismatch"].includes(
         error?.type || "",
       );
