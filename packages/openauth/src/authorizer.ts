@@ -41,8 +41,10 @@ import { Storage, StorageAdapter } from "./storage/storage.js";
 import { keys } from "./keys.js";
 import { validatePKCE } from "./pkce.js";
 import { Select } from "./ui/select.js";
-import { setTheme, Theme, THEME_SST } from "./ui/theme.js";
+import { setTheme, Theme } from "./ui/theme.js";
 import { isDomainMatch } from "./util.js";
+import { DynamoStorage } from "./storage/dynamo.js";
+import { MemoryStorage } from "./storage/memory.js";
 
 export const aws = awsHandle;
 
@@ -58,7 +60,7 @@ export function authorizer<
   }[keyof Providers]
 >(input: {
   subjects: Subjects;
-  storage: StorageAdapter;
+  storage?: StorageAdapter;
   providers: Providers;
   theme?: Theme;
   ttl?: {
@@ -95,10 +97,10 @@ export function authorizer<
         },
       });
     };
-
   const ttlAccess = input.ttl?.access ?? 60 * 60 * 24 * 30;
   const ttlRefresh = input.ttl?.refresh ?? 60 * 60 * 24 * 365;
   if (input.theme) setTheme(input.theme);
+
   const select = input.select ?? Select();
   const allow =
     input.allow ??
@@ -115,7 +117,21 @@ export function authorizer<
       return isDomainMatch(redir, host);
     });
 
-  const allKeys = keys(input.storage);
+  let storage = input.storage;
+  if (process.env.OPENAUTH_STORAGE) {
+    const parsed = JSON.parse(process.env.OPENAUTH_STORAGE);
+    if (parsed.type === "dynamo") storage = DynamoStorage(parsed.options);
+    if (parsed.type === "memory") storage = MemoryStorage();
+    if (parsed.type === "cloudflare")
+      throw new Error(
+        "Cloudflare storage cannot be configured through env because it requires bindings."
+      );
+  }
+  if (!storage)
+    throw new Error(
+      "Store is not configured. Either set the `storage` option or set `OPENAUTH_STORAGE` environment variable."
+    );
+  const allKeys = keys(storage);
   const primaryKey = allKeys.then((all) => all[0]);
 
   const auth: Omit<AdapterOptions<any>, "name"> = {
@@ -143,7 +159,7 @@ export function authorizer<
             if (authorization.response_type === "code") {
               const code = crypto.randomUUID();
               await Storage.set(
-                input.storage,
+                storage,
                 ["oauth:code", code],
                 {
                   type,
@@ -207,7 +223,7 @@ export function authorizer<
         await Storage.remove(this.storage, key);
       }
     },
-    storage: input.storage,
+    storage,
   };
 
   async function getAuthorization(ctx: Context) {
@@ -248,7 +264,7 @@ export function authorizer<
     const subject = await resolveSubject(value.type, value.properties);
     const refreshToken = crypto.randomUUID();
     await Storage.set(
-      input.storage,
+      storage!,
       ["oauth:refresh", subject, refreshToken],
       {
         ...value,
@@ -352,7 +368,7 @@ export function authorizer<
         clientID: string;
         redirectURI: string;
         pkce?: AuthorizationState["pkce"];
-      }>(input.storage, key);
+      }>(storage, key);
       if (!payload) {
         return c.json(
           {
@@ -362,7 +378,7 @@ export function authorizer<
           400
         );
       }
-      await Storage.remove(input.storage, key);
+      await Storage.remove(storage, key);
       if (payload.redirectURI !== form.get("redirect_uri")) {
         return c.json(
           {
@@ -435,7 +451,7 @@ export function authorizer<
         type: string;
         properties: any;
         clientID: string;
-      }>(input.storage, key);
+      }>(storage, key);
       if (!payload) {
         return c.json(
           {
@@ -445,7 +461,7 @@ export function authorizer<
           400
         );
       }
-      await Storage.remove(input.storage, key);
+      await Storage.remove(storage, key);
       const tokens = await generateTokens(c, payload);
       return c.json({
         access_token: tokens.access,
