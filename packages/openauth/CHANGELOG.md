@@ -1,5 +1,11 @@
 # @openauthjs/openauth
 
+## 0.0.19
+
+### Patch Changes
+
+- 0864481: allow configuring storage through environment
+
 ## 0.0.18
 
 ### Patch Changes
