@@ -22,6 +22,12 @@
 - **Standards-based**: It implements the OAuth 2.0 spec and is based on web standards. So any OAuth client can use it.
 - **Customizable**: It comes with prebuilt themeable UI that you can customize or opt out of.
 
+<picture>
+  <source srcset="https://raw.githubusercontent.com/openauthjs/identity/main/assets/themes-dark.png" media="(prefers-color-scheme: dark)">
+  <source srcset="https://raw.githubusercontent.com/openauthjs/identity/main/assets/themes-light.png" media="(prefers-color-scheme: dark)">
+  <img src="https://raw.githubusercontent.com/openauthjs/identity/main/assets/themes-light.png" alt="OpenAuth logo">
+</picture>
+
 ## Quick Start
 
 If you just want to get started as fast as possible you check jump straight into the [code examples](https://github.com/openauthjs/openauthjs/tree/master/examples) folder and copy paste away. There are also SST components for deploying everything OpenAuth needs.
