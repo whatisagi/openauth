@@ -41,7 +41,7 @@ import { Storage, StorageAdapter } from "./storage/storage.js";
 import { keys } from "./keys.js";
 import { validatePKCE } from "./pkce.js";
 import { Select } from "./ui/select.js";
-import { setTheme, Theme } from "./ui/theme.js";
+import { getTheme, setTheme, Theme } from "./ui/theme.js";
 import { isDomainMatch } from "./util.js";
 import { DynamoStorage } from "./storage/dynamo.js";
 import { MemoryStorage } from "./storage/memory.js";
@@ -99,7 +99,10 @@ export function authorizer<
     };
   const ttlAccess = input.ttl?.access ?? 60 * 60 * 24 * 30;
   const ttlRefresh = input.ttl?.refresh ?? 60 * 60 * 24 * 365;
-  if (input.theme) setTheme(input.theme);
+  if (input.theme) {
+    setTheme(input.theme);
+    console.log(getTheme());
+  }
 
   const select = input.select ?? Select();
   const allow =

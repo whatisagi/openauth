@@ -115,12 +115,12 @@ export const THEME_VERCEL: Theme = {
 
 // i really don't wanna use async local storage for this so get over it
 
-let theme: Theme = THEME_SST;
-
 export function setTheme(value: Theme) {
-  theme = value;
+  // @ts-ignore
+  globalThis.OPENAUTH_THEME = value;
 }
 
 export function getTheme() {
-  return theme;
+  // @ts-ignore
+  return globalThis.OPENAUTH_THEME || THEME_SST;
 }
