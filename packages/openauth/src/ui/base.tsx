@@ -1,29 +1,29 @@
-import { PropsWithChildren } from "hono/jsx";
-import css from "./ui.css" assert { type: "text" };
-import { getTheme } from "./theme.js";
+import { PropsWithChildren } from "hono/jsx"
+import css from "./ui.css" assert { type: "text" }
+import { getTheme } from "./theme.js"
 
 export function Layout(
   props: PropsWithChildren<{
-    size?: "small";
+    size?: "small"
   }>,
 ) {
-  const theme = getTheme();
+  const theme = getTheme()
   function get(key: "primary" | "background" | "logo", mode: "light" | "dark") {
-    if (!theme) return;
-    if (!theme[key]) return;
-    if (typeof theme[key] === "string") return theme[key];
+    if (!theme) return
+    if (!theme[key]) return
+    if (typeof theme[key] === "string") return theme[key]
 
-    return theme[key][mode] as string | undefined;
+    return theme[key][mode] as string | undefined
   }
 
   const radius = (() => {
-    if (theme?.radius === "none") return "0";
-    if (theme?.radius === "sm") return "1";
-    if (theme?.radius === "md") return "1.25";
-    if (theme?.radius === "lg") return "1.5";
-    if (theme?.radius === "full") return "1000000000001";
-    return "1";
-  })();
+    if (theme?.radius === "none") return "0"
+    if (theme?.radius === "sm") return "1"
+    if (theme?.radius === "md") return "1.25"
+    if (theme?.radius === "lg") return "1.5"
+    if (theme?.radius === "full") return "1000000000001"
+    return "1"
+  })()
 
   return (
     <html
@@ -64,5 +64,5 @@ export function Layout(
         </div>
       </body>
     </html>
-  );
+  )
 }

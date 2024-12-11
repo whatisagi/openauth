@@ -42,7 +42,7 @@ It adheres mostly to OAuth 2.0 specifications - which means anything that can sp
 
 Because it follows these specifications it can even be used to issue credentials for third party applications - allowing you to implement "login with myapp" flows.
 
-OpenAuth very intentionally does not attempt to solve user management. We've found that this is a very difficult problem given the wide range of databases and drivers that are used in the JS ecosystem. Additionally it's quite hard to build data abstractions that work for every use case. Instead, once a user has identified themselves OpenAuth will invoke a callback where you can implement your own user lookup/creation logic. 
+OpenAuth very intentionally does not attempt to solve user management. We've found that this is a very difficult problem given the wide range of databases and drivers that are used in the JS ecosystem. Additionally it's quite hard to build data abstractions that work for every use case. Instead, once a user has identified themselves OpenAuth will invoke a callback where you can implement your own user lookup/creation logic.
 
 While OpenAuth tries to be mostly stateless, it does need to store a minimal amount of data (refresh tokens, password hashes, etc). However this has been reduced to a simple KV store with various implementations for zero overhead systems like Cloudflare KV and DynamoDB. You should never need to directly access any data that is stored in there.
 
@@ -59,7 +59,7 @@ We'll show how to deploy the auth server and then a sample app that uses it.
 Start by importing the `authorizer` function from the `@openauthjs/openauth` package.
 
 ```ts
-import { authorizer } from "@openauthjs/openauth";
+import { authorizer } from "@openauthjs/openauth"
 ```
 
 OpenAuth is built on top of [Hono](https://github.com/honojs/hono) which is a minimal web framework that can run anywhere. The `authorizer` function creates a Hono app with all of the auth server implemented that you can then deploy to AWS Lambda, Cloudflare Workers, or in a container running under Node.js or Bun.
@@ -130,7 +130,7 @@ const app = authorizer({
 Next up is the `subjects` field. Subjects are what the access token generated at the end of the auth flow will map to. Under the hood, the access token is a JWT that contains this data. You will likely just have a single subject to start but you can define additional ones for different types of users.
 
 ```ts
-import { object, string } from "valibot";
+import { object, string } from "valibot"
 
 const subjects = createSubjects({
   user: object({
@@ -138,7 +138,7 @@ const subjects = createSubjects({
     // may want to add workspaceID here if doing a multi-tenant app
     workspaceID: string(),
   }),
-});
+})
 ```
 
 Note we are using [valibot](https://github.com/Valibot/valibot) to define the shape of the subject so it can be validated properly. You can use any validation library that is following the [standard-schema specification](https://github.com/standard-schema/standard-schema) - the next version of Zod will support this.
@@ -207,10 +207,9 @@ import { handle } from "hono/aws-lambda"
 export const handler = handle(app)
 
 // Node.js
-import { serve } from '@hono/node-server'
+import { serve } from "@hono/node-server"
 serve(app)
 ```
-
 
 You now have a centralized auth server. Test it out by visiting `/.well-known/oauth-authorization-server` - you can see a live example [here](https://auth.terminal.shop/.well-known/oauth-authorization-server).
 
@@ -222,14 +221,15 @@ Since this is a standard OAuth server you can use any libraries for OAuth and it
 import { createClient } from "@openauthjs/openauth/client"
 
 const client = createClient("my-client", {
-  issuer: "https://auth.myserver.com" // this is the url for your auth server
+  issuer: "https://auth.myserver.com", // this is the url for your auth server
 })
 ```
 
 #### SSR Sites
+
 If your frontend has a server component you can use the code flow. Redirect the user here
 
-``` ts
+```ts
 const redirect = await client.authorize(
   <client-id>,
   <redirect-uri>,
@@ -247,12 +247,15 @@ console.log(tokens.access, tokens.refresh)
 You likely want to store both the access token and refresh token in an HTTP only cookie so they are sent up with future requests. Then you can use the `client` to verify the tokens.
 
 ```ts
-const verified = await client.verify(
-  subjects,
-  cookies.get("access_token")!,
-  { refresh: cookies.get("refresh_token") || undefined },
-);
-console.log(verified.subject.type, verified.subject.properties, verified.refresh, verified.access);
+const verified = await client.verify(subjects, cookies.get("access_token")!, {
+  refresh: cookies.get("refresh_token") || undefined,
+})
+console.log(
+  verified.subject.type,
+  verified.subject.properties,
+  verified.refresh,
+  verified.access,
+)
 ```
 
 Passing in the refresh token is optional but if you do, this function will automatically refresh the access token if it has expired. It will return a new access token and refresh token which you should set back into the cookies.
@@ -270,27 +273,27 @@ location.href = redirect;
 When the auth flow is complete the user's browser will be redirected to the `redirect_uri` with a `code` query parameter. You can then exchange the code for access/refresh tokens.
 
 ```ts
-const verifier = localStorage.getItem("verifier");
-const tokens = await client.exchange(query.get("code"), redirect_uri, verifier);
-localStorage.setItem("access_token", tokens.access);
-localStorage.setItem("refresh_token", tokens.refresh);
+const verifier = localStorage.getItem("verifier")
+const tokens = await client.exchange(query.get("code"), redirect_uri, verifier)
+localStorage.setItem("access_token", tokens.access)
+localStorage.setItem("refresh_token", tokens.refresh)
 ```
 
 Then when you make requests to your API you can include the access token in the `Authorization` header.
 
 ```ts
-const accessToken = localStorage.getItem("access_token");
+const accessToken = localStorage.getItem("access_token")
 fetch("https://auth.example.com/api/user", {
   headers: {
     Authorization: `Bearer ${accessToken}`,
   },
-});
+})
 ```
 
 And then you can verify the access token on the server.
 
 ```ts
-const verified = await client.verify(subjects, accessToken);
+const verified = await client.verify(subjects, accessToken)
 console.log(verified.subject)
 ```
 

@@ -1,8 +1,8 @@
 /** @jsxImportSource hono/jsx */
 
 export function FormAlert(props: {
-  message?: string;
-  color?: "danger" | "success";
+  message?: string
+  color?: "danger" | "success"
 }) {
   return (
     <div data-component="form-alert" data-color={props.color}>
@@ -23,5 +23,5 @@ export function FormAlert(props: {
       </svg>
       <span data-slot="message">{props.message}</span>
     </div>
-  );
+  )
 }

@@ -1,6 +1,6 @@
-import { tryAuth } from "~/auth";
-import type { Route } from "./+types/home";
-import { data, Form, Link } from "react-router";
+import { tryAuth } from "~/auth"
+import type { Route } from "./+types/home"
+import { data, Form, Link } from "react-router"
 
 export async function loader({ request }: Route.LoaderArgs) {
   const auth = await tryAuth(request)

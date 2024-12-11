@@ -5,10 +5,10 @@ import {
   PasswordConfig,
   PasswordLoginError,
   PasswordRegisterError,
-} from "../adapter/password.js";
-import { Layout } from "./base.js";
-import "./form.js";
-import { FormAlert } from "./form.js";
+} from "../adapter/password.js"
+import { Layout } from "./base.js"
+import "./form.js"
+import { FormAlert } from "./form.js"
 
 const DEFAULT_COPY = {
   error_email_taken: "There is already an account with this email.",
@@ -33,23 +33,24 @@ const DEFAULT_COPY = {
   input_code: "Code",
   input_repeat: "Repeat password",
 } satisfies {
-  [key in `error_${| PasswordLoginError["type"]
-  | PasswordRegisterError["type"]
-  | PasswordChangeError["type"]}`]: string;
-} & Record<string, string>;
+  [key in `error_${
+    | PasswordLoginError["type"]
+    | PasswordRegisterError["type"]
+    | PasswordChangeError["type"]}`]: string
+} & Record<string, string>
 
-export type PasswordUICopy = typeof DEFAULT_COPY;
+export type PasswordUICopy = typeof DEFAULT_COPY
 
 export interface PasswordUIOptions {
-  sendCode: PasswordConfig["sendCode"];
-  copy?: Partial<PasswordUICopy>;
+  sendCode: PasswordConfig["sendCode"]
+  copy?: Partial<PasswordUICopy>
 }
 
 export function PasswordUI(input: PasswordUIOptions) {
   const copy = {
     ...DEFAULT_COPY,
     ...input.copy,
-  };
+  }
   return {
     sendCode: input.sendCode,
     login: async (_req, form, error): Promise<Response> => {
@@ -88,21 +89,21 @@ export function PasswordUI(input: PasswordUIOptions) {
             </div>
           </form>
         </Layout>
-      );
+      )
       return new Response(jsx.toString(), {
         status: error ? 401 : 200,
         headers: {
           "Content-Type": "text/html",
         },
-      });
+      })
     },
     register: async (_req, state, form, error): Promise<Response> => {
       const emailError = ["invalid_email", "email_taken"].includes(
         error?.type || "",
-      );
+      )
       const passwordError = ["invalid_password", "password_mismatch"].includes(
         error?.type || "",
-      );
+      )
       const jsx = (
         <Layout>
           <form data-component="form" method="post">
@@ -167,17 +168,17 @@ export function PasswordUI(input: PasswordUIOptions) {
             )}
           </form>
         </Layout>
-      ) as string;
+      ) as string
       return new Response(jsx.toString(), {
         headers: {
           "Content-Type": "text/html",
         },
-      });
+      })
     },
     change: async (_req, state, form, error): Promise<Response> => {
       const passwordError = ["invalid_password", "password_mismatch"].includes(
         error?.type || "",
-      );
+      )
       const jsx = (
         <Layout>
           <form data-component="form" method="post" replace>
@@ -256,13 +257,13 @@ export function PasswordUI(input: PasswordUIOptions) {
             </form>
           )}
         </Layout>
-      );
+      )
       return new Response(jsx.toString(), {
         status: error ? 400 : 200,
         headers: {
           "Content-Type": "text/html",
         },
-      });
+      })
     },
-  } satisfies PasswordConfig;
+  } satisfies PasswordConfig
 }

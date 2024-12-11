@@ -1,12 +1,12 @@
 /** @jsxImportSource hono/jsx */
 
-import { CodeAdapterOptions } from "../adapter/code.js";
-import { UnknownStateError } from "../error.js";
-import { Layout } from "./base.js";
-import { FormAlert } from "./form.js";
+import { CodeAdapterOptions } from "../adapter/code.js"
+import { UnknownStateError } from "../error.js"
+import { Layout } from "./base.js"
+import { FormAlert } from "./form.js"
 
 export function CodeUI(props: {
-  sendCode: (claims: Record<string, string>, code: string) => Promise<void>;
+  sendCode: (claims: Record<string, string>, code: string) => Promise<void>
 }) {
   return {
     sendCode: props.sendCode,
@@ -35,12 +35,12 @@ export function CodeUI(props: {
               We&apos;ll send a pin code to your email
             </p>
           </Layout>
-        );
+        )
         return new Response(jsx.toString(), {
           headers: {
             "Content-Type": "text/html",
           },
-        });
+        })
       }
 
       if (state.type === "code") {
@@ -87,15 +87,15 @@ export function CodeUI(props: {
               </div>
             </form>
           </Layout>
-        );
+        )
         return new Response(jsx.toString(), {
           headers: {
             "Content-Type": "text/html",
           },
-        });
+        })
       }
 
-      throw new UnknownStateError();
+      throw new UnknownStateError()
     },
-  } satisfies CodeAdapterOptions;
+  } satisfies CodeAdapterOptions
 }

@@ -1,26 +1,29 @@
 /** @jsxImportSource hono/jsx */
 
-import { Layout } from "./base.js";
+import { Layout } from "./base.js"
 
 export interface SelectProps {
   providers?: Record<
     string,
     {
-      hide?: boolean;
-      display?: string;
+      hide?: boolean
+      display?: string
     }
-  >;
+  >
 }
 
 export function Select(props?: SelectProps) {
-  return async (providers: Record<string, string>, _req: Request): Promise<Response> => {
+  return async (
+    providers: Record<string, string>,
+    _req: Request,
+  ): Promise<Response> => {
     const jsx = (
       <Layout>
         <div data-component="form">
           {Object.entries(providers).map(([key, type]) => {
-            const match = props?.providers?.[key];
-            if (match?.hide) return;
-            const icon = ICON[key];
+            const match = props?.providers?.[key]
+            if (match?.hide) return
+            const icon = ICON[key]
             return (
               <a
                 href={`/${key}/authorize`}
@@ -30,25 +33,25 @@ export function Select(props?: SelectProps) {
                 {icon && <i data-slot="icon">{icon}</i>}
                 Continue with {match?.display || DISPLAY[type] || type}
               </a>
-            );
+            )
           })}
         </div>
       </Layout>
-    );
+    )
 
     return new Response(jsx.toString(), {
       headers: {
         "Content-Type": "text/html",
       },
-    });
-  };
+    })
+  }
 }
 
 const DISPLAY: Record<string, string> = {
   twitch: "Twitch",
   google: "Google",
   github: "GitHub",
-};
+}
 
 const ICON: Record<string, any> = {
   code: (
@@ -101,4 +104,4 @@ const ICON: Record<string, any> = {
       ></path>
     </svg>
   ),
-};
+}
