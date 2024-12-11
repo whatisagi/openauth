@@ -6,7 +6,10 @@ export interface MemoryStorageOptions {
   persist?: string;
 }
 export function MemoryStorage(input?: MemoryStorageOptions): StorageAdapter {
-  const store = [] as [string, Record<string, any>][];
+  const store = [] as [
+    string,
+    { value: Record<string, any>; expiry?: number }
+  ][];
 
   if (input?.persist) {
     if (existsSync(input.persist)) {
@@ -41,15 +44,32 @@ export function MemoryStorage(input?: MemoryStorageOptions): StorageAdapter {
   return {
     async get(key: string[]) {
       const match = search(joinKey(key));
-      if (match.found) {
-        return store[match.index][1];
+      if (match.found && match) {
+        const entry = store[match.index][1];
+        if (entry.expiry && entry.expiry < Date.now()) {
+          store.splice(match.index, 1);
+          return;
+        }
+        return entry.value;
       }
       return;
     },
     async set(key: string[], value: any, ttl?: number) {
       const joined = joinKey(key);
       const match = search(joined);
-      store[match.index] = [joined, value];
+      const entry = [
+        joined,
+        {
+          value,
+          expiry: ttl ? Date.now() + ttl * 1000 : undefined,
+        },
+      ] as (typeof store)[number];
+      if (!match.found) {
+        store.splice(match.index, 0, entry);
+      }
+      if (match.found) {
+        store[match.index] = entry;
+      }
       await save();
     },
     async remove(key: string[]) {
@@ -61,9 +81,12 @@ export function MemoryStorage(input?: MemoryStorageOptions): StorageAdapter {
       await save();
     },
     async *scan(prefix: string[]) {
-      for (const [key, value] of store) {
+      for (const [key, entry] of store) {
         if (key.startsWith(joinKey(prefix))) {
-          yield [splitKey(key), value];
+          if (entry.expiry && entry.expiry < Date.now()) {
+            continue;
+          }
+          yield [splitKey(key), entry.value];
         }
       }
     },
