@@ -1,0 +1,33 @@
+name: format
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      
+      - run: bunx prettier --write "**/*.{js,jsx,ts,tsx,json,md,yaml,yml}"
+      
+      - run: git diff --exit-code || echo "has_changes=true" >> $GITHUB_OUTPUT
+      
+      - if: steps.git-check.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add -A
+          git commit -m "auto: format code with prettier"
+          git push
