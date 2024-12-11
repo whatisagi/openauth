@@ -379,7 +379,7 @@ export function PBKDF2Hasher(opts?: { interations?: number }): PasswordHasher<{
     },
   };
 }
-import crypto, { timingSafeEqual } from "crypto";
+import { timingSafeEqual, randomBytes, scrypt } from "crypto";
 
 export function ScryptHasher(opts?: {
   N?: number;
@@ -398,20 +398,14 @@ export function ScryptHasher(opts?: {
 
   return {
     async hash(password) {
-      const salt = crypto.randomBytes(16);
+      const salt = randomBytes(16);
       const keyLength = 32; // 256 bits
 
       const derivedKey = await new Promise<Buffer>((resolve, reject) => {
-        crypto.scrypt(
-          password,
-          salt,
-          keyLength,
-          { N, r, p },
-          (err, derivedKey) => {
-            if (err) reject(err);
-            else resolve(derivedKey);
-          },
-        );
+        scrypt(password, salt, keyLength, { N, r, p }, (err, derivedKey) => {
+          if (err) reject(err);
+          else resolve(derivedKey);
+        });
       });
 
       const hashBase64 = derivedKey.toString("base64");
@@ -431,7 +425,7 @@ export function ScryptHasher(opts?: {
       const keyLength = 32; // 256 bits
 
       const derivedKey = await new Promise<Buffer>((resolve, reject) => {
-        crypto.scrypt(
+        scrypt(
           password,
           salt,
           keyLength,

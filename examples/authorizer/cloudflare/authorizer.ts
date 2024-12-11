@@ -25,7 +25,7 @@ export default {
             sendCode: async (email, code) => {
               console.log(email, code);
             },
-          })
+          }),
         ),
       },
       success: async (ctx, value) => {

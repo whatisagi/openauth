@@ -15,7 +15,7 @@ export default authorizer({
         sendCode: async (email, code) => {
           console.log(email, code);
         },
-      })
+      }),
     ),
   },
   success: async (ctx, value) => {

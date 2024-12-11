@@ -43,7 +43,7 @@ test("code flow", async () => {
     fetch: (a, b) => Promise.resolve(auth.request(a, b)),
   });
   const [verifier, authorization] = await client.pkce(
-    "https://client.example.com/callback"
+    "https://client.example.com/callback",
   );
   let response = await auth.request(authorization);
   expect(response.status).toBe(302);
@@ -59,7 +59,7 @@ test("code flow", async () => {
   const tokens = await client.exchange(
     code!,
     "https://client.example.com/callback",
-    verifier
+    verifier,
   );
   expect(tokens.access).toBeTruthy();
   expect(tokens.refresh).toBeTruthy();

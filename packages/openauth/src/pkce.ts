@@ -1,4 +1,3 @@
-import { timingSafeEqual } from "crypto";
 import { base64url } from "jose";
 
 function generateVerifier(length: number): string {

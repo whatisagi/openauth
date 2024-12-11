@@ -27,7 +27,7 @@ export namespace Storage {
     adapter: StorageAdapter,
     key: string[],
     value: any,
-    ttl?: number
+    ttl?: number,
   ) {
     return adapter.set(encode(key), value, ttl);
   }
@@ -38,7 +38,7 @@ export namespace Storage {
 
   export function scan<T>(
     adapter: StorageAdapter,
-    key: string[]
+    key: string[],
   ): AsyncIterable<[string[], T]> {
     return adapter.scan(encode(key));
   }

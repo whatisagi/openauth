@@ -36,7 +36,7 @@ export function createClient(input: {
     const cached = issuerCache.get(issuer!);
     if (cached) return cached;
     const wellKnown = (await (f || fetch)(
-      `${issuer}/.well-known/oauth-authorization-server`
+      `${issuer}/.well-known/oauth-authorization-server`,
     ).then((r) => r.json())) as WellKnown;
     issuerCache.set(issuer!, wellKnown);
     return wellKnown;
@@ -47,7 +47,7 @@ export function createClient(input: {
     const cached = jwksCache.get(issuer!);
     if (cached) return cached;
     const keyset = (await (f || fetch)(wk.jwks_uri).then((r) =>
-      r.json()
+      r.json(),
     )) as JSONWebKeySet;
     const result = createLocalJWKSet(keyset);
     jwksCache.set(issuer!, result);
@@ -60,7 +60,7 @@ export function createClient(input: {
       response: "code" | "token",
       opts?: {
         provider?: string;
-      }
+      },
     ) {
       const result = new URL(issuer + "/authorize");
       if (opts?.provider) result.searchParams.set("provider", opts.provider);
@@ -73,7 +73,7 @@ export function createClient(input: {
       redirectURI: string,
       opts?: {
         provider?: string;
-      }
+      },
     ) {
       const result = new URL(issuer + "/authorize");
       if (opts?.provider) result.searchParams.set("provider", opts.provider);
@@ -117,7 +117,7 @@ export function createClient(input: {
         issuer?: string;
         audience?: string;
         fetch?: typeof fetch;
-      }
+      },
     ): Promise<{
       tokens?: {
         access: string;

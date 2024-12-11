@@ -26,7 +26,7 @@ const accessTokenCookie = createCookie("access_token", {
 export async function setTokens(
   access: string,
   refresh: string,
-  headers?: Headers
+  headers?: Headers,
 ) {
   headers ??= new Headers();
   headers.append("Set-Cookie", await refreshTokenCookie.serialize(refresh));
@@ -38,11 +38,11 @@ export async function clearTokens(headers?: Headers) {
   headers ??= new Headers();
   headers.append(
     "Set-Cookie",
-    await refreshTokenCookie.serialize("", { maxAge: 0 })
+    await refreshTokenCookie.serialize("", { maxAge: 0 }),
   );
   headers.append(
     "Set-Cookie",
-    await accessTokenCookie.serialize("", { maxAge: 0 })
+    await accessTokenCookie.serialize("", { maxAge: 0 }),
   );
   return headers;
 }
@@ -51,7 +51,7 @@ export async function login(request: Request) {
   const url = new URL(request.url);
   return Response.redirect(
     client.authorize(url.origin + "/callback", "code"),
-    302
+    302,
   );
 }
 

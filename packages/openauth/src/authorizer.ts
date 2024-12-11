@@ -6,11 +6,11 @@ import { Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 
 export interface OnSuccessResponder<
-  T extends { type: string; properties: any }
+  T extends { type: string; properties: any },
 > {
   subject<Type extends T["type"]>(
     type: Type,
-    properties: Extract<T, { type: Type }>["properties"]
+    properties: Extract<T, { type: Type }>["properties"],
   ): Promise<Response>;
 }
 
@@ -57,7 +57,7 @@ export function authorizer<
         provider: key;
       } & (Providers[key] extends Adapter<infer T> ? T : {})
     >;
-  }[keyof Providers]
+  }[keyof Providers],
 >(input: {
   subjects: Subjects;
   storage?: StorageAdapter;
@@ -69,13 +69,13 @@ export function authorizer<
   };
   select?: (
     providers: Record<string, string>,
-    req: Request
+    req: Request,
   ) => Promise<Response>;
   start?(req: Request): Promise<void>;
   success(
     response: OnSuccessResponder<SubjectPayload<Subjects>>,
     input: Result,
-    req: Request
+    req: Request,
   ): Promise<Response>;
   error?(error: UnknownStateError, req: Request): Promise<Response>;
   allow?(
@@ -84,7 +84,7 @@ export function authorizer<
       redirectURI: string;
       audience?: string;
     },
-    req: Request
+    req: Request,
   ): Promise<boolean>;
 }) {
   const error =
@@ -127,12 +127,12 @@ export function authorizer<
     if (parsed.type === "memory") storage = MemoryStorage();
     if (parsed.type === "cloudflare")
       throw new Error(
-        "Cloudflare storage cannot be configured through env because it requires bindings."
+        "Cloudflare storage cannot be configured through env because it requires bindings.",
       );
   }
   if (!storage)
     throw new Error(
-      "Store is not configured. Either set the `storage` option or set `OPENAUTH_STORAGE` environment variable."
+      "Store is not configured. Either set the `storage` option or set `OPENAUTH_STORAGE` environment variable.",
     );
   const allKeys = keys(storage);
   const primaryKey = allKeys.then((all) => all[0]);
@@ -171,7 +171,7 @@ export function authorizer<
                   clientID: authorization.client_id,
                   pkce: authorization.pkce,
                 },
-                60
+                60,
               );
               const location = new URL(authorization.redirect_uri);
               location.searchParams.set("code", code);
@@ -181,7 +181,7 @@ export function authorizer<
             }
             throw new OauthError(
               "invalid_request",
-              `Unsupported response_type: ${authorization.response_type}`
+              `Unsupported response_type: ${authorization.response_type}`,
             );
           },
         },
@@ -189,14 +189,14 @@ export function authorizer<
           provider: ctx.get("provider"),
           ...properties,
         },
-        ctx.req.raw
+        ctx.req.raw,
       );
     },
     forward(ctx, response) {
       return ctx.newResponse(
         response.body,
         response.status as any,
-        Object.fromEntries(response.headers.entries())
+        Object.fromEntries(response.headers.entries()),
       );
     },
     async set(ctx, key, maxAge, value) {
@@ -238,7 +238,7 @@ export function authorizer<
 
   async function encrypt(value: any) {
     return await new CompactEncrypt(
-      new TextEncoder().encode(JSON.stringify(value))
+      new TextEncoder().encode(JSON.stringify(value)),
     )
       .setProtectedHeader({ alg: "RSA-OAEP-512", enc: "A256GCM" })
       .encrypt(await primaryKey.then((k) => k.encryption.public));
@@ -262,7 +262,7 @@ export function authorizer<
       type: string;
       properties: any;
       clientID: string;
-    }
+    },
   ) {
     const subject = await resolveSubject(value.type, value.properties);
     const refreshToken = crypto.randomUUID();
@@ -272,7 +272,7 @@ export function authorizer<
       {
         ...value,
       },
-      Date.now() / 1000 + ttlRefresh
+      Date.now() / 1000 + ttlRefresh,
     );
     return {
       access: await new SignJWT({
@@ -289,7 +289,7 @@ export function authorizer<
             alg: k.alg,
             kid: k.id,
             typ: "JWT",
-          }))
+          })),
         )
         .sign(await primaryKey.then((v) => v.signing.private)),
       refresh: [subject, refreshToken].join(":"),
@@ -301,9 +301,9 @@ export function authorizer<
       new TextDecoder().decode(
         await compactDecrypt(
           value,
-          await primaryKey.then((v) => v.encryption.private)
-        ).then((value) => value.plaintext)
-      )
+          await primaryKey.then((v) => v.encryption.private),
+        ).then((value) => value.plaintext),
+      ),
     );
   }
 
@@ -362,7 +362,7 @@ export function authorizer<
             error: "invalid_request",
             error_description: "Missing code",
           },
-          400
+          400,
         );
       const key = ["oauth:code", code.toString()];
       const payload = await Storage.get<{
@@ -378,7 +378,7 @@ export function authorizer<
             error: "invalid_grant",
             error_description: "Authorization code has been used or expired",
           },
-          400
+          400,
         );
       }
       await Storage.remove(storage, key);
@@ -388,7 +388,7 @@ export function authorizer<
             error: "invalid_redirect_uri",
             error_description: "Redirect URI mismatch",
           },
-          400
+          400,
         );
       }
       if (payload.clientID !== form.get("client_id")) {
@@ -398,7 +398,7 @@ export function authorizer<
             error_description:
               "Client is not authorized to use this authorization code",
           },
-          403
+          403,
         );
       }
 
@@ -410,14 +410,14 @@ export function authorizer<
               error: "invalid_grant",
               error_description: "Missing code_verifier",
             },
-            400
+            400,
           );
 
         if (
           !(await validatePKCE(
             codeVerifier,
             payload.pkce.challenge,
-            payload.pkce.method
+            payload.pkce.method,
           ))
         ) {
           return c.json(
@@ -425,7 +425,7 @@ export function authorizer<
               error: "invalid_grant",
               error_description: "Code verifier does not match",
             },
-            400
+            400,
           );
         }
       }
@@ -444,7 +444,7 @@ export function authorizer<
             error: "invalid_request",
             error_description: "Missing refresh_token",
           },
-          400
+          400,
         );
       const splits = refreshToken.toString().split(":");
       const token = splits.pop()!;
@@ -461,7 +461,7 @@ export function authorizer<
             error: "invalid_grant",
             error_description: "Refresh token has been used or expired",
           },
-          400
+          400,
         );
       }
       await Storage.remove(storage, key);
@@ -482,7 +482,7 @@ export function authorizer<
       if (!match.client)
         return c.json(
           { error: "this provider does not support client_credentials" },
-          400
+          400,
         );
       const clientID = form.get("client_id");
       const clientSecret = form.get("client_secret");
@@ -513,7 +513,7 @@ export function authorizer<
           provider: provider.toString(),
           ...response,
         },
-        c.req.raw
+        c.req.raw,
       );
     }
 
@@ -568,7 +568,7 @@ export function authorizer<
           redirectURI: redirect_uri,
           audience,
         },
-        c.req.raw
+        c.req.raw,
       ))
     )
       throw new UnauthorizedClientError(client_id, redirect_uri);
@@ -581,10 +581,10 @@ export function authorizer<
           Object.entries(input.providers).map(([key, value]) => [
             key,
             value.type,
-          ])
+          ]),
         ),
-        c.req.raw
-      )
+        c.req.raw,
+      ),
     );
   });
 

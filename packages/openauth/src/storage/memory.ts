@@ -8,7 +8,7 @@ export interface MemoryStorageOptions {
 export function MemoryStorage(input?: MemoryStorageOptions): StorageAdapter {
   const store = [] as [
     string,
-    { value: Record<string, any>; expiry?: number }
+    { value: Record<string, any>; expiry?: number },
   ][];
 
   if (input?.persist) {

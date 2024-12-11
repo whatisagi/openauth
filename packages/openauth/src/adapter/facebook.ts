@@ -6,8 +6,8 @@ export function FacebookAdapter(config: Oauth2WrappedConfig) {
     ...config,
     type: "facebook",
     endpoint: {
-      authorization: "https://www.facebook.com/v12.0/dialog/oauth", 
-      token: "https://graph.facebook.com/v12.0/oauth/access_token", 
+      authorization: "https://www.facebook.com/v12.0/dialog/oauth",
+      token: "https://graph.facebook.com/v12.0/oauth/access_token",
     },
   });
 }
@@ -16,6 +16,6 @@ export function FacebookOidcAdapter(config: OidcWrappedConfig) {
   return OidcAdapter({
     ...config,
     type: "facebook",
-    issuer: "https://graph.facebook.com", 
+    issuer: "https://graph.facebook.com",
   });
 }

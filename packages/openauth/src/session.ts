@@ -13,7 +13,7 @@ export type SubjectPayload<T extends SubjectSchema> = Prettify<
 >;
 
 export function createSubjects<Schema extends SubjectSchema = {}>(
-  types: Schema
+  types: Schema,
 ) {
   return {
     ...types,
