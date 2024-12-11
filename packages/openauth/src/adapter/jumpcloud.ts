@@ -8,5 +8,5 @@ export function JumpCloudAdapter(config: Oauth2WrappedConfig) {
       authorization: "https://oauth.id.jumpcloud.com/oauth2/auth",
       token: "https://oauth.id.jumpcloud.com/oauth2/token",
     },
-  });
+  })
 }
