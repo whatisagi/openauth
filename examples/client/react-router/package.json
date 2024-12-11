@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@react-router/dev": "^7.0.2",
-    "@types/node": "^20",
+    "@types/node": "22.10.1",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",
     "cross-env": "^7.0.3",
