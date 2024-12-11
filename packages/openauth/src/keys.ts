@@ -7,43 +7,43 @@ import {
   importSPKI,
   JWK,
   KeyLike,
-} from "jose";
-import { Storage, StorageAdapter } from "./storage/storage.js";
+} from "jose"
+import { Storage, StorageAdapter } from "./storage/storage.js"
 
-const alg = "RS512";
+const alg = "RS512"
 
 interface SerializedKeyPair {
-  id: string;
-  publicKey: string;
-  privateKey: string;
-  created: number;
+  id: string
+  publicKey: string
+  privateKey: string
+  created: number
 }
 
 export interface KeyPair {
-  id: string;
-  alg: string;
+  id: string
+  alg: string
   signing: {
-    public: KeyLike;
-    private: KeyLike;
-  };
+    public: KeyLike
+    private: KeyLike
+  }
   encryption: {
-    public: KeyLike;
-    private: KeyLike;
-  };
-  created: Date;
-  jwk: JWK;
+    public: KeyLike
+    private: KeyLike
+  }
+  created: Date
+  jwk: JWK
 }
 
 export async function keys(storage: StorageAdapter): Promise<KeyPair[]> {
-  const results = [] as KeyPair[];
-  const scanner = Storage.scan<SerializedKeyPair>(storage, ["oauth:key"]);
+  const results = [] as KeyPair[]
+  const scanner = Storage.scan<SerializedKeyPair>(storage, ["oauth:key"])
   for await (const [_key, value] of scanner) {
     const publicKey = await importSPKI(value.publicKey, alg, {
       extractable: true,
-    });
-    const privateKey = await importPKCS8(value.privateKey, alg);
-    const jwk = await exportJWK(publicKey);
-    jwk.kid = value.id;
+    })
+    const privateKey = await importPKCS8(value.privateKey, alg)
+    const jwk = await exportJWK(publicKey)
+    jwk.kid = value.id
     results.push({
       id: value.id,
       alg,
@@ -57,19 +57,19 @@ export async function keys(storage: StorageAdapter): Promise<KeyPair[]> {
         private: await importPKCS8(value.privateKey, "RSA-OAEP-512"),
       },
       jwk,
-    });
+    })
   }
-  if (results.length) return results;
+  if (results.length) return results
 
   const key = await generateKeyPair(alg, {
     extractable: true,
-  });
+  })
   const serialized: SerializedKeyPair = {
     id: crypto.randomUUID(),
     publicKey: await exportSPKI(key.publicKey),
     privateKey: await exportPKCS8(key.privateKey),
     created: Date.now(),
-  };
-  await Storage.set(storage, ["oauth:key", serialized.id], serialized);
-  return keys(storage);
+  }
+  await Storage.set(storage, ["oauth:key", serialized.id], serialized)
+  return keys(storage)
 }

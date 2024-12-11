@@ -1,8 +1,8 @@
-import { authorizer } from "@openauthjs/openauth";
-import { MemoryStorage } from "@openauthjs/openauth/storage/memory";
-import { PasswordAdapter } from "@openauthjs/openauth/adapter/password";
-import { PasswordUI } from "@openauthjs/openauth/ui/password";
-import { subjects } from "../../subjects.js";
+import { authorizer } from "@openauthjs/openauth"
+import { MemoryStorage } from "@openauthjs/openauth/storage/memory"
+import { PasswordAdapter } from "@openauthjs/openauth/adapter/password"
+import { PasswordUI } from "@openauthjs/openauth/ui/password"
+import { subjects } from "../../subjects.js"
 
 export default authorizer({
   subjects,
@@ -13,7 +13,7 @@ export default authorizer({
     password: PasswordAdapter(
       PasswordUI({
         sendCode: async (email, code) => {
-          console.log(email, code);
+          console.log(email, code)
         },
       }),
     ),
@@ -22,8 +22,8 @@ export default authorizer({
     if (value.provider === "password") {
       return ctx.subject("user", {
         email: value.email,
-      });
+      })
     }
-    throw new Error("Invalid provider");
+    throw new Error("Invalid provider")
   },
-});
+})

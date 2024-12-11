@@ -1,5 +1,5 @@
-import { Oauth2Adapter, Oauth2WrappedConfig } from "./oauth2.js";
-import { OidcAdapter, OidcWrappedConfig } from "./oidc.js";
+import { Oauth2Adapter, Oauth2WrappedConfig } from "./oauth2.js"
+import { OidcAdapter, OidcWrappedConfig } from "./oidc.js"
 
 export function GoogleAdapter(config: Oauth2WrappedConfig) {
   return Oauth2Adapter({
@@ -9,7 +9,7 @@ export function GoogleAdapter(config: Oauth2WrappedConfig) {
       authorization: "https://accounts.google.com/o/oauth2/v2/auth",
       token: "https://oauth2.googleapis.com/token",
     },
-  });
+  })
 }
 
 export function GoogleOidcAdapter(config: OidcWrappedConfig) {
@@ -17,5 +17,5 @@ export function GoogleOidcAdapter(config: OidcWrappedConfig) {
     ...config,
     type: "google",
     issuer: "https://accounts.google.com",
-  });
+  })
 }

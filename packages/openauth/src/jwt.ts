@@ -1,4 +1,4 @@
-import { JWTPayload, jwtVerify, KeyLike, SignJWT } from "jose";
+import { JWTPayload, jwtVerify, KeyLike, SignJWT } from "jose"
 
 export namespace jwt {
   export function create(
@@ -8,10 +8,10 @@ export namespace jwt {
   ) {
     return new SignJWT(payload)
       .setProtectedHeader({ alg: algorithm, typ: "JWT", kid: "sst" })
-      .sign(privateKey);
+      .sign(privateKey)
   }
 
   export function verify<T>(token: string, publicKey: KeyLike) {
-    return jwtVerify<T>(token, publicKey);
+    return jwtVerify<T>(token, publicKey)
   }
 }

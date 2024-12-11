@@ -1,30 +1,30 @@
 export interface Theme {
-  title?: string;
-  favicon?: string;
-  radius?: "none" | "sm" | "md" | "lg" | "full";
+  title?: string
+  favicon?: string
+  radius?: "none" | "sm" | "md" | "lg" | "full"
   primary:
     | string
     | {
-        dark: string;
-        light: string;
-      };
+        dark: string
+        light: string
+      }
   background?:
     | string
     | {
-        dark: string;
-        light: string;
-      };
+        dark: string
+        light: string
+      }
   logo?:
     | string
     | {
-        dark: string;
-        light: string;
-      };
+        dark: string
+        light: string
+      }
   font?: {
-    family?: string;
-    scale?: string;
-  };
-  css?: string;
+    family?: string
+    scale?: string
+  }
+  css?: string
 }
 
 export const THEME_TERMINAL: Theme = {
@@ -46,7 +46,7 @@ export const THEME_TERMINAL: Theme = {
   css: `
     @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100;200;300;400;500;600;700;800;900&display=swap');
   `,
-};
+}
 
 export const THEME_SST: Theme = {
   title: "SST",
@@ -65,7 +65,7 @@ export const THEME_SST: Theme = {
   css: `
     @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@100;200;300;400;500;600;700;800;900&display=swap');
   `,
-};
+}
 
 export const THEME_SUPABASE: Theme = {
   title: "Supabase",
@@ -88,7 +88,7 @@ export const THEME_SUPABASE: Theme = {
   css: `
     @import url('https://fonts.googleapis.com/css2?family=Varela Round:wght@100;200;300;400;500;600;700;800;900&display=swap');
   `,
-};
+}
 
 export const THEME_VERCEL: Theme = {
   title: "Vercel",
@@ -111,16 +111,16 @@ export const THEME_VERCEL: Theme = {
   css: `
     @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100;200;300;400;500;600;700;800;900&display=swap');
   `,
-};
+}
 
 // i really don't wanna use async local storage for this so get over it
 
 export function setTheme(value: Theme) {
   // @ts-ignore
-  globalThis.OPENAUTH_THEME = value;
+  globalThis.OPENAUTH_THEME = value
 }
 
 export function getTheme() {
   // @ts-ignore
-  return globalThis.OPENAUTH_THEME || THEME_SST;
+  return globalThis.OPENAUTH_THEME || THEME_SST
 }

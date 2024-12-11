@@ -1,4 +1,4 @@
-import { Oauth2Adapter, Oauth2WrappedConfig } from "./oauth2.js";
+import { Oauth2Adapter, Oauth2WrappedConfig } from "./oauth2.js"
 
 export function DiscordAdapter(config: Oauth2WrappedConfig) {
   return Oauth2Adapter({
@@ -8,5 +8,5 @@ export function DiscordAdapter(config: Oauth2WrappedConfig) {
       authorization: "https://discord.com/oauth2/authorize",
       token: "https://discord.com/api/oauth2/token",
     },
-  });
+  })
 }

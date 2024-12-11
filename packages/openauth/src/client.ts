@@ -1,57 +1,57 @@
-import { createLocalJWKSet, errors, JSONWebKeySet, jwtVerify } from "jose";
-import { SubjectSchema } from "./session.js";
-import type { v1 } from "@standard-schema/spec";
+import { createLocalJWKSet, errors, JSONWebKeySet, jwtVerify } from "jose"
+import { SubjectSchema } from "./session.js"
+import type { v1 } from "@standard-schema/spec"
 import {
   InvalidAuthorizationCodeError,
   InvalidRefreshTokenError,
   InvalidSessionError,
-} from "./error.js";
-import { generatePKCE } from "./pkce.js";
+} from "./error.js"
+import { generatePKCE } from "./pkce.js"
 
 export interface WellKnown {
-  jwks_uri: string;
-  token_endpoint: string;
-  authorization_endpoint: string;
+  jwks_uri: string
+  token_endpoint: string
+  authorization_endpoint: string
 }
 
-const jwksCache = new Map<string, ReturnType<typeof createLocalJWKSet>>();
-const issuerCache = new Map<string, WellKnown>();
+const jwksCache = new Map<string, ReturnType<typeof createLocalJWKSet>>()
+const issuerCache = new Map<string, WellKnown>()
 
 interface ResponseLike {
-  json(): Promise<unknown>;
-  ok: Response["ok"];
+  json(): Promise<unknown>
+  ok: Response["ok"]
 }
-type FetchLike = (...args: any[]) => Promise<ResponseLike>;
+type FetchLike = (...args: any[]) => Promise<ResponseLike>
 
 export function createClient(input: {
-  clientID: string;
-  issuer?: string;
-  fetch?: FetchLike;
+  clientID: string
+  issuer?: string
+  fetch?: FetchLike
 }) {
-  const issuer = input.issuer || process.env.OPENAUTH_ISSUER;
-  if (!issuer) throw new Error("No issuer");
-  const f = input.fetch ?? fetch;
+  const issuer = input.issuer || process.env.OPENAUTH_ISSUER
+  if (!issuer) throw new Error("No issuer")
+  const f = input.fetch ?? fetch
 
   async function getIssuer() {
-    const cached = issuerCache.get(issuer!);
-    if (cached) return cached;
+    const cached = issuerCache.get(issuer!)
+    if (cached) return cached
     const wellKnown = (await (f || fetch)(
       `${issuer}/.well-known/oauth-authorization-server`,
-    ).then((r) => r.json())) as WellKnown;
-    issuerCache.set(issuer!, wellKnown);
-    return wellKnown;
+    ).then((r) => r.json())) as WellKnown
+    issuerCache.set(issuer!, wellKnown)
+    return wellKnown
   }
 
   async function getJWKS() {
-    const wk = await getIssuer();
-    const cached = jwksCache.get(issuer!);
-    if (cached) return cached;
+    const wk = await getIssuer()
+    const cached = jwksCache.get(issuer!)
+    if (cached) return cached
     const keyset = (await (f || fetch)(wk.jwks_uri).then((r) =>
       r.json(),
-    )) as JSONWebKeySet;
-    const result = createLocalJWKSet(keyset);
-    jwksCache.set(issuer!, result);
-    return result;
+    )) as JSONWebKeySet
+    const result = createLocalJWKSet(keyset)
+    jwksCache.set(issuer!, result)
+    return result
   }
 
   const result = {
@@ -59,31 +59,31 @@ export function createClient(input: {
       redirectURI: string,
       response: "code" | "token",
       opts?: {
-        provider?: string;
+        provider?: string
       },
     ) {
-      const result = new URL(issuer + "/authorize");
-      if (opts?.provider) result.searchParams.set("provider", opts.provider);
-      result.searchParams.set("client_id", input.clientID);
-      result.searchParams.set("redirect_uri", redirectURI);
-      result.searchParams.set("response_type", response);
-      return result.toString();
+      const result = new URL(issuer + "/authorize")
+      if (opts?.provider) result.searchParams.set("provider", opts.provider)
+      result.searchParams.set("client_id", input.clientID)
+      result.searchParams.set("redirect_uri", redirectURI)
+      result.searchParams.set("response_type", response)
+      return result.toString()
     },
     async pkce(
       redirectURI: string,
       opts?: {
-        provider?: string;
+        provider?: string
       },
     ) {
-      const result = new URL(issuer + "/authorize");
-      if (opts?.provider) result.searchParams.set("provider", opts.provider);
-      result.searchParams.set("client_id", input.clientID);
-      result.searchParams.set("redirect_uri", redirectURI);
-      result.searchParams.set("response_type", "code");
-      const pkce = await generatePKCE();
-      result.searchParams.set("code_challenge_method", "S256");
-      result.searchParams.set("code_challenge", pkce.challenge);
-      return [pkce.verifier, result.toString()];
+      const result = new URL(issuer + "/authorize")
+      if (opts?.provider) result.searchParams.set("provider", opts.provider)
+      result.searchParams.set("client_id", input.clientID)
+      result.searchParams.set("redirect_uri", redirectURI)
+      result.searchParams.set("response_type", "code")
+      const pkce = await generatePKCE()
+      result.searchParams.set("code_challenge_method", "S256")
+      result.searchParams.set("code_challenge", pkce.challenge)
+      return [pkce.verifier, result.toString()]
     },
     async exchange(code: string, redirectURI: string, verifier?: string) {
       const tokens = await f(issuer + "/token", {
@@ -98,60 +98,60 @@ export function createClient(input: {
           client_id: input.clientID,
           code_verifier: verifier || "",
         }).toString(),
-      });
-      const json = (await tokens.json()) as any;
+      })
+      const json = (await tokens.json()) as any
       if (!tokens.ok) {
-        console.error(json);
-        throw new InvalidAuthorizationCodeError();
+        console.error(json)
+        throw new InvalidAuthorizationCodeError()
       }
       return {
         access: json.access_token as string,
         refresh: json.refresh_token as string,
-      };
+      }
     },
     async verify<T extends SubjectSchema>(
       subjects: T,
       token: string,
       options?: {
-        refresh?: string;
-        issuer?: string;
-        audience?: string;
-        fetch?: typeof fetch;
+        refresh?: string
+        issuer?: string
+        audience?: string
+        fetch?: typeof fetch
       },
     ): Promise<{
       tokens?: {
-        access: string;
-        refresh: string;
-      };
+        access: string
+        refresh: string
+      }
       subject: {
         [type in keyof T]: {
-          type: type;
-          properties: v1.InferOutput<T[type]>;
-        };
-      }[keyof T];
+          type: type
+          properties: v1.InferOutput<T[type]>
+        }
+      }[keyof T]
     }> {
-      const jwks = await getJWKS();
+      const jwks = await getJWKS()
       try {
         const result = await jwtVerify<{
-          mode: "access";
-          type: keyof T;
-          properties: v1.InferInput<T[keyof T]>;
+          mode: "access"
+          type: keyof T
+          properties: v1.InferInput<T[keyof T]>
         }>(token, jwks, {
           issuer,
-        });
+        })
         const validated = await subjects[result.payload.type][
           "~standard"
-        ].validate(result.payload.properties);
+        ].validate(result.payload.properties)
         if (!validated.issues && result.payload.mode === "access")
           return {
             subject: {
               type: result.payload.type,
               properties: validated.value,
             } as any,
-          };
+          }
       } catch (e) {
         if (e instanceof errors.JWTExpired && options?.refresh) {
-          const wk = await getIssuer();
+          const wk = await getIssuer()
           const tokens = await f(wk.token_endpoint, {
             method: "POST",
             headers: {
@@ -161,27 +161,27 @@ export function createClient(input: {
               grant_type: "refresh_token",
               refresh_token: options.refresh,
             }).toString(),
-          });
-          const json = (await tokens.json()) as any;
+          })
+          const json = (await tokens.json()) as any
           if (!tokens.ok) {
-            console.error(json);
-            throw new InvalidRefreshTokenError();
+            console.error(json)
+            throw new InvalidRefreshTokenError()
           }
           const verified = await result.verify(subjects, json.access_token, {
             refresh: json.refresh_token,
             issuer,
             fetch: options?.fetch,
-          });
+          })
           verified.tokens = {
             access: json.access_token,
             refresh: json.refresh_token,
-          };
-          return verified;
+          }
+          return verified
         }
-        throw e;
+        throw e
       }
-      throw new InvalidSessionError();
+      throw new InvalidSessionError()
     },
-  };
-  return result;
+  }
+  return result
 }

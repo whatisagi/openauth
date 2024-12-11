@@ -1,15 +1,15 @@
-import { authorizer } from "@openauthjs/openauth";
-import { CloudflareStorage } from "@openauthjs/openauth/storage/cloudflare";
+import { authorizer } from "@openauthjs/openauth"
+import { CloudflareStorage } from "@openauthjs/openauth/storage/cloudflare"
 import {
   type ExecutionContext,
   type KVNamespace,
-} from "@cloudflare/workers-types";
-import { subjects } from "../../subjects.js";
-import { PasswordAdapter } from "@openauthjs/openauth/adapter/password";
-import { PasswordUI } from "@openauthjs/openauth/ui/password";
+} from "@cloudflare/workers-types"
+import { subjects } from "../../subjects.js"
+import { PasswordAdapter } from "@openauthjs/openauth/adapter/password"
+import { PasswordUI } from "@openauthjs/openauth/ui/password"
 
 interface Env {
-  CloudflareAuthKV: KVNamespace;
+  CloudflareAuthKV: KVNamespace
 }
 
 export default {
@@ -23,7 +23,7 @@ export default {
         password: PasswordAdapter(
           PasswordUI({
             sendCode: async (email, code) => {
-              console.log(email, code);
+              console.log(email, code)
             },
           }),
         ),
@@ -32,10 +32,10 @@ export default {
         if (value.provider === "password") {
           return ctx.subject("user", {
             email: value.email,
-          });
+          })
         }
-        throw new Error("Invalid provider");
+        throw new Error("Invalid provider")
       },
-    }).fetch(request, env, ctx);
+    }).fetch(request, env, ctx)
   },
-};
+}

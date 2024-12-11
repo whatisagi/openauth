@@ -1,4 +1,4 @@
-import { Oauth2Adapter, Oauth2WrappedConfig } from "./oauth2.js";
+import { Oauth2Adapter, Oauth2WrappedConfig } from "./oauth2.js"
 
 export function TwitchAdapter(config: Oauth2WrappedConfig) {
   return Oauth2Adapter({
@@ -8,5 +8,5 @@ export function TwitchAdapter(config: Oauth2WrappedConfig) {
       authorization: "https://id.twitch.tv/oauth2/authorize",
       token: "https://id.twitch.tv/oauth2/token",
     },
-  });
+  })
 }

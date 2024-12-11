@@ -10,7 +10,7 @@ export class OauthError extends Error {
       | "temporarily_unavailable",
     public description: string,
   ) {
-    super(error + " - " + description);
+    super(error + " - " + description)
   }
 }
 
@@ -19,13 +19,13 @@ export class MissingProviderError extends OauthError {
     super(
       "invalid_request",
       "Must specify `provider` query parameter if `select` callback on authorizer is not specified",
-    );
+    )
   }
 }
 
 export class MissingParameterError extends OauthError {
   constructor(public parameter: string) {
-    super("invalid_request", "Missing parameter: " + parameter);
+    super("invalid_request", "Missing parameter: " + parameter)
   }
 }
 
@@ -37,7 +37,7 @@ export class UnauthorizedClientError extends OauthError {
     super(
       "unauthorized_client",
       `Client ${clientID} is not authorized to use this redirect_uri: ${redirectURI}`,
-    );
+    )
   }
 }
 
@@ -45,24 +45,24 @@ export class UnknownStateError extends Error {
   constructor() {
     super(
       "The browser was in an unknown state. This could be because certain cookies expired or the browser was switched in the middle of an authentication flow",
-    );
+    )
   }
 }
 
 export class InvalidSessionError extends Error {
   constructor() {
-    super("Invalid session");
+    super("Invalid session")
   }
 }
 
 export class InvalidRefreshTokenError extends Error {
   constructor() {
-    super("Invalid refresh token");
+    super("Invalid refresh token")
   }
 }
 
 export class InvalidAuthorizationCodeError extends Error {
   constructor() {
-    super("Invalid authorization code");
+    super("Invalid authorization code")
   }
 }
