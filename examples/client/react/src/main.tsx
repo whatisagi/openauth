@@ -1,6 +1,6 @@
-import { createClient } from '@openauthjs/openauth/client'
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import { createClient } from "@openauthjs/openauth/client"
+import { StrictMode } from "react"
+import { createRoot } from "react-dom/client"
 
 const client = createClient({
   clientID: "react",
@@ -8,7 +8,7 @@ const client = createClient({
 })
 
 let _refresh = localStorage.getItem("refresh")
-let _access: string | undefined;
+let _access: string | undefined
 async function getToken() {
   if (!_refresh) return
   const next = await client.refresh(_refresh, {
@@ -24,8 +24,7 @@ async function getToken() {
 const hash = new URLSearchParams(location.hash.slice(1))
 const access = hash.get("access_token")
 const refresh = hash.get("refresh_token")
-if (access)
-  _access = access
+if (access) _access = access
 if (refresh) {
   localStorage.setItem("refresh", refresh)
   _refresh = refresh
@@ -36,15 +35,20 @@ if (!token) {
   location.href = client.authorize(location.origin, "token")
 }
 
-
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />
   </StrictMode>,
 )
 
 function App() {
-  return <button onClick={async () => {
-    alert(await getToken())
-  }}>See Token</button>
+  return (
+    <button
+      onClick={async () => {
+        alert(await getToken())
+      }}
+    >
+      See Token
+    </button>
+  )
 }
