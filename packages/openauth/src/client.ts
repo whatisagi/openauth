@@ -1,4 +1,10 @@
-import { createLocalJWKSet, errors, JSONWebKeySet, jwtVerify } from "jose"
+import {
+  createLocalJWKSet,
+  errors,
+  JSONWebKeySet,
+  jwtVerify,
+  decodeJwt,
+} from "jose"
 import { SubjectSchema } from "./session.js"
 import type { v1 } from "@standard-schema/spec"
 import {
@@ -109,6 +115,39 @@ export function createClient(input: {
         refresh: json.refresh_token as string,
       }
     },
+    async refresh(
+      refresh: string,
+      opts?: {
+        access?: string
+      },
+    ) {
+      if (!opts?.access) {
+        const decoded = decodeJwt(refresh)
+        // allow 30s window for expiration
+        if (decoded.exp < Date.now() / 1000 + 30) {
+          return
+        }
+      }
+      const tokens = await f(issuer + "/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          grant_type: "refresh_token",
+          refresh_token: refresh,
+        }).toString(),
+      })
+      const json = (await tokens.json()) as any
+      if (!tokens.ok) {
+        console.error(json)
+        throw new InvalidRefreshTokenError()
+      }
+      return {
+        access: json.access_token as string,
+        refresh: json.refresh_token as string,
+      }
+    },
     async verify<T extends SubjectSchema>(
       subjects: T,
       token: string,
@@ -151,30 +190,17 @@ export function createClient(input: {
           }
       } catch (e) {
         if (e instanceof errors.JWTExpired && options?.refresh) {
-          const wk = await getIssuer()
-          const tokens = await f(wk.token_endpoint, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: new URLSearchParams({
-              grant_type: "refresh_token",
-              refresh_token: options.refresh,
-            }).toString(),
-          })
-          const json = (await tokens.json()) as any
-          if (!tokens.ok) {
-            console.error(json)
-            throw new InvalidRefreshTokenError()
-          }
-          const verified = await result.verify(subjects, json.access_token, {
-            refresh: json.refresh_token,
+          const tokens = await this.refresh(options.refresh)
+
+          const verified = await result.verify(subjects, tokens.access, {
+            refresh: tokens.refresh,
             issuer,
             fetch: options?.fetch,
           })
+
           verified.tokens = {
-            access: json.access_token,
-            refresh: json.refresh_token,
+            access: tokens.access,
+            refresh: tokens.refresh,
           }
           return verified
         }
