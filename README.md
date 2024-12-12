@@ -15,7 +15,7 @@
 
 ---
 
-[OpenAuth](https://openauth.js.org) is a standards-based auth provider for web apps, mobile apps, single pages apps, APIs, or 3rd party clients.
+[OpenAuth](https://openauth.js.org) is a standards-based auth provider for web apps, mobile apps, single pages apps, APIs, or 3rd party clients. It is currently in beta.
 
 - **Universal**: You can deploy it as a standalone service or embed it into an existing application. It works with any framework or platform.
 - **Self-hosted**: It runs entirely on your infrastructure and can be deployed on Node.js, Bun, AWS Lambda, or Cloudflare Workers.
