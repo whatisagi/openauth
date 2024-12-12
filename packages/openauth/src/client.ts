@@ -8,6 +8,7 @@ import {
 import { SubjectSchema } from "./session.js"
 import type { v1 } from "@standard-schema/spec"
 import {
+  InvalidAccessTokenError,
   InvalidAuthorizationCodeError,
   InvalidRefreshTokenError,
   InvalidSessionError,
@@ -123,8 +124,11 @@ export function createClient(input: {
     ) {
       if (!opts?.access) {
         const decoded = decodeJwt(refresh)
+        if (!decoded) {
+          throw new InvalidAccessTokenError()
+        }
         // allow 30s window for expiration
-        if (decoded.exp < Date.now() / 1000 + 30) {
+        if ((decoded.exp || 0) < Date.now() / 1000 + 30) {
           return
         }
       }
@@ -191,7 +195,7 @@ export function createClient(input: {
       } catch (e) {
         if (e instanceof errors.JWTExpired && options?.refresh) {
           const tokens = await this.refresh(options.refresh)
-
+          if (!tokens) throw new InvalidRefreshTokenError()
           const verified = await result.verify(subjects, tokens.access, {
             refresh: tokens.refresh,
             issuer,

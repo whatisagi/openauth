@@ -61,6 +61,12 @@ export class InvalidRefreshTokenError extends Error {
   }
 }
 
+export class InvalidAccessTokenError extends Error {
+  constructor() {
+    super("Invalid access token")
+  }
+}
+
 export class InvalidAuthorizationCodeError extends Error {
   constructor() {
     super("Invalid authorization code")
