@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Authorizer</title>
+  </head>
+  <body>
+    <h1>Authorizer</h1>
+    <form method="post" action="/authorize">
+      <input type="hidden" name="action" value="request" />
+      <label for="email">Email</label>
+      <input type="email" name="email" id="email" />
+      <button type="submit">Request</button>
+    </form>
+    <form method="post" action="/authorize">
+      <input type="hidden" name="action" value="resend" />
+      <label for="email">Email</label>
+      <input type="email" name="email" id="email" />
+      <button type="submit">Resend</button>
+    </form>
+  </body>
+</html>   
