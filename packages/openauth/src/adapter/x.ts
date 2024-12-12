@@ -6,7 +6,7 @@ export function XAdapter(config: Oauth2WrappedConfig) {
     type: "x",
     endpoint: {
       authorization: "https://twitter.com/i/oauth2/authorize",
-      token: "https://api.x.com/2/oauth2/token"
+      token: "https://api.x.com/2/oauth2/token",
     },
   })
 }
