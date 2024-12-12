@@ -8,7 +8,6 @@ export async function auth() {
   const cookies = await getCookies();
   const accessToken = cookies.get("access_token");
   const refreshToken = cookies.get("refresh_token");
-  console.log(accessToken, refreshToken);
 
   if (!accessToken) {
     return false;
