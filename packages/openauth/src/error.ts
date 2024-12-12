@@ -49,9 +49,9 @@ export class UnknownStateError extends Error {
   }
 }
 
-export class InvalidSessionError extends Error {
+export class InvalidSubjectError extends Error {
   constructor() {
-    super("Invalid session")
+    super("Invalid subject")
   }
 }
 

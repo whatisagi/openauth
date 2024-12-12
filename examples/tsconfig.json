@@ -3,6 +3,7 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "Bundler",
+    "strict": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
   }

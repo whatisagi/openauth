@@ -14,17 +14,18 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
       const verified = await client.verify(subjects, accessToken.value, {
         refresh: refreshToken?.value,
       })
-      if (verified.tokens)
-        setTokens(ctx, verified.tokens.access, verified.tokens.refresh)
-      ctx.locals.subject = verified.subject
-      return next()
+      if (!verified.err) {
+        if (verified.tokens)
+          setTokens(ctx, verified.tokens.access, verified.tokens.refresh)
+        ctx.locals.subject = verified.subject
+        return next()
+      }
     }
   } catch (e) {}
+
   const url = new URL(ctx.request.url)
   return Response.redirect(
     client.authorize(url.origin + "/callback", "code"),
     302,
   )
-
-  return next()
 })

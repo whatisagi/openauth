@@ -45,6 +45,7 @@ import { getTheme, setTheme, Theme } from "./ui/theme.js"
 import { isDomainMatch } from "./util.js"
 import { DynamoStorage } from "./storage/dynamo.js"
 import { MemoryStorage } from "./storage/memory.js"
+import { cors } from "hono/cors"
 
 export const aws = awsHandle
 
@@ -349,175 +350,184 @@ export function authorizer<
     })
   })
 
-  app.post("/token", async (c) => {
-    const form = await c.req.formData()
-    const grantType = form.get("grant_type")
+  app.post(
+    "/token",
+    cors({
+      origin: "*",
+      allowHeaders: ["*"],
+      allowMethods: ["POST"],
+      credentials: false,
+    }),
+    async (c) => {
+      const form = await c.req.formData()
+      const grantType = form.get("grant_type")
 
-    if (grantType === "authorization_code") {
-      const code = form.get("code")
-      if (!code)
-        return c.json(
-          {
-            error: "invalid_request",
-            error_description: "Missing code",
-          },
-          400,
-        )
-      const key = ["oauth:code", code.toString()]
-      const payload = await Storage.get<{
-        type: string
-        properties: any
-        clientID: string
-        redirectURI: string
-        pkce?: AuthorizationState["pkce"]
-      }>(storage, key)
-      if (!payload) {
-        return c.json(
-          {
-            error: "invalid_grant",
-            error_description: "Authorization code has been used or expired",
-          },
-          400,
-        )
-      }
-      await Storage.remove(storage, key)
-      if (payload.redirectURI !== form.get("redirect_uri")) {
-        return c.json(
-          {
-            error: "invalid_redirect_uri",
-            error_description: "Redirect URI mismatch",
-          },
-          400,
-        )
-      }
-      if (payload.clientID !== form.get("client_id")) {
-        return c.json(
-          {
-            error: "unauthorized_client",
-            error_description:
-              "Client is not authorized to use this authorization code",
-          },
-          403,
-        )
-      }
-
-      if (payload.pkce) {
-        const codeVerifier = form.get("code_verifier")?.toString()
-        if (!codeVerifier)
+      if (grantType === "authorization_code") {
+        const code = form.get("code")
+        if (!code)
           return c.json(
             {
-              error: "invalid_grant",
-              error_description: "Missing code_verifier",
+              error: "invalid_request",
+              error_description: "Missing code",
             },
             400,
           )
-
-        if (
-          !(await validatePKCE(
-            codeVerifier,
-            payload.pkce.challenge,
-            payload.pkce.method,
-          ))
-        ) {
+        const key = ["oauth:code", code.toString()]
+        const payload = await Storage.get<{
+          type: string
+          properties: any
+          clientID: string
+          redirectURI: string
+          pkce?: AuthorizationState["pkce"]
+        }>(storage, key)
+        if (!payload) {
           return c.json(
             {
               error: "invalid_grant",
-              error_description: "Code verifier does not match",
+              error_description: "Authorization code has been used or expired",
             },
             400,
           )
         }
+        await Storage.remove(storage, key)
+        if (payload.redirectURI !== form.get("redirect_uri")) {
+          return c.json(
+            {
+              error: "invalid_redirect_uri",
+              error_description: "Redirect URI mismatch",
+            },
+            400,
+          )
+        }
+        if (payload.clientID !== form.get("client_id")) {
+          return c.json(
+            {
+              error: "unauthorized_client",
+              error_description:
+                "Client is not authorized to use this authorization code",
+            },
+            403,
+          )
+        }
+
+        if (payload.pkce) {
+          const codeVerifier = form.get("code_verifier")?.toString()
+          if (!codeVerifier)
+            return c.json(
+              {
+                error: "invalid_grant",
+                error_description: "Missing code_verifier",
+              },
+              400,
+            )
+
+          if (
+            !(await validatePKCE(
+              codeVerifier,
+              payload.pkce.challenge,
+              payload.pkce.method,
+            ))
+          ) {
+            return c.json(
+              {
+                error: "invalid_grant",
+                error_description: "Code verifier does not match",
+              },
+              400,
+            )
+          }
+        }
+        const tokens = await generateTokens(c, payload)
+        return c.json({
+          access_token: tokens.access,
+          refresh_token: tokens.refresh,
+        })
       }
-      const tokens = await generateTokens(c, payload)
-      return c.json({
-        access_token: tokens.access,
-        refresh_token: tokens.refresh,
-      })
-    }
 
-    if (grantType === "refresh_token") {
-      const refreshToken = form.get("refresh_token")
-      if (!refreshToken)
-        return c.json(
+      if (grantType === "refresh_token") {
+        const refreshToken = form.get("refresh_token")
+        if (!refreshToken)
+          return c.json(
+            {
+              error: "invalid_request",
+              error_description: "Missing refresh_token",
+            },
+            400,
+          )
+        const splits = refreshToken.toString().split(":")
+        const token = splits.pop()!
+        const subject = splits.join(":")
+        const key = ["oauth:refresh", subject, token]
+        const payload = await Storage.get<{
+          type: string
+          properties: any
+          clientID: string
+        }>(storage, key)
+        if (!payload) {
+          return c.json(
+            {
+              error: "invalid_grant",
+              error_description: "Refresh token has been used or expired",
+            },
+            400,
+          )
+        }
+        await Storage.remove(storage, key)
+        const tokens = await generateTokens(c, payload)
+        return c.json({
+          access_token: tokens.access,
+          refresh_token: tokens.refresh,
+        })
+      }
+
+      if (grantType === "client_credentials") {
+        const provider = form.get("provider")
+        if (!provider)
+          return c.json({ error: "missing `provider` form value" }, 400)
+        const match = input.providers[provider.toString()]
+        if (!match)
+          return c.json({ error: "invalid `provider` query parameter" }, 400)
+        if (!match.client)
+          return c.json(
+            { error: "this provider does not support client_credentials" },
+            400,
+          )
+        const clientID = form.get("client_id")
+        const clientSecret = form.get("client_secret")
+        if (!clientID)
+          return c.json({ error: "missing `client_id` form value" }, 400)
+        if (!clientSecret)
+          return c.json({ error: "missing `client_secret` form value" }, 400)
+        const response = await match.client({
+          clientID: clientID.toString(),
+          clientSecret: clientSecret.toString(),
+          params: Object.fromEntries(form) as Record<string, string>,
+        })
+        return input.success(
           {
-            error: "invalid_request",
-            error_description: "Missing refresh_token",
+            async subject(type, properties) {
+              const tokens = await generateTokens(c, {
+                type: type as string,
+                properties,
+                clientID: response.clientID,
+              })
+              return c.json({
+                access_token: tokens.access,
+                refresh_token: tokens.refresh,
+              })
+            },
           },
-          400,
-        )
-      const splits = refreshToken.toString().split(":")
-      const token = splits.pop()!
-      const subject = splits.join(":")
-      const key = ["oauth:refresh", subject, token]
-      const payload = await Storage.get<{
-        type: string
-        properties: any
-        clientID: string
-      }>(storage, key)
-      if (!payload) {
-        return c.json(
           {
-            error: "invalid_grant",
-            error_description: "Refresh token has been used or expired",
+            provider: provider.toString(),
+            ...response,
           },
-          400,
+          c.req.raw,
         )
       }
-      await Storage.remove(storage, key)
-      const tokens = await generateTokens(c, payload)
-      return c.json({
-        access_token: tokens.access,
-        refresh_token: tokens.refresh,
-      })
-    }
 
-    if (grantType === "client_credentials") {
-      const provider = form.get("provider")
-      if (!provider)
-        return c.json({ error: "missing `provider` form value" }, 400)
-      const match = input.providers[provider.toString()]
-      if (!match)
-        return c.json({ error: "invalid `provider` query parameter" }, 400)
-      if (!match.client)
-        return c.json(
-          { error: "this provider does not support client_credentials" },
-          400,
-        )
-      const clientID = form.get("client_id")
-      const clientSecret = form.get("client_secret")
-      if (!clientID)
-        return c.json({ error: "missing `client_id` form value" }, 400)
-      if (!clientSecret)
-        return c.json({ error: "missing `client_secret` form value" }, 400)
-      const response = await match.client({
-        clientID: clientID.toString(),
-        clientSecret: clientSecret.toString(),
-        params: Object.fromEntries(form) as Record<string, string>,
-      })
-      return input.success(
-        {
-          async subject(type, properties) {
-            const tokens = await generateTokens(c, {
-              type: type as string,
-              properties,
-              clientID: response.clientID,
-            })
-            return c.json({
-              access_token: tokens.access,
-              refresh_token: tokens.refresh,
-            })
-          },
-        },
-        {
-          provider: provider.toString(),
-          ...response,
-        },
-        c.req.raw,
-      )
-    }
-
-    throw new Error("Invalid grant_type")
-  })
+      throw new Error("Invalid grant_type")
+    },
+  )
 
   app.get("/authorize", async (c) => {
     const provider = c.req.query("provider")

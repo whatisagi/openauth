@@ -11,7 +11,7 @@ import {
   InvalidAccessTokenError,
   InvalidAuthorizationCodeError,
   InvalidRefreshTokenError,
-  InvalidSessionError,
+  InvalidSubjectError,
 } from "./error.js"
 import { generatePKCE } from "./pkce.js"
 
@@ -19,6 +19,11 @@ export interface WellKnown {
   jwks_uri: string
   token_endpoint: string
   authorization_endpoint: string
+}
+
+export interface Tokens {
+  access: string
+  refresh: string
 }
 
 const jwksCache = new Map<string, ReturnType<typeof createLocalJWKSet>>()
@@ -121,15 +126,26 @@ export function createClient(input: {
       opts?: {
         access?: string
       },
-    ) {
-      if (!opts?.access) {
-        const decoded = decodeJwt(refresh)
+    ): Promise<
+      | {
+          err?: never
+          tokens?: Tokens
+        }
+      | {
+          err: InvalidRefreshTokenError | InvalidAccessTokenError
+        }
+    > {
+      if (opts && opts.access) {
+        const decoded = decodeJwt(opts.access)
+        console.log(decoded)
         if (!decoded) {
-          throw new InvalidAccessTokenError()
+          return {
+            err: new InvalidAccessTokenError(),
+          }
         }
         // allow 30s window for expiration
-        if ((decoded.exp || 0) < Date.now() / 1000 + 30) {
-          return
+        if ((decoded.exp || 0) > Date.now() / 1000 + 30) {
+          return {}
         }
       }
       const tokens = await f(issuer + "/token", {
@@ -144,12 +160,15 @@ export function createClient(input: {
       })
       const json = (await tokens.json()) as any
       if (!tokens.ok) {
-        console.error(json)
-        throw new InvalidRefreshTokenError()
+        return {
+          err: new InvalidRefreshTokenError(),
+        }
       }
       return {
-        access: json.access_token as string,
-        refresh: json.refresh_token as string,
+        tokens: {
+          access: json.access_token as string,
+          refresh: json.refresh_token as string,
+        },
       }
     },
     async verify<T extends SubjectSchema>(
@@ -161,18 +180,21 @@ export function createClient(input: {
         audience?: string
         fetch?: typeof fetch
       },
-    ): Promise<{
-      tokens?: {
-        access: string
-        refresh: string
-      }
-      subject: {
-        [type in keyof T]: {
-          type: type
-          properties: v1.InferOutput<T[type]>
+    ): Promise<
+      | {
+          err?: undefined
+          tokens?: Tokens
+          subject: {
+            [type in keyof T]: {
+              type: type
+              properties: v1.InferOutput<T[type]>
+            }
+          }[keyof T]
         }
-      }[keyof T]
-    }> {
+      | {
+          err: InvalidRefreshTokenError | InvalidAccessTokenError
+        }
+    > {
       const jwks = await getJWKS()
       try {
         const result = await jwtVerify<{
@@ -192,25 +214,31 @@ export function createClient(input: {
               properties: validated.value,
             } as any,
           }
+        return {
+          err: new InvalidSubjectError(),
+        }
       } catch (e) {
         if (e instanceof errors.JWTExpired && options?.refresh) {
-          const tokens = await this.refresh(options.refresh)
-          if (!tokens) throw new InvalidRefreshTokenError()
-          const verified = await result.verify(subjects, tokens.access, {
-            refresh: tokens.refresh,
-            issuer,
-            fetch: options?.fetch,
-          })
-
-          verified.tokens = {
-            access: tokens.access,
-            refresh: tokens.refresh,
-          }
+          const refreshed = await this.refresh(options.refresh)
+          if (refreshed.err) return refreshed
+          const verified = await result.verify(
+            subjects,
+            refreshed.tokens!.access,
+            {
+              refresh: refreshed.tokens!.refresh,
+              issuer,
+              fetch: options?.fetch,
+            },
+          )
+          if (verified.err) return verified
+          verified.tokens = refreshed.tokens
           return verified
         }
-        throw e
+        console.error(e)
+        return {
+          err: new InvalidAccessTokenError(),
+        }
       }
-      throw new InvalidSessionError()
     },
   }
   return result

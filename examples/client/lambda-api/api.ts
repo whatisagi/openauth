@@ -32,7 +32,9 @@ const app = new Hono()
       const verified = await client.verify(subjects, access!, {
         refresh,
       })
-      setSession(c, verified.access, verified.refresh)
+      if (verified.err) throw new Error("Invalid access token")
+      if (verified.tokens)
+        setSession(c, verified.tokens.access, verified.tokens.refresh)
       return c.json(verified.subject)
     } catch (e) {
       console.error(e)

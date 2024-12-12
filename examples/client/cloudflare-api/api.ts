@@ -37,22 +37,19 @@ export default {
         const cookies = new URLSearchParams(
           request.headers.get("cookie")?.replaceAll("; ", "&"),
         )
-        try {
-          const verified = await client.verify(
-            subjects,
-            cookies.get("access_token")!,
-            {
-              refresh: cookies.get("refresh_token") || undefined,
-            },
-          )
-          const resp = Response.json(verified.subject)
-          if (verified.tokens)
-            setSession(resp, verified.tokens.access, verified.tokens.refresh)
-          return resp
-        } catch (e) {
-          console.error(e)
+        const verified = await client.verify(
+          subjects,
+          cookies.get("access_token")!,
+          {
+            refresh: cookies.get("refresh_token") || undefined,
+          },
+        )
+        if (verified.err)
           return Response.redirect(url.origin + "/authorize", 302)
-        }
+        const resp = Response.json(verified.subject)
+        if (verified.tokens)
+          setSession(resp, verified.tokens.access, verified.tokens.refresh)
+        return resp
       default:
         return new Response("Not found", { status: 404 })
     }
