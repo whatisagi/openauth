@@ -171,7 +171,7 @@ const app = authorizer({
       console.log(value.tokenset.access);
       userID = ... // lookup user or create them
     }
-    return ctx.subject("user", { 
+    return ctx.subject("user", {
       userID,
       'a workspace id'
     });
