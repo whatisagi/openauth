@@ -1,9 +1,10 @@
-import Image from "next/image"
-import { auth, login, logout } from "./actions"
-import styles from "./page.module.css"
+import Image from "next/image";
+import { auth, login, logout } from "./actions";
+import styles from "./page.module.css";
 
 export default async function Home() {
-  const subject = await auth()
+  const subject = await auth();
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
