@@ -20,7 +20,7 @@ Open [http://localhost:3001](http://localhost:3001) with your browser and click 
 
 ## Files
 
-- `app/auth.ts`: OpenAuth client and helper to set tokens in cookies.
-- `app/actions.ts`: Actions to get current logged in user, and to login and logout.
-- `app/api/callback/route.ts`: Callback route for OpenAuth.
-- `app/page.tsx`: Shows login and logout buttons and the current user.
+- [`app/auth.ts`](app/auth.ts): OpenAuth client and helper to set tokens in cookies.
+- [`app/actions.ts`](app/actions.ts): Actions to get current logged in user, and to login and logout.
+- [`app/api/callback/route.ts`](app/api/callback/route.ts): Callback route for OpenAuth.
+- [`app/page.tsx`](app/page.tsx): Shows login and logout buttons and the current user.
