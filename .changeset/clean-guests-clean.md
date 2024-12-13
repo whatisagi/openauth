@@ -2,4 +2,4 @@
 "@openauthjs/openauth": patch
 ---
 
-Add common ColorScheme 
+Add common ColorScheme

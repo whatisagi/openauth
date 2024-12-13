@@ -7,15 +7,9 @@ export interface Theme {
   title?: string
   favicon?: string
   radius?: "none" | "sm" | "md" | "lg" | "full"
-  primary:
-    | string
-    | ColorScheme
-  background?:
-    | string
-    | ColorScheme
-  logo?:
-    | string
-    | ColorScheme
+  primary: string | ColorScheme
+  background?: string | ColorScheme
+  logo?: string | ColorScheme
   font?: {
     family?: string
     scale?: string
