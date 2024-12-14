@@ -1,5 +1,5 @@
 ---
-"@openauthjs/openauth": patch
+"@openauthjs/openauth": minor
 ---
 
 BREAKING CHANGE: `client.exchange` and `client.authorize` signatures have changed.
