@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client"
 
 const client = createClient({
   clientID: "react",
-  issuer: "https://auth.thdxr.dev.terminal.shop",
+  issuer: "http://localhost:3000",
 })
 
 let _access: string | undefined
