@@ -42,7 +42,7 @@ const auth = authorizer({
           })
         })
       },
-      client: async ({ clientID, clientSecret, params }) => {
+      client: async ({ clientID, clientSecret }) => {
         if (clientID !== "myuser" && clientSecret !== "mypass") {
           throw new Error("Wrong credentials")
         }
@@ -57,7 +57,6 @@ const auth = authorizer({
 const expectNonEmptyString = expect.stringMatching(/.+/)
 
 beforeEach(async () => {
-  storage = MemoryStorage()
   setSystemTime(new Date("1/1/2024"))
 })
 
@@ -72,10 +71,14 @@ describe("code flow", () => {
       clientID: "123",
       fetch: (a, b) => Promise.resolve(auth.request(a, b)),
     })
-    const [verifier, authorization] = await client.pkce(
+    const { challenge, url } = await client.authorize(
       "https://client.example.com/callback",
+      "code",
+      {
+        pkce: true,
+      },
     )
-    let response = await auth.request(authorization)
+    let response = await auth.request(url)
     expect(response.status).toBe(302)
     response = await auth.request(response.headers.get("location")!, {
       headers: {
@@ -86,22 +89,23 @@ describe("code flow", () => {
     const location = new URL(response.headers.get("location")!)
     const code = location.searchParams.get("code")
     expect(code).not.toBeNull()
-    const tokens = await client.exchange(
+    const exchanged = await client.exchange(
       code!,
       "https://client.example.com/callback",
-      verifier,
+      challenge.verifier,
     )
+    if (exchanged.err) throw exchanged.err
+    const tokens = exchanged.tokens
     expect(tokens).toStrictEqual({
       access: expectNonEmptyString,
       refresh: expectNonEmptyString,
     })
     const verified = await client.verify(subjects, tokens.access)
-    expect(verified).toStrictEqual({
-      subject: {
-        type: "user",
-        properties: {
-          userID: "123",
-        },
+    if (verified.err) throw verified.err
+    expect(verified.subject).toStrictEqual({
+      type: "user",
+      properties: {
+        userID: "123",
       },
     })
   })
@@ -148,7 +152,7 @@ describe("refresh token", () => {
   let tokens: { access: string; refresh: string }
   let client: ReturnType<typeof createClient>
 
-  const requestRefreshToken = async (refresh_token) =>
+  const requestRefreshToken = async (refresh_token: string) =>
     auth.request("https://auth.example.com/token", {
       method: "POST",
       headers: {
@@ -166,10 +170,14 @@ describe("refresh token", () => {
       clientID: "123",
       fetch: (a, b) => Promise.resolve(auth.request(a, b)),
     })
-    const [verifier, authorization] = await client.pkce(
+    const { challenge, url } = await client.authorize(
       "https://client.example.com/callback",
+      "code",
+      {
+        pkce: true,
+      },
     )
-    let response = await auth.request(authorization)
+    let response = await auth.request(url)
     response = await auth.request(response.headers.get("location")!, {
       headers: {
         cookie: response.headers.get("set-cookie")!,
@@ -177,11 +185,13 @@ describe("refresh token", () => {
     })
     const location = new URL(response.headers.get("location")!)
     const code = location.searchParams.get("code")
-    tokens = await client.exchange(
+    const exchanged = await client.exchange(
       code!,
       "https://client.example.com/callback",
-      verifier,
+      challenge.verifier,
     )
+    if (exchanged.err) throw exchanged.err
+    tokens = exchanged.tokens
   })
 
   test("success", async () => {

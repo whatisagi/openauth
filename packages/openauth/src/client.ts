@@ -26,9 +26,6 @@ export interface Tokens {
   refresh: string
 }
 
-const jwksCache = new Map<string, ReturnType<typeof createLocalJWKSet>>()
-const issuerCache = new Map<string, WellKnown>()
-
 interface ResponseLike {
   json(): Promise<unknown>
   ok: Response["ok"]
@@ -45,6 +42,8 @@ export function createClient(input: {
   issuer?: string
   fetch?: FetchLike
 }) {
+  const jwksCache = new Map<string, ReturnType<typeof createLocalJWKSet>>()
+  const issuerCache = new Map<string, WellKnown>()
   const issuer = input.issuer || process.env.OPENAUTH_ISSUER
   if (!issuer) throw new Error("No issuer")
   const f = input.fetch ?? fetch
@@ -274,7 +273,6 @@ export function createClient(input: {
           verified.tokens = refreshed.tokens
           return verified
         }
-        console.error(e)
         return {
           err: new InvalidAccessTokenError(),
         }

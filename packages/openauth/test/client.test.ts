@@ -55,7 +55,6 @@ const auth = authorizer({
 const expectNonEmptyString = expect.stringMatching(/.+/)
 
 beforeEach(async () => {
-  storage = MemoryStorage()
   setSystemTime(new Date("1/1/2024"))
 })
 
@@ -90,11 +89,13 @@ describe("verify", () => {
     })
     const location = new URL(response.headers.get("location")!)
     const code = location.searchParams.get("code")
-    tokens = await client.exchange(
+    const exchanged = await client.exchange(
       code!,
       "https://client.example.com/callback",
       verifier,
     )
+    if (exchanged.err) throw exchanged.err
+    tokens = exchanged.tokens
   })
 
   test("success", async () => {
