@@ -5,3 +5,4 @@ dist
 persist.json
 .DS_Store
 notes
+.nvim.lua
