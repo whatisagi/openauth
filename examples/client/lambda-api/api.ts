@@ -11,15 +11,20 @@ const client = createClient({
 const app = new Hono()
   .get("/authorize", async (c) => {
     const origin = new URL(c.req.url).origin
-    return c.redirect(client.authorize(origin + "/callback", "code"), 302)
+    const { url } = await client.authorize(origin + "/callback", "code")
+    return c.redirect(url, 302)
   })
   .get("/callback", async (c) => {
     const origin = new URL(c.req.url).origin
     try {
       const code = c.req.query("code")
       if (!code) throw new Error("Missing code")
-      const tokens = await client.exchange(code, origin + "/callback")
-      setSession(c, tokens.access, tokens.refresh)
+      const exchanged = await client.exchange(code, origin + "/callback")
+      if (exchanged.err)
+        return new Response(exchanged.err.toString(), {
+          status: 400,
+        })
+      setSession(c, exchanged.tokens.access, exchanged.tokens.refresh)
       return c.redirect("/", 302)
     } catch (e: any) {
       return new Response(e.toString())

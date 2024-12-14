@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test"
-import { isDomainMatch } from "../src/util"
+import { isDomainMatch } from "../src/util.js"
 
 test("isDomainMatch", () => {
   // Basic matches

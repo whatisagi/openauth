@@ -35,6 +35,11 @@ interface ResponseLike {
 }
 type FetchLike = (...args: any[]) => Promise<ResponseLike>
 
+export type Challenge = {
+  state: string
+  verifier?: string
+}
+
 export function createClient(input: {
   clientID: string
   issuer?: string
@@ -67,20 +72,37 @@ export function createClient(input: {
   }
 
   const result = {
-    authorize(
+    async authorize(
       redirectURI: string,
       response: "code" | "token",
       opts?: {
+        pkce?: boolean
         provider?: string
       },
     ) {
       const result = new URL(issuer + "/authorize")
-      if (opts?.provider) result.searchParams.set("provider", opts.provider)
+      const challenge: Challenge = {
+        state: crypto.randomUUID(),
+      }
       result.searchParams.set("client_id", input.clientID)
       result.searchParams.set("redirect_uri", redirectURI)
       result.searchParams.set("response_type", response)
-      return result.toString()
+      result.searchParams.set("state", challenge.state)
+      if (opts?.provider) result.searchParams.set("provider", opts.provider)
+      if (opts?.pkce && response === "code") {
+        const pkce = await generatePKCE()
+        result.searchParams.set("code_challenge_method", "S256")
+        result.searchParams.set("code_challenge", pkce.challenge)
+        challenge.verifier = pkce.verifier
+      }
+      return {
+        challenge,
+        url: result.toString(),
+      }
     },
+    /**
+     * @deprecated use `authorize` instead, it will do pkce by default unless disabled with `opts.pkce = false`
+     */
     async pkce(
       redirectURI: string,
       opts?: {
@@ -97,7 +119,19 @@ export function createClient(input: {
       result.searchParams.set("code_challenge", pkce.challenge)
       return [pkce.verifier, result.toString()]
     },
-    async exchange(code: string, redirectURI: string, verifier?: string) {
+    async exchange(
+      code: string,
+      redirectURI: string,
+      verifier?: string,
+    ): Promise<
+      | {
+          err: false
+          tokens: Tokens
+        }
+      | {
+          err: InvalidAuthorizationCodeError
+        }
+    > {
       const tokens = await f(issuer + "/token", {
         method: "POST",
         headers: {
@@ -113,12 +147,16 @@ export function createClient(input: {
       })
       const json = (await tokens.json()) as any
       if (!tokens.ok) {
-        console.error(json)
-        throw new InvalidAuthorizationCodeError()
+        return {
+          err: new InvalidAuthorizationCodeError(),
+        }
       }
       return {
-        access: json.access_token as string,
-        refresh: json.refresh_token as string,
+        err: false,
+        tokens: {
+          access: json.access_token as string,
+          refresh: json.refresh_token as string,
+        },
       }
     },
     async refresh(
@@ -128,7 +166,7 @@ export function createClient(input: {
       },
     ): Promise<
       | {
-          err?: never
+          err: false
           tokens?: Tokens
         }
       | {
@@ -144,7 +182,9 @@ export function createClient(input: {
         }
         // allow 30s window for expiration
         if ((decoded.exp || 0) > Date.now() / 1000 + 30) {
-          return {}
+          return {
+            err: false,
+          }
         }
       }
       const tokens = await f(issuer + "/token", {
@@ -164,6 +204,7 @@ export function createClient(input: {
         }
       }
       return {
+        err: false,
         tokens: {
           access: json.access_token as string,
           refresh: json.refresh_token as string,

@@ -4,36 +4,47 @@ import { createRoot } from "react-dom/client"
 
 const client = createClient({
   clientID: "react",
-  issuer: "http://localhost:3000",
+  issuer: "https://auth.thdxr.dev.terminal.shop",
 })
 
-let _refresh = localStorage.getItem("refresh")
 let _access: string | undefined
 async function getToken() {
-  if (!_refresh) return
-  const next = await client.refresh(_refresh, {
+  const refresh = localStorage.getItem("refresh")
+  if (!refresh) return
+  const next = await client.refresh(refresh, {
     access: _access,
   })
   if (next.err) return
   if (!next.tokens) return _access
   localStorage.setItem("refresh", next.tokens.refresh)
-  _refresh = next.tokens.refresh
   _access = next.tokens.access
   return _access
 }
 
-const hash = new URLSearchParams(location.hash.slice(1))
-const access = hash.get("access_token")
-const refresh = hash.get("refresh_token")
-if (access) _access = access
-if (refresh) {
-  localStorage.setItem("refresh", refresh)
-  _refresh = refresh
+// handle callback
+const hash = new URLSearchParams(location.search.slice(1))
+const code = hash.get("code")
+const state = hash.get("state")
+const challenge = JSON.parse(sessionStorage.getItem("challenge")!)
+if (code) {
+  if (state === challenge.state && challenge.verifier) {
+    const exchanged = await client.exchange(code!, location.origin, challenge.verifier)
+    if (!exchanged.err) {
+      _access = exchanged.tokens?.access
+      localStorage.setItem("refresh", exchanged.tokens.refresh)
+    }
+  }
+  window.history.replaceState({}, '', '/');
 }
-location.hash = ""
+
+// check for token or redirect to authorize
 const token = await getToken()
 if (!token) {
-  location.href = client.authorize(location.origin, "token")
+  const { challenge, url } = await client.authorize(location.origin, "code", {
+    pkce: true,
+  })
+  sessionStorage.setItem("challenge", JSON.stringify(challenge))
+  location.href = url
 }
 
 createRoot(document.getElementById("root")!).render(

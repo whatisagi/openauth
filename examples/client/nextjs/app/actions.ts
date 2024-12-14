@@ -45,12 +45,11 @@ export async function login() {
   const headers = await getHeaders()
   const host = headers.get("host")
   const protocol = host?.includes("localhost") ? "http" : "https"
-  const redirectUrl = client.authorize(
+  const { url } = await client.authorize(
     `${protocol}://${host}/api/callback`,
     "code",
   )
-
-  redirect(redirectUrl)
+  redirect(url)
 }
 
 export async function logout() {

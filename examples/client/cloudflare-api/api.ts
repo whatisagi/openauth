@@ -23,16 +23,24 @@ export default {
       case "/callback":
         try {
           const code = url.searchParams.get("code")!
-          const tokens = await client.exchange(code, redirectURI)
+          const exchanged = await client.exchange(code, redirectURI)
+          if (exchanged.err) throw new Error("Invalid code")
           const response = new Response(null, { status: 302, headers: {} })
           response.headers.set("Location", url.origin)
-          setSession(response, tokens.access, tokens.refresh)
+          setSession(
+            response,
+            exchanged.tokens.access,
+            exchanged.tokens.refresh,
+          )
           return response
         } catch (e: any) {
           return new Response(e.toString())
         }
       case "/authorize":
-        return Response.redirect(client.authorize(redirectURI, "code"), 302)
+        return Response.redirect(
+          await client.authorize(redirectURI, "code").then((v) => v.url),
+          302,
+        )
       case "/":
         const cookies = new URLSearchParams(
           request.headers.get("cookie")?.replaceAll("; ", "&"),

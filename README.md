@@ -232,7 +232,7 @@ const client = createClient({
 If your frontend has a server component you can use the code flow. Redirect the user here
 
 ```ts
-const redirect = await client.authorize(
+const { url } = await client.authorize(
   <client-id>,
   <redirect-uri>,
   "code",
@@ -267,18 +267,23 @@ Passing in the refresh token is optional but if you do, this function will autom
 In cases where you do not have a server, you can use the `token` flow with `pkce` on the frontend.
 
 ```ts
-const [verifier, redirect] = await client.pkce(<client_id>, <redirect_uri>);
-localStorage.setItem("verifier", verifier);
-location.href = redirect;
+const { challenge, url } = await client.authorize(<client_id>, <redirect_uri>, { pkce: true });
+localStorage.setItem("challenge", JSON.stringify(challenge));
+location.href = url;
 ```
 
 When the auth flow is complete the user's browser will be redirected to the `redirect_uri` with a `code` query parameter. You can then exchange the code for access/refresh tokens.
 
 ```ts
-const verifier = localStorage.getItem("verifier")
-const tokens = await client.exchange(query.get("code"), redirect_uri, verifier)
-localStorage.setItem("access_token", tokens.access)
-localStorage.setItem("refresh_token", tokens.refresh)
+const challenge = JSON.parse(localStorage.getItem("challenge"))
+const exchanged = await client.exchange(
+  query.get("code"),
+  redirect_uri,
+  challenge.verifier,
+)
+if (exchanged.err) throw new Error("Invalid code")
+localStorage.setItem("access_token", exchanged.tokens.access)
+localStorage.setItem("refresh_token", exchanged.tokens.refresh)
 ```
 
 Then when you make requests to your API you can include the access token in the `Authorization` header.
