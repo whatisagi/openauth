@@ -28,13 +28,17 @@ const state = hash.get("state")
 const challenge = JSON.parse(sessionStorage.getItem("challenge")!)
 if (code) {
   if (state === challenge.state && challenge.verifier) {
-    const exchanged = await client.exchange(code!, location.origin, challenge.verifier)
+    const exchanged = await client.exchange(
+      code!,
+      location.origin,
+      challenge.verifier,
+    )
     if (!exchanged.err) {
       _access = exchanged.tokens?.access
       localStorage.setItem("refresh", exchanged.tokens.refresh)
     }
   }
-  window.history.replaceState({}, '', '/');
+  window.history.replaceState({}, "", "/")
 }
 
 // check for token or redirect to authorize
