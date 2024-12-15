@@ -223,6 +223,7 @@ export function createClient(input: {
       | {
           err?: undefined
           tokens?: Tokens
+          aud: string
           subject: {
             [type in keyof T]: {
               type: type
@@ -248,6 +249,7 @@ export function createClient(input: {
         ].validate(result.payload.properties)
         if (!validated.issues && result.payload.mode === "access")
           return {
+            aud: result.payload.aud as string,
             subject: {
               type: result.payload.type,
               properties: validated.value,
