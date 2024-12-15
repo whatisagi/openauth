@@ -11,6 +11,7 @@ import { authorizer } from "../src/authorizer.js"
 import { createClient } from "../src/client.js"
 import { createSubjects } from "../src/index.js"
 import { MemoryStorage } from "../src/storage/memory.js"
+import { Adapter } from "../src/adapter/adapter.js"
 
 const subjects = createSubjects({
   user: object({
@@ -23,11 +24,6 @@ const auth = authorizer({
   storage,
   subjects,
   allow: async () => true,
-  success: async (ctx) => {
-    return ctx.subject("user", {
-      userID: "123",
-    })
-  },
   ttl: {
     access: 60,
     refresh: 6000,
@@ -47,10 +43,18 @@ const auth = authorizer({
           throw new Error("Wrong credentials")
         }
         return {
-          clientID,
+          email: "foo@bar.com",
         }
       },
-    },
+    } satisfies Adapter<{ email: string }>,
+  },
+  success: async (ctx, value) => {
+    if (value.provider === "dummy") {
+      return ctx.subject("user", {
+        userID: "123",
+      })
+    }
+    throw new Error("Invalid provider: " + value.provider)
   },
 })
 
