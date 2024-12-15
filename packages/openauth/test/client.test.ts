@@ -102,6 +102,7 @@ describe("verify", () => {
     const refreshSpy = spyOn(client, "refresh")
     const verified = await client.verify(subjects, tokens.access)
     expect(verified).toStrictEqual({
+      aud: "123",
       subject: {
         type: "user",
         properties: {
@@ -119,6 +120,7 @@ describe("verify", () => {
       refresh: tokens.refresh,
     })
     expect(verified).toStrictEqual({
+      aud: "123",
       tokens: {
         access: expectNonEmptyString,
         refresh: expectNonEmptyString,

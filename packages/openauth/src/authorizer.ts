@@ -509,7 +509,7 @@ export function authorizer<
               const tokens = await generateTokens(c, {
                 type: type as string,
                 properties,
-                clientID: response.clientID,
+                clientID: clientID.toString(),
               })
               return c.json({
                 access_token: tokens.access,

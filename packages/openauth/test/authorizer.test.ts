@@ -142,6 +142,7 @@ describe("client credentials flow", () => {
     })
     const verified = await client.verify(subjects, tokens.access_token)
     expect(verified).toStrictEqual({
+      aud: "myuser",
       subject: {
         type: "user",
         properties: {
@@ -212,6 +213,7 @@ describe("refresh token", () => {
 
     const verified = await client.verify(subjects, refreshed.access_token)
     expect(verified).toStrictEqual({
+      aud: "123",
       subject: {
         type: "user",
         properties: {
@@ -237,6 +239,7 @@ describe("refresh token", () => {
 
     const verified = await client.verify(subjects, refreshed.access_token)
     expect(verified).toStrictEqual({
+      aud: "123",
       subject: {
         type: "user",
         properties: {
