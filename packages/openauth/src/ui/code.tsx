@@ -52,7 +52,10 @@ export function CodeUI(props: {
               )}
               {state.type === "code" && (
                 <FormAlert
-                  message={(state.resend ? "Code resent to " : "Code sent to ") + state.claims.email}
+                  message={
+                    (state.resend ? "Code resent to " : "Code sent to ") +
+                    state.claims.email
+                  }
                   color="success"
                 />
               )}
