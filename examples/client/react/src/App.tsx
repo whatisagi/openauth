@@ -56,9 +56,13 @@ function App() {
   async function login() {
     const token = await getToken()
     if (!token) {
-      const { challenge, url } = await client.authorize(location.origin, "code", {
-        pkce: true,
-      })
+      const { challenge, url } = await client.authorize(
+        location.origin,
+        "code",
+        {
+          pkce: true,
+        },
+      )
       sessionStorage.setItem("challenge", JSON.stringify(challenge))
       location.href = url
     }
@@ -99,22 +103,23 @@ function App() {
     window.location.replace("/")
   }
 
-  return isAuthenticating
-    ? <div>Loading...</div>
-    : (
-      <div>
-        {accessToken.current ?
-          <div>
-            <p>
-              <span>Logged in</span>
-              {userId && <span> as {userId}</span>}
-            </p>
-            <button onClick={logout}>Logout</button>
-          </div>
-          : <button onClick={login}>Login with OAuth</button>
-        }
-      </div>
-    )
+  return isAuthenticating ? (
+    <div>Loading...</div>
+  ) : (
+    <div>
+      {accessToken.current ? (
+        <div>
+          <p>
+            <span>Logged in</span>
+            {userId && <span> as {userId}</span>}
+          </p>
+          <button onClick={logout}>Logout</button>
+        </div>
+      ) : (
+        <button onClick={login}>Login with OAuth</button>
+      )}
+    </div>
+  )
 }
 
 export default App

@@ -1,4 +1,4 @@
-# JWT API 
+# JWT API
 
 This simple API verifies the `Authorization` header using the OpenAuth client and returns the subject.
 
