@@ -20,7 +20,7 @@ export default async function Home() {
           {subject ? (
             <>
               <li>
-                Logged in as <code>{subject.properties.email}</code>.
+                Logged in as <code>{subject.properties.id}</code>.
               </li>
               <li>
                 And then check out <code>app/page.tsx</code>.

@@ -6,6 +6,12 @@ import { Resource } from "sst"
 import { PasswordAdapter } from "@openauthjs/openauth/adapter/password"
 import { PasswordUI } from "@openauthjs/openauth/ui/password"
 
+async function getUser(email: string) {
+  // Get user from database
+  // Return user ID
+  return "123"
+}
+
 const app = authorizer({
   storage: DynamoStorage({
     table: Resource.LambdaAuthTable.name,
@@ -23,7 +29,7 @@ const app = authorizer({
   success: async (ctx, value) => {
     if (value.provider === "password") {
       return ctx.subject("user", {
-        email: value.email,
+        id: await getUser(value.email),
       })
     }
     throw new Error("Invalid provider")

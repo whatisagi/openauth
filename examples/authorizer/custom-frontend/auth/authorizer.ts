@@ -3,6 +3,12 @@ import { MemoryStorage } from "@openauthjs/openauth/storage/memory"
 import { CodeAdapter } from "@openauthjs/openauth/adapter/code"
 import { subjects } from "../../../subjects.js"
 
+async function getUser(email: string) {
+  // Get user from database
+  // Return user ID
+  return "123"
+}
+
 export default authorizer({
   subjects,
   storage: MemoryStorage({
@@ -29,7 +35,7 @@ export default authorizer({
   success: async (ctx, value) => {
     if (value.provider === "code") {
       return ctx.subject("user", {
-        email: value.claims.email,
+        id: await getUser(value.claims.email),
       })
     }
     throw new Error("Invalid provider")

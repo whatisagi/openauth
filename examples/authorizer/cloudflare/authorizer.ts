@@ -12,6 +12,12 @@ interface Env {
   CloudflareAuthKV: KVNamespace
 }
 
+async function getUser(email: string) {
+  // Get user from database
+  // Return user ID
+  return "123"
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     return authorizer({
@@ -31,7 +37,7 @@ export default {
       success: async (ctx, value) => {
         if (value.provider === "password") {
           return ctx.subject("user", {
-            email: value.email,
+            id: await getUser(value.email),
           })
         }
         throw new Error("Invalid provider")
