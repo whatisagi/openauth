@@ -48,7 +48,8 @@
 }
 /* Plain blocks */
 .sl-markdown-content .expressive-code .frame:not(.has-title):not(.is-terminal) pre {
-  border-color: var(--sl-color-border-code);
+  border-color: var(--sl-color-white);
+  border-radius: 0;
   background-color: transparent;
 }
 .sl-markdown-content .expressive-code .copy {
