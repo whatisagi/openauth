@@ -6,12 +6,12 @@ import "sst"
 export {}
 declare module "sst" {
   export interface Resource {
-    "CloudflareAuth": {
-      "type": "sst.cloudflare.Worker"
-      "url": string
+    CloudflareAuth: {
+      type: "sst.cloudflare.Worker"
+      url: string
     }
-    "CloudflareAuthKV": {
-      "type": "sst.cloudflare.Kv"
+    CloudflareAuthKV: {
+      type: "sst.cloudflare.Kv"
     }
   }
 }
