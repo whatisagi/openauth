@@ -45,10 +45,10 @@ if (image) {
         <a href="https://www.youtube.com/watch?v=SSjNUuQ06tk" target="_blank">Learn more</a>
       </div>
       <div class="col2">
-        <a href={config.github}>Star on GitHub</a>
+        <a href="/docs">View the docs</a>
       </div>
       <div class="col3">
-        <a target="_blank" href={config.discord}>Join Discord</a>
+        <a href={config.github}>Star on GitHub</a>
       </div>
     </section>
 
@@ -136,6 +136,12 @@ section.cta {
     text-align: center;
     text-transform: uppercase;
     padding: calc(var(--padding) / 2) 0.5rem;
+  }
+
+  @media (max-width: 30rem) {
+    & > div {
+      padding-bottom: calc(var(--padding) / 2 + 4px);
+    }
   }
 
   & > div + div {

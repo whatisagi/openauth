@@ -49,6 +49,10 @@ export default defineConfig({
         github: config.github,
         discord: config.discord,
       },
+      lastUpdated: true,
+      editLink: {
+        baseUrl: `${config.github}/edit/master/www/`,
+      },
       components: {
         Hero: "./src/components/Hero.astro",
         Head: "./src/components/Head.astro",
