@@ -92,7 +92,11 @@ export function CodeAdapter<
         ) {
           const fd = await c.req.formData()
           const compare = fd.get("code")?.toString()
-          if (!state.code || !compare || !timingSafeCompare(state.code, compare)) {
+          if (
+            !state.code ||
+            !compare ||
+            !timingSafeCompare(state.code, compare)
+          ) {
             return transition(
               c,
               {
