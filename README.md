@@ -25,7 +25,7 @@
 <picture>
   <source srcset="https://raw.githubusercontent.com/openauthjs/identity/main/assets/themes-dark.png" media="(prefers-color-scheme: dark)">
   <source srcset="https://raw.githubusercontent.com/openauthjs/identity/main/assets/themes-light.png" media="(prefers-color-scheme: dark)">
-  <img src="https://raw.githubusercontent.com/openauthjs/identity/main/assets/themes-light.png" alt="OpenAuth logo">
+  <img src="https://raw.githubusercontent.com/openauthjs/identity/main/assets/themes-light.png" alt="OpenAuth themes">
 </picture>
 
 ## Quick Start

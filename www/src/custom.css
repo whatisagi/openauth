@@ -212,6 +212,9 @@ nav.sidebar a[aria-current=page]:focus {
   color: var(--sl-color-text);
   font-weight: normal;
 }
+.right-sidebar-panel ul li > a {
+  padding-inline: calc(0.75rem * var(--depth) + var(--pad-inline)) var(--pad-inline)
+}
 /* Mobile nav */
 mobile-starlight-toc nav {
   backdrop-filter: blur(8px);

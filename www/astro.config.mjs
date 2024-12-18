@@ -1,5 +1,7 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import { rehypeHeadingIds } from "@astrojs/markdown-remark";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import config from "./config";
 
 // https://astro.build/config
@@ -70,6 +72,7 @@ export default defineConfig({
         "./src/styles/tsdoc.css",
         "./src/styles/lander.css",
         "./src/styles/markdown.css",
+        "./src/styles/headings.css",
       ],
       sidebar: [
         { label: "Intro", slug: "docs" },
@@ -120,4 +123,15 @@ export default defineConfig({
       ],
     }),
   ],
+  markdown: {
+    rehypePlugins: [
+      rehypeHeadingIds,
+      [
+        rehypeAutolinkHeadings,
+        {
+          behavior: 'wrap',
+        },
+      ],
+    ],
+  },
 });
