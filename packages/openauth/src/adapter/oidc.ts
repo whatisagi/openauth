@@ -27,7 +27,9 @@ export interface IdTokenResponse {
   raw: Record<string, any>
 }
 
-export function OidcAdapter(config: OidcConfig) {
+export function OidcAdapter(
+  config: OidcConfig,
+): Adapter<{ id: JWTPayload; clientID: string }> {
   const query = config.query || {}
   const scopes = config.scopes || []
 
@@ -97,5 +99,5 @@ export function OidcAdapter(config: OidcConfig) {
         })
       })
     },
-  } satisfies Adapter<{ id: JWTPayload; clientID: string }>
+  }
 }

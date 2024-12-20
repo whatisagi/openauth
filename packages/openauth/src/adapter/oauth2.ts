@@ -28,7 +28,9 @@ interface AdapterState {
   redirect: string
 }
 
-export function Oauth2Adapter(config: Oauth2Config) {
+export function Oauth2Adapter(
+  config: Oauth2Config,
+): Adapter<{ tokenset: Oauth2Token; clientID: string }> {
   const query = config.query || {}
   return {
     type: config.type || "oauth2",
@@ -102,5 +104,5 @@ export function Oauth2Adapter(config: Oauth2Config) {
         })
       })
     },
-  } satisfies Adapter<{ tokenset: Oauth2Token; clientID: string }>
+  }
 }

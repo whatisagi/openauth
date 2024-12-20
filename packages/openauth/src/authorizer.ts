@@ -5,6 +5,9 @@ import { handle as awsHandle } from "hono/aws-lambda"
 import { Context } from "hono"
 import { deleteCookie, getCookie, setCookie } from "hono/cookie"
 
+/**
+ * The interface for the success responder.
+ */
 export interface OnSuccessResponder<
   T extends { type: string; properties: any },
 > {
@@ -53,9 +56,10 @@ import { DynamoStorage } from "./storage/dynamo.js"
 import { MemoryStorage } from "./storage/memory.js"
 import { cors } from "hono/cors"
 
+/** @internal */
 export const aws = awsHandle
 
-export function authorizer<
+export interface AuthorizerInput<
   Providers extends Record<string, Adapter<any>>,
   Subjects extends SubjectSchema,
   Result = {
@@ -65,7 +69,7 @@ export function authorizer<
       } & (Providers[key] extends Adapter<infer T> ? T : {})
     >
   }[keyof Providers],
->(input: {
+> {
   subjects: Subjects
   storage?: StorageAdapter
   providers: Providers
@@ -93,7 +97,24 @@ export function authorizer<
     },
     req: Request,
   ): Promise<boolean>
-}) {
+}
+
+/**
+ * Create an authorizer object for handling OAuth 2.0 authorization requests.
+ * @param input - The input object containing the subjects, storage, providers, theme, and optional success responder.
+ * @returns An object containing methods for authorizing, exchanging tokens, refreshing tokens, and verifying tokens.
+ */
+export function authorizer<
+  Providers extends Record<string, Adapter<any>>,
+  Subjects extends SubjectSchema,
+  Result = {
+    [key in keyof Providers]: Prettify<
+      {
+        provider: key
+      } & (Providers[key] extends Adapter<infer T> ? T : {})
+    >
+  }[keyof Providers],
+>(input: AuthorizerInput<Providers, Subjects, Result>) {
   const error =
     input.error ??
     function (err) {

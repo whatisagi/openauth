@@ -1,13 +1,45 @@
+/**
+ * This is the AWS DynamoDB storage adapter.
+ *
+ * ```ts
+ * import { DynamoStorage } from "@openauthjs/openauth/storage/dynamo";
+ *
+ * DynamoStorage({
+ *   table: "my-table",
+ *   pk: "pk",
+ *   sk: "sk",
+ * })
+ * ```
+ *
+ * @packageDocumentation
+ */
+
 import { client } from "./aws.js"
 import { joinKey, StorageAdapter } from "./storage.js"
 
+/**
+ * Configuration options for the Dynamo storage adapter.
+ */
 export interface DynamoStorageOptions {
+  /**
+   * The name of the DynamoDB table.
+   */
   table: string
+  /**
+   * The primary key column name.
+   */
   pk?: string
+  /**
+   * The sort key column name.
+   */
   sk?: string
 }
 
-export function DynamoStorage(options: DynamoStorageOptions) {
+/**
+ * Creates a Dynamo storage adapter.
+ * @param options - The configuration options for the adapter.
+ */
+export function DynamoStorage(options: DynamoStorageOptions): StorageAdapter {
   const c = client()
   const pk = options.pk || "pk"
   const sk = options.sk || "sk"
@@ -132,5 +164,5 @@ export function DynamoStorage(options: DynamoStorageOptions) {
         lastEvaluatedKey = result.LastEvaluatedKey
       }
     },
-  } satisfies StorageAdapter
+  }
 }
