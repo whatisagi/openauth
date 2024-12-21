@@ -1,6 +1,6 @@
 {
-  "name": "nextjs",
-  "version": "0.1.5",
+  "name": "@openauthjs/example-nextjs",
+  "version": "0.1.6",
   "private": true,
   "scripts": {
     "dev": "next dev",

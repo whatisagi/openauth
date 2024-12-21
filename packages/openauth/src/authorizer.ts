@@ -5,12 +5,21 @@ import { handle as awsHandle } from "hono/aws-lambda"
 import { Context } from "hono"
 import { deleteCookie, getCookie, setCookie } from "hono/cookie"
 
+/**
+ * The interface for the success responder.
+ */
 export interface OnSuccessResponder<
   T extends { type: string; properties: any },
 > {
   subject<Type extends T["type"]>(
     type: Type,
     properties: Extract<T, { type: Type }>["properties"],
+    opts?: {
+      ttl?: {
+        access?: number
+        refresh?: number
+      }
+    },
   ): Promise<Response>
 }
 
@@ -41,15 +50,16 @@ import { Storage, StorageAdapter } from "./storage/storage.js"
 import { keys } from "./keys.js"
 import { validatePKCE } from "./pkce.js"
 import { Select } from "./ui/select.js"
-import { getTheme, setTheme, Theme } from "./ui/theme.js"
+import { setTheme, Theme } from "./ui/theme.js"
 import { isDomainMatch } from "./util.js"
 import { DynamoStorage } from "./storage/dynamo.js"
 import { MemoryStorage } from "./storage/memory.js"
 import { cors } from "hono/cors"
 
+/** @internal */
 export const aws = awsHandle
 
-export function authorizer<
+export interface AuthorizerInput<
   Providers extends Record<string, Adapter<any>>,
   Subjects extends SubjectSchema,
   Result = {
@@ -59,7 +69,7 @@ export function authorizer<
       } & (Providers[key] extends Adapter<infer T> ? T : {})
     >
   }[keyof Providers],
->(input: {
+> {
   subjects: Subjects
   storage?: StorageAdapter
   providers: Providers
@@ -87,7 +97,24 @@ export function authorizer<
     },
     req: Request,
   ): Promise<boolean>
-}) {
+}
+
+/**
+ * Create an authorizer object for handling OAuth 2.0 authorization requests.
+ * @param input - The input object containing the subjects, storage, providers, theme, and optional success responder.
+ * @returns An object containing methods for authorizing, exchanging tokens, refreshing tokens, and verifying tokens.
+ */
+export function authorizer<
+  Providers extends Record<string, Adapter<any>>,
+  Subjects extends SubjectSchema,
+  Result = {
+    [key in keyof Providers]: Prettify<
+      {
+        provider: key
+      } & (Providers[key] extends Adapter<infer T> ? T : {})
+    >
+  }[keyof Providers],
+>(input: AuthorizerInput<Providers, Subjects, Result>) {
   const error =
     input.error ??
     function (err) {
@@ -138,18 +165,24 @@ export function authorizer<
   const primaryKey = allKeys.then((all) => all[0])
 
   const auth: Omit<AdapterOptions<any>, "name"> = {
-    async success(ctx: Context, properties: any, opts) {
+    async success(ctx: Context, properties: any, successOpts) {
       return await input.success(
         {
-          async subject(type, properties) {
+          async subject(type, properties, subjectOpts) {
             const authorization = await getAuthorization(ctx)
-            await opts?.invalidate?.(await resolveSubject(type, properties))
+            await successOpts?.invalidate?.(
+              await resolveSubject(type, properties),
+            )
             if (authorization.response_type === "token") {
               const location = new URL(authorization.redirect_uri)
               const tokens = await generateTokens(ctx, {
                 type: type as string,
                 properties,
                 clientID: authorization.client_id,
+                ttl: {
+                  access: subjectOpts?.ttl?.access ?? ttlAccess,
+                  refresh: subjectOpts?.ttl?.refresh ?? ttlRefresh,
+                },
               })
               location.hash = new URLSearchParams({
                 access_token: tokens.access,
@@ -170,6 +203,10 @@ export function authorizer<
                   redirectURI: authorization.redirect_uri,
                   clientID: authorization.client_id,
                   pkce: authorization.pkce,
+                  ttl: {
+                    access: subjectOpts?.ttl?.access ?? ttlAccess,
+                    refresh: subjectOpts?.ttl?.refresh ?? ttlRefresh,
+                  },
                 },
                 60,
               )
@@ -262,6 +299,10 @@ export function authorizer<
       type: string
       properties: any
       clientID: string
+      ttl: {
+        access: number
+        refresh: number
+      }
     },
   ) {
     const subject = await resolveSubject(value.type, value.properties)
@@ -272,7 +313,7 @@ export function authorizer<
       {
         ...value,
       },
-      ttlRefresh,
+      value.ttl.refresh,
     )
     return {
       access: await new SignJWT({
@@ -283,7 +324,7 @@ export function authorizer<
         iss: issuer(ctx),
         sub: subject,
       })
-        .setExpirationTime(Date.now() / 1000 + ttlAccess)
+        .setExpirationTime(Date.now() / 1000 + value.ttl.access)
         .setProtectedHeader(
           await primaryKey.then((k) => ({
             alg: k.alg,
@@ -378,6 +419,10 @@ export function authorizer<
           properties: any
           clientID: string
           redirectURI: string
+          ttl: {
+            access: number
+            refresh: number
+          }
           pkce?: AuthorizationState["pkce"]
         }>(storage, key)
         if (!payload) {
@@ -462,6 +507,10 @@ export function authorizer<
           type: string
           properties: any
           clientID: string
+          ttl: {
+            access: number
+            refresh: number
+          }
         }>(storage, key)
         if (!payload) {
           return c.json(
@@ -505,11 +554,15 @@ export function authorizer<
         })
         return input.success(
           {
-            async subject(type, properties) {
+            async subject(type, properties, opts) {
               const tokens = await generateTokens(c, {
                 type: type as string,
                 properties,
                 clientID: clientID.toString(),
+                ttl: {
+                  access: opts?.ttl?.access ?? ttlAccess,
+                  refresh: opts?.ttl?.refresh ?? ttlRefresh,
+                },
               })
               return c.json({
                 access_token: tokens.access,

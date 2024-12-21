@@ -1,0 +1,8 @@
+{
+  "name": "@openauthjs/example-authorizer-cloudflare",
+  "version": "0.0.0",
+  "dependencies": {
+    "@openauthjs/openauth": "workspace:*",
+    "sst": "3.4.22"
+  }
+}
