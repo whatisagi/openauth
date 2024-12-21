@@ -38,6 +38,9 @@ export const THEME_TERMINAL: Theme = {
   `,
 }
 
+/**
+ * Built-in theme styled after SST
+ */
 export const THEME_SST: Theme = {
   title: "SST",
   logo: {
