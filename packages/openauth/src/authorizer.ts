@@ -78,10 +78,7 @@ export interface AuthorizerInput<
     access?: number
     refresh?: number
   }
-  select?: (
-    providers: Record<string, string>,
-    req: Request,
-  ) => Promise<Response>
+  select?(providers: Record<string, string>, req: Request): Promise<Response>
   start?(req: Request): Promise<void>
   success(
     response: OnSuccessResponder<SubjectPayload<Subjects>>,
