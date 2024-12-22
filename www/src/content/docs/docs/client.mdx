@@ -1,0 +1,399 @@
+---
+title: client
+description: A page for the client.
+---
+
+import Segment from '../../../components/tsdoc/Segment.astro';
+import Section from '../../../components/tsdoc/Section.astro';
+import NestedTitle from '../../../components/tsdoc/NestedTitle.astro';
+import InlineSection from '../../../components/tsdoc/InlineSection.astro';
+
+<div class="tsdoc">
+## Methods
+### createClient
+<Segment>
+<Section type="signature">
+```ts
+createClient(input)
+```
+</Section>
+<Section type="parameters">
+#### Parameters
+- <p><code class="key">input</code> [<code class="type">ClientInput</code>](#clientinput)</p>
+The input object containing the client ID, issuer, and optional fetch function.
+</Section>
+<InlineSection>
+**Returns** [<code class="type">Client</code>](#client)
+</InlineSection>
+Create a client object for interacting with an OAuth 2.0 authorization server.
+</Segment>
+## AuthorizeOptions
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">pkce?</code>](#authorizeoptions.pkce) <code class="primitive">boolean</code></p>
+- <p>[<code class="key">provider?</code>](#authorizeoptions.provider) <code class="primitive">string</code></p>
+</Section>
+</Segment>
+<NestedTitle id="authorizeoptions.pkce" Tag="h4" parent="AuthorizeOptions.">pkce?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">boolean</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizeoptions.provider" Tag="h4" parent="AuthorizeOptions.">provider?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+## AuthorizeResult
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">challenge</code>](#authorizeresult.challenge) [<code class="type">Challenge</code>](#challenge)</p>
+- <p>[<code class="key">url</code>](#authorizeresult.url) <code class="primitive">string</code></p>
+</Section>
+</Segment>
+<NestedTitle id="authorizeresult.challenge" Tag="h4" parent="AuthorizeResult.">challenge</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** [<code class="type">Challenge</code>](#challenge)
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizeresult.url" Tag="h4" parent="AuthorizeResult.">url</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+## Client
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">authorize</code>](#client.authorize) <code class="primitive">(redirectURI: <code class="primitive">string</code>, response: <code class="symbol">&ldquo;</code><code class="primitive">code</code><code class="symbol">&rdquo;</code><code class="symbol"> | </code><code class="symbol">&ldquo;</code><code class="primitive">token</code><code class="symbol">&rdquo;</code>, opts?: [<code class="type">AuthorizeOptions</code>](#authorizeoptions)) => <code class="primitive">Promise</code><code class="symbol">&lt;</code>[<code class="type">AuthorizeResult</code>](#authorizeresult)<code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">exchange</code>](#client.exchange) <code class="primitive">(code: <code class="primitive">string</code>, redirectURI: <code class="primitive">string</code>, verifier?: <code class="primitive">string</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code>[<code class="type">ExchangeSuccess</code>](#exchangesuccess)<code class="symbol"> | </code>[<code class="type">ExchangeError</code>](#exchangeerror)<code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">refresh</code>](#client.refresh) <code class="primitive">(refresh: <code class="primitive">string</code>, opts?: [<code class="type">RefreshOptions</code>](#refreshoptions)) => <code class="primitive">Promise</code><code class="symbol">&lt;</code>[<code class="type">RefreshSuccess</code>](#refreshsuccess)<code class="symbol"> | </code>[<code class="type">RefreshError</code>](#refresherror)<code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">verify</code>](#client.verify) <code class="primitive">(subjects: [<code class="type">T</code>](#t), token: <code class="primitive">string</code>, options?: [<code class="type">VerifyOptions</code>](#verifyoptions)) => <code class="primitive">Promise</code><code class="symbol">&lt;</code>[<code class="type">VerifyError</code>](#verifyerror)<code class="symbol"> | </code>[<code class="type">VerifyResult</code>](#verifyresult)<code class="symbol">&gt;</code></code></p>
+</Section>
+</Segment>
+<NestedTitle id="client.authorize" Tag="h4" parent="Client.">authorize</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">(redirectURI: <code class="primitive">string</code>, response: <code class="symbol">&ldquo;</code><code class="primitive">code</code><code class="symbol">&rdquo;</code><code class="symbol"> | </code><code class="symbol">&ldquo;</code><code class="primitive">token</code><code class="symbol">&rdquo;</code>, opts?: [<code class="type">AuthorizeOptions</code>](#authorizeoptions)) => <code class="primitive">Promise</code><code class="symbol">&lt;</code>[<code class="type">AuthorizeResult</code>](#authorizeresult)<code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="client.exchange" Tag="h4" parent="Client.">exchange</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">(code: <code class="primitive">string</code>, redirectURI: <code class="primitive">string</code>, verifier?: <code class="primitive">string</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code>[<code class="type">ExchangeSuccess</code>](#exchangesuccess)<code class="symbol"> | </code>[<code class="type">ExchangeError</code>](#exchangeerror)<code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="client.refresh" Tag="h4" parent="Client.">refresh</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">(refresh: <code class="primitive">string</code>, opts?: [<code class="type">RefreshOptions</code>](#refreshoptions)) => <code class="primitive">Promise</code><code class="symbol">&lt;</code>[<code class="type">RefreshSuccess</code>](#refreshsuccess)<code class="symbol"> | </code>[<code class="type">RefreshError</code>](#refresherror)<code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="client.verify" Tag="h4" parent="Client.">verify</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">(subjects: [<code class="type">T</code>](#t), token: <code class="primitive">string</code>, options?: [<code class="type">VerifyOptions</code>](#verifyoptions)) => <code class="primitive">Promise</code><code class="symbol">&lt;</code>[<code class="type">VerifyError</code>](#verifyerror)<code class="symbol"> | </code>[<code class="type">VerifyResult</code>](#verifyresult)<code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+## ClientInput
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">clientID</code>](#clientinput.clientid) <code class="primitive">string</code></p>
+- <p>[<code class="key">fetch?</code>](#clientinput.fetch) <code class="type">FetchLike</code></p>
+- <p>[<code class="key">issuer?</code>](#clientinput.issuer) <code class="primitive">string</code></p>
+</Section>
+The input object for the client.
+</Segment>
+<NestedTitle id="clientinput.clientid" Tag="h4" parent="ClientInput.">clientID</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+The client ID.
+</Segment>
+<NestedTitle id="clientinput.fetch" Tag="h4" parent="ClientInput.">fetch?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="type">FetchLike</code>
+</InlineSection>
+</Section>
+The fetch function to use.
+</Segment>
+<NestedTitle id="clientinput.issuer" Tag="h4" parent="ClientInput.">issuer?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+The issuer URL.
+</Segment>
+## ExchangeError
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">err</code>](#exchangeerror.err) [<code class="type">InvalidAuthorizationCodeError</code>](/docs/authorizer#invalidauthorizationcodeerror)</p>
+</Section>
+</Segment>
+<NestedTitle id="exchangeerror.err" Tag="h4" parent="ExchangeError.">err</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** [<code class="type">InvalidAuthorizationCodeError</code>](/docs/authorizer#invalidauthorizationcodeerror)
+</InlineSection>
+</Section>
+</Segment>
+## ExchangeSuccess
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">err</code>](#exchangesuccess.err) <code class="primitive">false</code></p>
+- <p>[<code class="key">tokens</code>](#exchangesuccess.tokens) [<code class="type">Tokens</code>](#tokens)</p>
+</Section>
+</Segment>
+<NestedTitle id="exchangesuccess.err" Tag="h4" parent="ExchangeSuccess.">err</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">false</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="exchangesuccess.tokens" Tag="h4" parent="ExchangeSuccess.">tokens</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** [<code class="type">Tokens</code>](#tokens)
+</InlineSection>
+</Section>
+</Segment>
+## RefreshError
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">err</code>](#refresherror.err) [<code class="type">InvalidRefreshTokenError</code>](/docs/authorizer#invalidrefreshtokenerror)<code class="symbol"> | </code>[<code class="type">InvalidAccessTokenError</code>](/docs/authorizer#invalidaccesstokenerror)</p>
+</Section>
+</Segment>
+<NestedTitle id="refresherror.err" Tag="h4" parent="RefreshError.">err</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** [<code class="type">InvalidRefreshTokenError</code>](/docs/authorizer#invalidrefreshtokenerror)<code class="symbol"> | </code>[<code class="type">InvalidAccessTokenError</code>](/docs/authorizer#invalidaccesstokenerror)
+</InlineSection>
+</Section>
+</Segment>
+## RefreshOptions
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">access?</code>](#refreshoptions.access) <code class="primitive">string</code></p>
+</Section>
+</Segment>
+<NestedTitle id="refreshoptions.access" Tag="h4" parent="RefreshOptions.">access?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+## RefreshSuccess
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">err</code>](#refreshsuccess.err) <code class="primitive">false</code></p>
+- <p>[<code class="key">tokens?</code>](#refreshsuccess.tokens) [<code class="type">Tokens</code>](#tokens)</p>
+</Section>
+</Segment>
+<NestedTitle id="refreshsuccess.err" Tag="h4" parent="RefreshSuccess.">err</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">false</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="refreshsuccess.tokens" Tag="h4" parent="RefreshSuccess.">tokens?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** [<code class="type">Tokens</code>](#tokens)
+</InlineSection>
+</Section>
+</Segment>
+## Tokens
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">access</code>](#tokens.access) <code class="primitive">string</code></p>
+- <p>[<code class="key">refresh</code>](#tokens.refresh) <code class="primitive">string</code></p>
+</Section>
+The tokens returned by the authorization server.
+</Segment>
+<NestedTitle id="tokens.access" Tag="h4" parent="Tokens.">access</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+The access token.
+</Segment>
+<NestedTitle id="tokens.refresh" Tag="h4" parent="Tokens.">refresh</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+The refresh token.
+</Segment>
+## VerifyError
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">err</code>](#verifyerror.err) [<code class="type">InvalidRefreshTokenError</code>](/docs/authorizer#invalidrefreshtokenerror)<code class="symbol"> | </code>[<code class="type">InvalidAccessTokenError</code>](/docs/authorizer#invalidaccesstokenerror)</p>
+</Section>
+</Segment>
+<NestedTitle id="verifyerror.err" Tag="h4" parent="VerifyError.">err</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** [<code class="type">InvalidRefreshTokenError</code>](/docs/authorizer#invalidrefreshtokenerror)<code class="symbol"> | </code>[<code class="type">InvalidAccessTokenError</code>](/docs/authorizer#invalidaccesstokenerror)
+</InlineSection>
+</Section>
+</Segment>
+## VerifyOptions
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">audience?</code>](#verifyoptions.audience) <code class="primitive">string</code></p>
+- <p>[<code class="key">fetch?</code>](#verifyoptions.fetch) <code class="primitive">object type</code></p>
+- <p>[<code class="key">issuer?</code>](#verifyoptions.issuer) <code class="primitive">string</code></p>
+- <p>[<code class="key">refresh?</code>](#verifyoptions.refresh) <code class="primitive">string</code></p>
+</Section>
+</Segment>
+<NestedTitle id="verifyoptions.audience" Tag="h4" parent="VerifyOptions.">audience?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="verifyoptions.fetch" Tag="h4" parent="VerifyOptions.">fetch?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">object type</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="verifyoptions.issuer" Tag="h4" parent="VerifyOptions.">issuer?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="verifyoptions.refresh" Tag="h4" parent="VerifyOptions.">refresh?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+## VerifyResult
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">aud</code>](#verifyresult.aud) <code class="primitive">string</code></p>
+- <p>[<code class="key">err?</code>](#verifyresult.err) <code class="primitive">undefined</code></p>
+- <p>[<code class="key">subject</code>](#verifyresult.subject) <code class="primitive">indexedAccess</code></p>
+- <p>[<code class="key">tokens?</code>](#verifyresult.tokens) [<code class="type">Tokens</code>](#tokens)</p>
+</Section>
+</Segment>
+<NestedTitle id="verifyresult.aud" Tag="h4" parent="VerifyResult.">aud</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="verifyresult.err" Tag="h4" parent="VerifyResult.">err?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">undefined</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="verifyresult.subject" Tag="h4" parent="VerifyResult.">subject</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">indexedAccess</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="verifyresult.tokens" Tag="h4" parent="VerifyResult.">tokens?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** [<code class="type">Tokens</code>](#tokens)
+</InlineSection>
+</Section>
+</Segment>
+## WellKnown
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">authorization_endpoint</code>](#wellknown.authorization_endpoint) <code class="primitive">string</code></p>
+- <p>[<code class="key">jwks_uri</code>](#wellknown.jwks_uri) <code class="primitive">string</code></p>
+- <p>[<code class="key">token_endpoint</code>](#wellknown.token_endpoint) <code class="primitive">string</code></p>
+</Section>
+The well-known information for an OAuth 2.0 authorization server.
+</Segment>
+<NestedTitle id="wellknown.authorization_endpoint" Tag="h4" parent="WellKnown.">authorization_endpoint</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+The URI to the authorization endpoint.
+</Segment>
+<NestedTitle id="wellknown.jwks_uri" Tag="h4" parent="WellKnown.">jwks_uri</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+The URI to the JWKS endpoint.
+</Segment>
+<NestedTitle id="wellknown.token_endpoint" Tag="h4" parent="WellKnown.">token_endpoint</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+The URI to the token endpoint.
+</Segment>
+</div>

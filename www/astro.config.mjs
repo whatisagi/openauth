@@ -1,8 +1,8 @@
-import { defineConfig } from "astro/config";
-import starlight from "@astrojs/starlight";
-import { rehypeHeadingIds } from "@astrojs/markdown-remark";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import config from "./config";
+import { defineConfig } from "astro/config"
+import starlight from "@astrojs/starlight"
+import { rehypeHeadingIds } from "@astrojs/markdown-remark"
+import rehypeAutolinkHeadings from "rehype-autolink-headings"
+import config from "./config"
 
 // https://astro.build/config
 export default defineConfig({
@@ -77,47 +77,29 @@ export default defineConfig({
       sidebar: [
         { label: "Intro", slug: "docs" },
         {
-          label: "Get Started",
+          label: "Adapters",
           items: [
-            { label: "Test Nav 1", slug: "docs" },
-            { label: "Test Nav 2", slug: "docs" },
-            { label: "Test Nav 3", slug: "docs" },
-            { label: "Test Nav 4", slug: "docs" },
-            { label: "Test Nav 5", slug: "docs" },
-            { label: "Test Nav 6", slug: "docs" },
+            { label: "Apple", slug: "docs/adapter/apple" },
+            { label: "Google", slug: "docs/adapter/google" },
           ],
         },
         {
-          label: "Get Started",
+          label: "Storage",
+          items: [{ label: "Dynamo", slug: "docs/storage/dynamo" }],
+        },
+        {
+          label: "Others",
           items: [
-            { label: "Test Nav 1", slug: "docs" },
-            { label: "Test Nav 2", slug: "docs" },
-            { label: "Test Nav 3", slug: "docs" },
-            { label: "Test Nav 4", slug: "docs" },
-            { label: "Test Nav 5", slug: "docs" },
-            { label: "Test Nav 6", slug: "docs" },
+            { label: "Client", slug: "docs/client" },
+            { label: "Session", slug: "docs/session" },
+            { label: "Authorizer", slug: "docs/authorizer" },
           ],
         },
         {
-          label: "Get Started",
+          label: "UI",
           items: [
-            { label: "Test Nav 1", slug: "docs" },
-            { label: "Test Nav 2", slug: "docs" },
-            { label: "Test Nav 3", slug: "docs" },
-            { label: "Test Nav 4", slug: "docs" },
-            { label: "Test Nav 5", slug: "docs" },
-            { label: "Test Nav 6", slug: "docs" },
-          ],
-        },
-        {
-          label: "Get Started",
-          items: [
-            { label: "Test Nav 1", slug: "docs" },
-            { label: "Test Nav 2", slug: "docs" },
-            { label: "Test Nav 3", slug: "docs" },
-            { label: "Test Nav 4", slug: "docs" },
-            { label: "Test Nav 5", slug: "docs" },
-            { label: "Test Nav 6", slug: "docs" },
+            { label: "Theme", slug: "docs/ui/theme" },
+            { label: "Password", slug: "docs/ui/password" },
           ],
         },
       ],
@@ -129,9 +111,9 @@ export default defineConfig({
       [
         rehypeAutolinkHeadings,
         {
-          behavior: 'wrap',
+          behavior: "wrap",
         },
       ],
     ],
   },
-});
+})

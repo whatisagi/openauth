@@ -1,0 +1,174 @@
+---
+title: theme
+description: A page for the theme UI.
+---
+
+import Segment from '../../../../components/tsdoc/Segment.astro';
+import Section from '../../../../components/tsdoc/Section.astro';
+import NestedTitle from '../../../../components/tsdoc/NestedTitle.astro';
+import InlineSection from '../../../../components/tsdoc/InlineSection.astro';
+
+<div class="tsdoc">
+<Section type="about">
+</Section>
+---
+## Themes
+### THEME_SST
+<Segment>
+Built-in theme styled after SST
+</Segment>
+### THEME_SUPABASE
+<Segment>
+</Segment>
+### THEME_TERMINAL
+<Segment>
+</Segment>
+### THEME_VERCEL
+<Segment>
+</Segment>
+## Methods
+### getTheme
+<Segment>
+<Section type="signature">
+```ts
+getTheme()
+```
+</Section>
+<InlineSection>
+**Returns** <code class="primitive">any</code>
+</InlineSection>
+</Segment>
+### setTheme
+<Segment>
+<Section type="signature">
+```ts
+setTheme(value)
+```
+</Section>
+<Section type="parameters">
+#### Parameters
+- <p><code class="key">value</code> [<code class="type">Theme</code>](#theme)</p>
+</Section>
+<InlineSection>
+**Returns** <code class="primitive">void</code>
+</InlineSection>
+</Segment>
+## ColorScheme
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">dark</code>](#colorscheme.dark) <code class="primitive">string</code></p>
+- <p>[<code class="key">light</code>](#colorscheme.light) <code class="primitive">string</code></p>
+</Section>
+</Segment>
+<NestedTitle id="colorscheme.dark" Tag="h4" parent="ColorScheme.">dark</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="colorscheme.light" Tag="h4" parent="ColorScheme.">light</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+## Theme
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">background?</code>](#theme.background) <code class="primitive">string</code><code class="symbol"> | </code>[<code class="type">ColorScheme</code>](#colorscheme)</p>
+- <p>[<code class="key">css?</code>](#theme.css) <code class="primitive">string</code></p>
+- <p>[<code class="key">favicon?</code>](#theme.favicon) <code class="primitive">string</code></p>
+- <p>[<code class="key">font?</code>](#theme.font) <code class="primitive">object type</code></p>
+  - <p>[<code class="key">family?</code>](#font.family) <code class="primitive">string</code></p>
+  - <p>[<code class="key">scale?</code>](#font.scale) <code class="primitive">string</code></p>
+- <p>[<code class="key">logo?</code>](#theme.logo) <code class="primitive">string</code><code class="symbol"> | </code>[<code class="type">ColorScheme</code>](#colorscheme)</p>
+- <p>[<code class="key">primary</code>](#theme.primary) <code class="primitive">string</code><code class="symbol"> | </code>[<code class="type">ColorScheme</code>](#colorscheme)</p>
+- <p>[<code class="key">radius?</code>](#theme.radius) <code class="symbol">&ldquo;</code><code class="primitive">none</code><code class="symbol">&rdquo;</code><code class="symbol"> | </code><code class="symbol">&ldquo;</code><code class="primitive">sm</code><code class="symbol">&rdquo;</code><code class="symbol"> | </code><code class="symbol">&ldquo;</code><code class="primitive">md</code><code class="symbol">&rdquo;</code><code class="symbol"> | </code><code class="symbol">&ldquo;</code><code class="primitive">lg</code><code class="symbol">&rdquo;</code><code class="symbol"> | </code><code class="symbol">&ldquo;</code><code class="primitive">full</code><code class="symbol">&rdquo;</code></p>
+- <p>[<code class="key">title?</code>](#theme.title) <code class="primitive">string</code></p>
+</Section>
+</Segment>
+<NestedTitle id="theme.background" Tag="h4" parent="Theme.">background?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code><code class="symbol"> | </code>[<code class="type">ColorScheme</code>](#colorscheme)
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="theme.css" Tag="h4" parent="Theme.">css?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="theme.favicon" Tag="h4" parent="Theme.">favicon?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="theme.font" Tag="h4" parent="Theme.">font?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">object type</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="font.family" Tag="h5" parent="Theme.font.">family?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="font.scale" Tag="h5" parent="Theme.font.">scale?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="theme.logo" Tag="h4" parent="Theme.">logo?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code><code class="symbol"> | </code>[<code class="type">ColorScheme</code>](#colorscheme)
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="theme.primary" Tag="h4" parent="Theme.">primary</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code><code class="symbol"> | </code>[<code class="type">ColorScheme</code>](#colorscheme)
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="theme.radius" Tag="h4" parent="Theme.">radius?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="symbol">&ldquo;</code><code class="primitive">none</code><code class="symbol">&rdquo;</code><code class="symbol"> | </code><code class="symbol">&ldquo;</code><code class="primitive">sm</code><code class="symbol">&rdquo;</code><code class="symbol"> | </code><code class="symbol">&ldquo;</code><code class="primitive">md</code><code class="symbol">&rdquo;</code><code class="symbol"> | </code><code class="symbol">&ldquo;</code><code class="primitive">lg</code><code class="symbol">&rdquo;</code><code class="symbol"> | </code><code class="symbol">&ldquo;</code><code class="primitive">full</code><code class="symbol">&rdquo;</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="theme.title" Tag="h4" parent="Theme.">title?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+</div>

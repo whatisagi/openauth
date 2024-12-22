@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "bun generate.ts && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -16,5 +16,8 @@
     "astro": "^4.16.10",
     "rehype-autolink-headings": "^7.1.0",
     "sharp": "^0.32.5"
+  },
+  "devDependencies": {
+    "typedoc": "^0.27.5"
   }
 }
