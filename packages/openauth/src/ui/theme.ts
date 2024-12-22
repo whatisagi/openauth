@@ -1,4 +1,4 @@
-export type ColorScheme = {
+export interface ColorScheme {
   dark: string
   light: string
 }
