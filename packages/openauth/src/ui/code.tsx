@@ -23,11 +23,14 @@ export type CodeUICopy = typeof DEFAULT_COPY
 export function CodeUI(props: {
   sendCode: (claims: Record<string, string>, code: string) => Promise<void>
   copy?: Partial<CodeUICopy>
+  mode?: "email" | "phone"
 }) {
   const copy = {
     ...DEFAULT_COPY,
     ...props.copy,
   }
+
+  const mode = props.mode ?? "email"
 
   return {
     sendCode: props.sendCode,
@@ -44,8 +47,9 @@ export function CodeUI(props: {
               <input
                 data-component="input"
                 autofocus
-                type="email"
-                name="email"
+                type={mode === "email" ? "email" : "tel"}
+                name={mode === "email" ? "email" : "phone"}
+                inputmode={mode === "email" ? "email" : "numeric"}
                 required
                 placeholder={copy.email_placeholder}
               />
@@ -86,6 +90,8 @@ export function CodeUI(props: {
                 type="text"
                 name="code"
                 required
+                inputmode="numeric"
+                autocomplete="one-time-code"
                 placeholder={copy.code_placeholder}
               />
               <button data-component="button">{copy.button_continue}</button>
