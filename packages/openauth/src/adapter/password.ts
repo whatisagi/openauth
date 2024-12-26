@@ -213,9 +213,8 @@ export function PasswordAdapter(config: PasswordConfig) {
       })
 
       routes.get("/change", async (c) => {
-        const redirect =
-          c.req.query("redirect_uri") ||
-          c.req.url.replace(/change.*/, "authorize")
+        let redirect =
+          c.req.query("redirect_uri") || getRelativeUrl(c, "./authorize")
         const state: PasswordChangeState = {
           type: "start",
           redirect,
@@ -368,6 +367,7 @@ export function PBKDF2Hasher(opts?: { interations?: number }): PasswordHasher<{
   }
 }
 import { timingSafeEqual, randomBytes, scrypt } from "node:crypto"
+import { getRelativeUrl } from "../util.js"
 
 export function ScryptHasher(opts?: {
   N?: number
