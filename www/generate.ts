@@ -17,6 +17,19 @@ const uis = modules.filter((m) => m.name.startsWith("ui/"))
 const adapters = modules.filter((m) => m.name.startsWith("adapter/"))
 const storages = modules.filter((m) => m.name.startsWith("storage/"))
 
+const FRONTMATTER: Record<string, { title: string, editUrl: string, description: string }> = {
+  theme: {
+    title: "Themes",
+    description: "Reference docs for themes.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/ui/theme.ts`,
+  },
+  password: {
+    title: "Password UI",
+    description: "Reference docs for themes.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/ui/theme.ts`,
+  },
+};
+
 renderSession()
 renderClient()
 renderAuthorizer()
@@ -31,6 +44,7 @@ function renderAdapter(module: TypeDoc.DeclarationReflection) {
   saveFile(module.name, [
     renderHeader({
       moduleName: module.name,
+      editUrl: false,
       title: name,
       description: `A page for the ${name} adapter.`,
     }),
@@ -49,6 +63,7 @@ function renderStorage(module: TypeDoc.DeclarationReflection) {
   saveFile(module.name, [
     renderHeader({
       moduleName: module.name,
+      editUrl: false,
       title: name,
       description: `A page for the ${name} storage.`,
     }),
@@ -64,11 +79,13 @@ function renderUI(module: TypeDoc.DeclarationReflection) {
   console.debug(`renderUI: ${module.name}`)
 
   const name = module.name.replace("ui/", "")
+  const { title, editUrl, description } = FRONTMATTER[name] || {};
   saveFile(module.name, [
     renderHeader({
+      title: title || name,
       moduleName: module.name,
-      title: name,
-      description: `A page for the ${name} UI.`,
+      editUrl: editUrl || false,
+      description: description || `A page for the ${name} UI.`,
     }),
     `<div class="tsdoc">`,
     renderAbout(renderComment(module.comment)),
@@ -87,6 +104,7 @@ function renderSession() {
   saveFile(name, [
     renderHeader({
       moduleName: module.name,
+      editUrl: false,
       title: name,
       description: `A page for the session.`,
     }),
@@ -104,6 +122,7 @@ function renderClient() {
   saveFile(name, [
     renderHeader({
       moduleName: module.name,
+      editUrl: false,
       title: name,
       description: `A page for the client.`,
     }),
@@ -122,6 +141,7 @@ function renderAuthorizer() {
   saveFile(name, [
     renderHeader({
       moduleName: authorizer.name,
+      editUrl: false,
       title: name,
       description: `A page for the authorizer.`,
     }),
@@ -136,6 +156,7 @@ function renderAuthorizer() {
 function renderHeader(input: {
   moduleName: string
   title: string
+  editUrl: string | boolean
   description: string
 }) {
   const relativePath = path.relative(
@@ -145,6 +166,7 @@ function renderHeader(input: {
   return [
     `---`,
     `title: ${input.title}`,
+    `editUrl: ${input.editUrl}`,
     `description: ${input.description}`,
     `---`,
     "",
@@ -301,13 +323,13 @@ function renderComment(comment?: TypeDoc.Comment) {
           // Otherwise render it as a comment ie. No domains configured
           tag.content.length === 1 && tag.content[0].kind === "code"
             ? `**Default** ${renderType(
-                new TypeDoc.IntrinsicType(
-                  tag.content[0].text
-                    .replace(/`/g, "")
-                    .replace(/{/g, "&lcub;")
-                    .replace(/}/g, "&rcub;"),
-                ),
-              )}`
+              new TypeDoc.IntrinsicType(
+                tag.content[0].text
+                  .replace(/`/g, "")
+                  .replace(/{/g, "&lcub;")
+                  .replace(/}/g, "&rcub;"),
+              ),
+            )}`
             : `**Default** ${tag.content.map((c) => c.text)}`,
           `</InlineSection>`,
         ]
@@ -440,8 +462,8 @@ function renderType(type: TypeDoc.SomeType): Text {
   function renderArrayType(type: TypeDoc.ArrayType) {
     return type.elementType.type === "union"
       ? `<code class="symbol">(</code>${renderType(
-          type.elementType,
-        )}<code class="symbol">)[]</code>`
+        type.elementType,
+      )}<code class="symbol">)[]</code>`
       : `${renderType(type.elementType)}<code class="symbol">[]</code>`
   }
   function renderTypescriptType(type: TypeDoc.ReferenceType) {
@@ -505,17 +527,17 @@ function flattenNestedTypes(
         { prefix, subType, depth },
         ...(subType.kind === TypeDoc.ReflectionKind.Property
           ? flattenNestedTypes(
-              subType.type!,
-              `${prefix}.${subType.name}`,
-              depth + 1,
-            )
+            subType.type!,
+            `${prefix}.${subType.name}`,
+            depth + 1,
+          )
           : []),
         ...(subType.kind === TypeDoc.ReflectionKind.Accessor
           ? flattenNestedTypes(
-              subType.getSignature?.type!,
-              `${prefix}.${subType.name}`,
-              depth + 1,
-            )
+            subType.getSignature?.type!,
+            `${prefix}.${subType.name}`,
+            depth + 1,
+          )
           : []),
       ])
   }
@@ -568,7 +590,7 @@ function saveFile(moduleName: string, content: any[]) {
 
 function configureLogger() {
   if (process.env.DEBUG) return
-  console.debug = () => {}
+  console.debug = () => { }
 }
 
 async function build() {
@@ -605,4 +627,4 @@ async function build() {
   return project
 }
 
-async function generate() {}
+async function generate() { }

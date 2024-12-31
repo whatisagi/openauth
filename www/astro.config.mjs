@@ -98,8 +98,8 @@ export default defineConfig({
         {
           label: "UI",
           items: [
-            { label: "Theme", slug: "docs/ui/theme" },
-            { label: "Password", slug: "docs/ui/password" },
+            "docs/ui/theme",
+            "docs/ui/password",
           ],
         },
       ],
@@ -108,12 +108,7 @@ export default defineConfig({
   markdown: {
     rehypePlugins: [
       rehypeHeadingIds,
-      [
-        rehypeAutolinkHeadings,
-        {
-          behavior: "wrap",
-        },
-      ],
+      [rehypeAutolinkHeadings, { behavior: "wrap" }],
     ],
   },
 })
