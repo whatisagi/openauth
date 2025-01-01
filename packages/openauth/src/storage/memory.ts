@@ -28,7 +28,6 @@
  *
  * @packageDocumentation
  */
-
 import { joinKey, splitKey, StorageAdapter } from "./storage.js"
 import { existsSync, readFileSync } from "node:fs"
 import { writeFile } from "node:fs/promises"
