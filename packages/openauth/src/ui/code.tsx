@@ -93,18 +93,24 @@ export interface CodeUIOptions {
    * Custom copy for the UI.
    */
   copy?: Partial<CodeUICopy>
+  /**
+   * The mode to use for the input.
+   * @default "email"
+   */
+  mode?: "email" | "phone"
 }
 
 /**
  * Creates a UI for the Code provider flow.
  * @param props - Configure the UI.
  */
-
 export function CodeUI(props: CodeUIOptions) {
   const copy = {
     ...DEFAULT_COPY,
     ...props.copy,
   }
+
+  const mode = props.mode ?? "email"
 
   return {
     sendCode: props.sendCode,
@@ -121,8 +127,9 @@ export function CodeUI(props: CodeUIOptions) {
               <input
                 data-component="input"
                 autofocus
-                type="email"
-                name="email"
+                type={mode === "email" ? "email" : "tel"}
+                name={mode === "email" ? "email" : "phone"}
+                inputmode={mode === "email" ? "email" : "numeric"}
                 required
                 placeholder={copy.email_placeholder}
               />
@@ -163,6 +170,8 @@ export function CodeUI(props: CodeUIOptions) {
                 type="text"
                 name="code"
                 required
+                inputmode="numeric"
+                autocomplete="one-time-code"
                 placeholder={copy.code_placeholder}
               />
               <button data-component="button">{copy.button_continue}</button>
