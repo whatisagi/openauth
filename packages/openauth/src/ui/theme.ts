@@ -56,7 +56,7 @@ export interface ColorScheme {
 }
 
 /**
- * A type to define your custom theme. 
+ * A type to define your custom theme.
  */
 export interface Theme {
   /**

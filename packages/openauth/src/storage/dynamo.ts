@@ -120,8 +120,8 @@ export function DynamoStorage(options: DynamoStorageOptions): StorageAdapter {
           [sk]: { S: parsed.sk },
           ...(expiry
             ? {
-              expiry: { N: Math.floor(expiry.getTime() / 1000).toString() },
-            }
+                expiry: { N: Math.floor(expiry.getTime() / 1000).toString() },
+              }
             : {}),
           value: { S: JSON.stringify(value) },
         },

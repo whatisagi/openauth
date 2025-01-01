@@ -17,7 +17,10 @@ const uis = modules.filter((m) => m.name.startsWith("ui/"))
 const adapters = modules.filter((m) => m.name.startsWith("adapter/"))
 const storages = modules.filter((m) => m.name.startsWith("storage/"))
 
-const FRONTMATTER: Record<string, { title: string, editUrl: string, description: string }> = {
+const FRONTMATTER: Record<
+  string,
+  { title: string; editUrl: string; description: string }
+> = {
   theme: {
     title: "Themes",
     description: "Reference docs for themes.",
@@ -58,7 +61,7 @@ const FRONTMATTER: Record<string, { title: string, editUrl: string, description:
     description: "Reference doc for the client SDK.",
     editUrl: `${config.github}/blob/master/packages/openauth/src/client.ts`,
   },
-};
+}
 
 renderSession()
 renderClient()
@@ -90,7 +93,7 @@ function renderStorage(module: TypeDoc.DeclarationReflection) {
   console.debug(`renderStorage: ${module.name}`)
 
   const name = module.name.replace("storage/", "")
-  const { title, editUrl, description } = FRONTMATTER[name] || {};
+  const { title, editUrl, description } = FRONTMATTER[name] || {}
   saveFile(module.name, [
     renderHeader({
       title: title || name,
@@ -110,7 +113,7 @@ function renderUI(module: TypeDoc.DeclarationReflection) {
   console.debug(`renderUI: ${module.name}`)
 
   const name = module.name.replace("ui/", "")
-  const { title, editUrl, description } = FRONTMATTER[name] || {};
+  const { title, editUrl, description } = FRONTMATTER[name] || {}
   saveFile(module.name, [
     renderHeader({
       title: title || name,
@@ -150,7 +153,7 @@ function renderClient() {
 
   const module = client
   const name = module.name
-  const { title, editUrl, description } = FRONTMATTER[name] || {};
+  const { title, editUrl, description } = FRONTMATTER[name] || {}
   saveFile(name, [
     renderHeader({
       title: title || name,
@@ -356,13 +359,13 @@ function renderComment(comment?: TypeDoc.Comment) {
           // Otherwise render it as a comment ie. No domains configured
           tag.content.length === 1 && tag.content[0].kind === "code"
             ? `**Default** ${renderType(
-              new TypeDoc.IntrinsicType(
-                tag.content[0].text
-                  .replace(/`/g, "")
-                  .replace(/{/g, "&lcub;")
-                  .replace(/}/g, "&rcub;"),
-              ),
-            )}`
+                new TypeDoc.IntrinsicType(
+                  tag.content[0].text
+                    .replace(/`/g, "")
+                    .replace(/{/g, "&lcub;")
+                    .replace(/}/g, "&rcub;"),
+                ),
+              )}`
             : `**Default** ${tag.content.map((c) => c.text)}`,
           `</InlineSection>`,
         ]
@@ -495,8 +498,8 @@ function renderType(type: TypeDoc.SomeType): Text {
   function renderArrayType(type: TypeDoc.ArrayType) {
     return type.elementType.type === "union"
       ? `<code class="symbol">(</code>${renderType(
-        type.elementType,
-      )}<code class="symbol">)[]</code>`
+          type.elementType,
+        )}<code class="symbol">)[]</code>`
       : `${renderType(type.elementType)}<code class="symbol">[]</code>`
   }
   function renderTypescriptType(type: TypeDoc.ReferenceType) {
@@ -560,17 +563,17 @@ function flattenNestedTypes(
         { prefix, subType, depth },
         ...(subType.kind === TypeDoc.ReflectionKind.Property
           ? flattenNestedTypes(
-            subType.type!,
-            `${prefix}.${subType.name}`,
-            depth + 1,
-          )
+              subType.type!,
+              `${prefix}.${subType.name}`,
+              depth + 1,
+            )
           : []),
         ...(subType.kind === TypeDoc.ReflectionKind.Accessor
           ? flattenNestedTypes(
-            subType.getSignature?.type!,
-            `${prefix}.${subType.name}`,
-            depth + 1,
-          )
+              subType.getSignature?.type!,
+              `${prefix}.${subType.name}`,
+              depth + 1,
+            )
           : []),
       ])
   }
@@ -623,7 +626,7 @@ function saveFile(moduleName: string, content: any[]) {
 
 function configureLogger() {
   if (process.env.DEBUG) return
-  console.debug = () => { }
+  console.debug = () => {}
 }
 
 async function build() {
@@ -664,4 +667,4 @@ async function build() {
   return project
 }
 
-async function generate() { }
+async function generate() {}
