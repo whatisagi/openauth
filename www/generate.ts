@@ -53,6 +53,11 @@ const FRONTMATTER: Record<string, { title: string, editUrl: string, description:
     description: "Reference doc for the Cloudflare KV storage adapter.",
     editUrl: `${config.github}/blob/master/packages/openauth/src/storage/cloudflare.ts`,
   },
+  client: {
+    title: "Client",
+    description: "Reference doc for the client SDK.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/client.ts`,
+  },
 };
 
 renderSession()
@@ -145,14 +150,16 @@ function renderClient() {
 
   const module = client
   const name = module.name
+  const { title, editUrl, description } = FRONTMATTER[name] || {};
   saveFile(name, [
     renderHeader({
+      title: title || name,
       moduleName: module.name,
-      editUrl: false,
-      title: name,
-      description: `A page for the client.`,
+      editUrl: editUrl || false,
+      description: description || `A page for the client.`,
     }),
     `<div class="tsdoc">`,
+    renderAbout(renderComment(module.comment)),
     renderFunctions(module),
     renderInterfaces(module),
     `</div>`,

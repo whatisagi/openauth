@@ -77,22 +77,18 @@ export default defineConfig({
       sidebar: [
         { label: "Intro", slug: "docs" },
         {
-          label: "Adapters",
+          label: "Core",
           items: [
-            { label: "Apple", slug: "docs/adapter/apple" },
-            { label: "Google", slug: "docs/adapter/google" },
+            "docs/client",
+            { label: "Session", slug: "docs/session" },
+            { label: "Authorizer", slug: "docs/authorizer" },
           ],
         },
         {
-          label: "Storage",
-          items: ["docs/storage/memory", "docs/storage/dynamo", "docs/storage/cloudflare"],
-        },
-        {
-          label: "Others",
+          label: "Providers",
           items: [
-            { label: "Client", slug: "docs/client" },
-            { label: "Session", slug: "docs/session" },
-            { label: "Authorizer", slug: "docs/authorizer" },
+            { label: "Apple", slug: "docs/adapter/apple" },
+            { label: "Google", slug: "docs/adapter/google" },
           ],
         },
         {
@@ -103,6 +99,10 @@ export default defineConfig({
             "docs/ui/code",
             "docs/ui/password",
           ],
+        },
+        {
+          label: "Storage",
+          items: ["docs/storage/memory", "docs/storage/dynamo", "docs/storage/cloudflare"],
         },
       ],
     }),

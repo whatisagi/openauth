@@ -1,7 +1,7 @@
 ---
-title: client
-editUrl: false
-description: A page for the client.
+title: Client
+editUrl: https://github.com/openauthjs/openauth/blob/master/packages/openauth/src/client.ts
+description: Reference doc for the client SDK.
 ---
 
 import Segment from '../../../components/tsdoc/Segment.astro';
@@ -10,6 +10,54 @@ import NestedTitle from '../../../components/tsdoc/NestedTitle.astro';
 import InlineSection from '../../../components/tsdoc/InlineSection.astro';
 
 <div class="tsdoc">
+<Section type="about">
+Use the OpenAuth client kick off your authorization flows, exchange tokens, refresh tokens,
+and verify tokens.
+
+Start by creating a client.
+
+
+```ts
+import { createClient } from "@openauthjs/openauth/client"
+
+const client = createClient({
+  clientID: "my-client",
+  issuer: "https://auth.myserver.com"
+})
+```
+
+
+Start the authorization flow by calling 
+`authorize`
+.
+
+
+```ts
+const redirect_uri = "https://myserver.com/callback"
+
+const { url } = await client.authorize(
+  redirect_uri,
+  "code",
+)
+```
+
+
+When the user completes the flow, exchange the code for tokens.
+
+
+```ts
+const tokens = await client.exchange(query.get("code"), redirect_uri)
+```
+
+
+Verify the tokens.
+
+
+```ts
+const verified = await client.verify(subjects, tokens.access)
+```
+</Section>
+---
 ## Methods
 ### createClient
 <Segment>
