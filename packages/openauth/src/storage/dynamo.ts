@@ -1,13 +1,18 @@
 /**
- * This is the AWS DynamoDB storage adapter.
+ * Configure OpenAuth to use [DynamoDB](https://aws.amazon.com/dynamodb/) as a storage adapter.
  *
  * ```ts
  * import { DynamoStorage } from "@openauthjs/openauth/storage/dynamo";
  *
- * DynamoStorage({
+ * const storage = DynamoStorage({
  *   table: "my-table",
  *   pk: "pk",
- *   sk: "sk",
+ *   sk: "sk"
+ * })
+ *
+ * export default authorizer({
+ *   storage,
+ *   // ...
  * })
  * ```
  *
@@ -18,7 +23,16 @@ import { client } from "./aws.js"
 import { joinKey, StorageAdapter } from "./storage.js"
 
 /**
- * Configuration options for the Dynamo storage adapter.
+ * Configure the DynamoDB table that's created.
+ *
+ * @example
+ * ```ts
+ * {
+ *   table: "my-table",
+ *   pk: "pk",
+ *   sk: "sk"
+ * }
+ * ```
  */
 export interface DynamoStorageOptions {
   /**
@@ -36,8 +50,8 @@ export interface DynamoStorageOptions {
 }
 
 /**
- * Creates a Dynamo storage adapter.
- * @param options - The configuration options for the adapter.
+ * Creates a DynamoDB store.
+ * @param options - The config for the adapter.
  */
 export function DynamoStorage(options: DynamoStorageOptions): StorageAdapter {
   const c = client()
@@ -106,8 +120,8 @@ export function DynamoStorage(options: DynamoStorageOptions): StorageAdapter {
           [sk]: { S: parsed.sk },
           ...(expiry
             ? {
-                expiry: { N: Math.floor(expiry.getTime() / 1000).toString() },
-              }
+              expiry: { N: Math.floor(expiry.getTime() / 1000).toString() },
+            }
             : {}),
           value: { S: JSON.stringify(value) },
         },

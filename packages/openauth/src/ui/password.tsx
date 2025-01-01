@@ -1,3 +1,27 @@
+/**
+ * Configure the UI that's used by the Password provider.
+ *
+ * ```ts {1,7-12}
+ * import { PasswordUI } from "@openauthjs/openauth/ui/password"
+ * import { PasswordAdapter } from "@openauthjs/openauth/adapter/password"
+ *
+ * export default authorizer({
+ *   providers: {
+ *     password: PasswordAdapter(
+ *       PasswordUI({
+ *         copy: {
+ *           error_email_taken: "This email is already taken."
+ *         },
+ *         sendCode: (email, code) => console.log(email, code)
+ *       })
+ *     )
+ *   },
+ *   // ...
+ * })
+ * ```
+ *
+ * @packageDocumentation
+ */
 /** @jsxImportSource hono/jsx */
 
 import {
@@ -11,42 +35,128 @@ import "./form.js"
 import { FormAlert } from "./form.js"
 
 const DEFAULT_COPY = {
+  /**
+   * Error message when email is already taken.
+   */
   error_email_taken: "There is already an account with this email.",
+  /**
+   * Error message when the confirmation code is incorrect.
+   */
   error_invalid_code: "Code is incorrect.",
+  /**
+   * Error message when the email is invalid.
+   */
   error_invalid_email: "Email is not valid.",
+  /**
+   * Error message when the password is incorrect.
+   */
   error_invalid_password: "Password is incorrect.",
+  /**
+   * Error message when the passwords do not match.
+   */
   error_password_mismatch: "Passwords do not match.",
+  /**
+   * Title of the register page.
+   */
   register_title: "Welcome to the app",
+  /**
+   * Description of the register page.
+   */
   register_description: "Sign in with your email",
+  /**
+   * Title of the login page.
+   */
   login_title: "Welcome to the app",
+  /**
+   * Description of the login page.
+   */
   login_description: "Sign in with your email",
+  /**
+   * Copy for the register button.
+   */
   register: "Register",
+  /**
+   * Copy for the register link.
+   */
   register_prompt: "Don't have an account?",
+  /**
+   * Copy for the login link.
+   */
   login_prompt: "Already have an account?",
+  /**
+   * Copy for the login button.
+   */
   login: "Login",
+  /**
+   * Copy for the forgot password link.
+   */
   change_prompt: "Forgot password?",
+  /**
+   * Copy for the resend code button.
+   */
   code_resend: "Resend code",
+  /**
+   * Copy for the "Back to" link.
+   */
   code_return: "Back to",
+  /**
+   * Copy for the logo.
+   * @internal
+   */
   logo: "A",
+  /**
+   * Copy for the email input.
+   */
   input_email: "Email",
+  /**
+   * Copy for the password input.
+   */
   input_password: "Password",
+  /**
+   * Copy for the code input.
+   */
   input_code: "Code",
+  /**
+   * Copy for the repeat password input.
+   */
   input_repeat: "Repeat password",
+  /**
+   * Copy for the continue button.
+   */
   button_continue: "Continue",
 } satisfies {
-  [key in `error_${
-    | PasswordLoginError["type"]
-    | PasswordRegisterError["type"]
-    | PasswordChangeError["type"]}`]: string
+  [key in `error_${| PasswordLoginError["type"]
+  | PasswordRegisterError["type"]
+  | PasswordChangeError["type"]}`]: string
 } & Record<string, string>
 
 export type PasswordUICopy = typeof DEFAULT_COPY
 
+/**
+ * Configure the password UI.
+ */
 export interface PasswordUIOptions {
+  /**
+   * Callback to send the confirmation code to the user.
+   *
+   * @example
+   * ```ts
+   * async (email, code) => {
+   *   // Send an email with the code
+   * }
+   * ```
+   */
   sendCode: PasswordConfig["sendCode"]
+  /**
+   * Custom copy for the UI.
+   */
   copy?: Partial<PasswordUICopy>
 }
 
+/**
+ * Creates a UI for the Password provider flow.
+ * @param input - Configure the UI.
+ */
 export function PasswordUI(input: PasswordUIOptions) {
   const copy = {
     ...DEFAULT_COPY,

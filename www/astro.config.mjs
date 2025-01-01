@@ -85,7 +85,7 @@ export default defineConfig({
         },
         {
           label: "Storage",
-          items: [{ label: "Dynamo", slug: "docs/storage/dynamo" }],
+          items: ["docs/storage/memory", "docs/storage/dynamo", "docs/storage/cloudflare"],
         },
         {
           label: "Others",
@@ -99,6 +99,8 @@ export default defineConfig({
           label: "UI",
           items: [
             "docs/ui/theme",
+            "docs/ui/select",
+            "docs/ui/code",
             "docs/ui/password",
           ],
         },

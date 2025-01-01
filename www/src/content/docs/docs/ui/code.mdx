@@ -1,0 +1,186 @@
+---
+title: CodeUI
+editUrl: https://github.com/openauthjs/openauth/blob/master/packages/openauth/src/ui/code.tsx
+description: Reference doc for the `CodeUI`.
+---
+
+import Segment from '../../../../components/tsdoc/Segment.astro';
+import Section from '../../../../components/tsdoc/Section.astro';
+import NestedTitle from '../../../../components/tsdoc/NestedTitle.astro';
+import InlineSection from '../../../../components/tsdoc/InlineSection.astro';
+
+<div class="tsdoc">
+<Section type="about">
+Configure the UI that's used by the Code provider.
+
+
+```ts {1,7-12}
+import { CodeUI } from "@openauthjs/openauth/ui/code"
+import { CodeAdapter } from "@openauthjs/openauth/adapter/code"
+
+export default authorizer({
+  providers: {
+    code: CodeAdapter(
+      CodeUI({
+        copy: {
+          code_info: "We'll send a pin code to your email"
+        },
+        sendCode: (claims, code) => console.log(claims.email, code)
+      })
+    )
+  },
+  // ...
+})
+```
+</Section>
+---
+## Methods
+### CodeUI
+<Segment>
+<Section type="signature">
+```ts
+CodeUI(props)
+```
+</Section>
+<Section type="parameters">
+#### Parameters
+- <p><code class="key">props</code> [<code class="type">CodeUIOptions</code>](#codeuioptions)</p>
+Configure the UI.
+</Section>
+<InlineSection>
+**Returns** <code class="primitive">object type</code>
+</InlineSection>
+Creates a UI for the Code provider flow.
+</Segment>
+## CodeUIOptions
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">copy?</code>](#codeuioptions.copy) <code class="primitive">Partial</code><code class="symbol">&lt;</code><code class="primitive">object type</code><code class="symbol">&gt;</code></p>
+  - <p>[<code class="key">button_continue</code>](#copy.button_continue) <code class="primitive">string</code></p>
+  - <p>[<code class="key">code_didnt_get</code>](#copy.code_didnt_get) <code class="primitive">string</code></p>
+  - <p>[<code class="key">code_info</code>](#copy.code_info) <code class="primitive">string</code></p>
+  - <p>[<code class="key">code_invalid</code>](#copy.code_invalid) <code class="primitive">string</code></p>
+  - <p>[<code class="key">code_placeholder</code>](#copy.code_placeholder) <code class="primitive">string</code></p>
+  - <p>[<code class="key">code_resend</code>](#copy.code_resend) <code class="primitive">string</code></p>
+  - <p>[<code class="key">code_resent</code>](#copy.code_resent) <code class="primitive">string</code></p>
+  - <p>[<code class="key">code_sent</code>](#copy.code_sent) <code class="primitive">string</code></p>
+  - <p>[<code class="key">email_invalid</code>](#copy.email_invalid) <code class="primitive">string</code></p>
+  - <p>[<code class="key">email_placeholder</code>](#copy.email_placeholder) <code class="primitive">string</code></p>
+- <p>[<code class="key">sendCode</code>](#codeuioptions.sendcode) <code class="primitive">object type</code></p>
+</Section>
+Configure the password UI.
+</Segment>
+<NestedTitle id="codeuioptions.copy" Tag="h4" parent="CodeUIOptions.">copy?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">Partial</code><code class="symbol">&lt;</code><code class="primitive">object type</code><code class="symbol">&gt;</code>
+</InlineSection>
+</Section>
+Custom copy for the UI.
+</Segment>
+<NestedTitle id="copy.button_continue" Tag="h5" parent="CodeUIOptions.copy.">button_continue</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+Copy for the continue button.
+</Segment>
+<NestedTitle id="copy.code_didnt_get" Tag="h5" parent="CodeUIOptions.copy.">code_didnt_get</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+Copy for the link to resend the code.
+</Segment>
+<NestedTitle id="copy.code_info" Tag="h5" parent="CodeUIOptions.copy.">code_info</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+Copy informing that the pin code will be emailed.
+</Segment>
+<NestedTitle id="copy.code_invalid" Tag="h5" parent="CodeUIOptions.copy.">code_invalid</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+Error message when the code is invalid.
+</Segment>
+<NestedTitle id="copy.code_placeholder" Tag="h5" parent="CodeUIOptions.copy.">code_placeholder</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+Copy for the pin code input.
+</Segment>
+<NestedTitle id="copy.code_resend" Tag="h5" parent="CodeUIOptions.copy.">code_resend</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+Copy for the resend button.
+</Segment>
+<NestedTitle id="copy.code_resent" Tag="h5" parent="CodeUIOptions.copy.">code_resent</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+Copy for when the code was resent.
+</Segment>
+<NestedTitle id="copy.code_sent" Tag="h5" parent="CodeUIOptions.copy.">code_sent</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+Copy for when the code was sent.
+</Segment>
+<NestedTitle id="copy.email_invalid" Tag="h5" parent="CodeUIOptions.copy.">email_invalid</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+Error message when the email is invalid.
+</Segment>
+<NestedTitle id="copy.email_placeholder" Tag="h5" parent="CodeUIOptions.copy.">email_placeholder</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+Copy for the email input.
+</Segment>
+<NestedTitle id="codeuioptions.sendcode" Tag="h4" parent="CodeUIOptions.">sendCode</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">object type</code>
+</InlineSection>
+</Section>
+Callback to send the confirmation code to the user.
+```ts
+async (claims, code) => {
+  // Send an email with the code
+}
+```
+</Segment>
+</div>

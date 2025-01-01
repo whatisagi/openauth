@@ -24,9 +24,34 @@ const FRONTMATTER: Record<string, { title: string, editUrl: string, description:
     editUrl: `${config.github}/blob/master/packages/openauth/src/ui/theme.ts`,
   },
   password: {
-    title: "Password UI",
-    description: "Reference docs for themes.",
-    editUrl: `${config.github}/blob/master/packages/openauth/src/ui/theme.ts`,
+    title: "PasswordUI",
+    description: "Reference doc for the `PasswordUI`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/ui/password.tsx`,
+  },
+  code: {
+    title: "CodeUI",
+    description: "Reference doc for the `CodeUI`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/ui/code.tsx`,
+  },
+  select: {
+    title: "Select",
+    description: "Reference doc for the `Select` UI.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/ui/select.tsx`,
+  },
+  dynamo: {
+    title: "DynamoDB",
+    description: "Reference doc for the DynamoDB storage adapter.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/storage/dynamo.ts`,
+  },
+  memory: {
+    title: "Memory",
+    description: "Reference doc for the Memory storage adapter.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/storage/memory.ts`,
+  },
+  cloudflare: {
+    title: "Cloudflare KV",
+    description: "Reference doc for the Cloudflare KV storage adapter.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/storage/cloudflare.ts`,
   },
 };
 
@@ -60,12 +85,13 @@ function renderStorage(module: TypeDoc.DeclarationReflection) {
   console.debug(`renderStorage: ${module.name}`)
 
   const name = module.name.replace("storage/", "")
+  const { title, editUrl, description } = FRONTMATTER[name] || {};
   saveFile(module.name, [
     renderHeader({
+      title: title || name,
       moduleName: module.name,
-      editUrl: false,
-      title: name,
-      description: `A page for the ${name} storage.`,
+      editUrl: editUrl || false,
+      description: description || `A page for the ${name} storage.`,
     }),
     `<div class="tsdoc">`,
     renderAbout(renderComment(module.comment)),
@@ -609,10 +635,14 @@ async function build() {
       "../packages/openauth/src/adapter/google.ts",
       "../packages/openauth/src/session.ts",
       "../packages/openauth/src/ui/theme.ts",
+      "../packages/openauth/src/ui/code.tsx",
+      "../packages/openauth/src/ui/select.tsx",
       "../packages/openauth/src/ui/password.tsx",
       "../packages/openauth/src/client.ts",
       "../packages/openauth/src/authorizer.ts",
+      "../packages/openauth/src/storage/memory.ts",
       "../packages/openauth/src/storage/dynamo.ts",
+      "../packages/openauth/src/storage/cloudflare.ts",
       "../packages/openauth/src/error.ts",
     ],
     tsconfig: "../packages/openauth/tsconfig.json",

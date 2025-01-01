@@ -1,7 +1,7 @@
 ---
-title: dynamo
-editUrl: false
-description: A page for the dynamo storage.
+title: DynamoDB
+editUrl: https://github.com/openauthjs/openauth/blob/master/packages/openauth/src/storage/dynamo.ts
+description: Reference doc for the DynamoDB storage adapter.
 ---
 
 import Segment from '../../../../components/tsdoc/Segment.astro';
@@ -11,16 +11,21 @@ import InlineSection from '../../../../components/tsdoc/InlineSection.astro';
 
 <div class="tsdoc">
 <Section type="about">
-This is the AWS DynamoDB storage adapter.
+Configure OpenAuth to use [DynamoDB](https://aws.amazon.com/dynamodb/) as a storage adapter.
 
 
 ```ts
 import { DynamoStorage } from "@openauthjs/openauth/storage/dynamo";
 
-DynamoStorage({
+const storage = DynamoStorage({
   table: "my-table",
   pk: "pk",
-  sk: "sk",
+  sk: "sk"
+})
+
+export default authorizer({
+  storage,
+  // ...
 })
 ```
 </Section>
@@ -36,12 +41,12 @@ DynamoStorage(options)
 <Section type="parameters">
 #### Parameters
 - <p><code class="key">options</code> [<code class="type">DynamoStorageOptions</code>](#dynamostorageoptions)</p>
-The configuration options for the adapter.
+The config for the adapter.
 </Section>
 <InlineSection>
 **Returns** <code class="type">StorageAdapter</code>
 </InlineSection>
-Creates a Dynamo storage adapter.
+Creates a DynamoDB store.
 </Segment>
 ## DynamoStorageOptions
 <Segment>
@@ -50,7 +55,14 @@ Creates a Dynamo storage adapter.
 - <p>[<code class="key">sk?</code>](#dynamostorageoptions.sk) <code class="primitive">string</code></p>
 - <p>[<code class="key">table</code>](#dynamostorageoptions.table) <code class="primitive">string</code></p>
 </Section>
-Configuration options for the Dynamo storage adapter.
+Configure the DynamoDB table that's created.
+```ts
+{
+  table: "my-table",
+  pk: "pk",
+  sk: "sk"
+}
+```
 </Segment>
 <NestedTitle id="dynamostorageoptions.pk" Tag="h4" parent="DynamoStorageOptions.">pk?</NestedTitle>
 <Segment>
