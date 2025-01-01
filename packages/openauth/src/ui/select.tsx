@@ -22,6 +22,7 @@
  *
  * @packageDocumentation
  */
+/** @jsxImportSource hono/jsx */
 
 import { Layout } from "./base.js"
 
