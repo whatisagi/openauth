@@ -1,21 +1,14 @@
-<p align="center">
-  <a href="https://openauth.js.org">
-    <picture>
-      <source srcset="https://raw.githubusercontent.com/openauthjs/identity/main/logo-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="https://raw.githubusercontent.com/openauthjs/identity/main/logo-light.svg" media="(prefers-color-scheme: light)">
-      <img src="https://raw.githubusercontent.com/openauthjs/identity/main/logo-light.svg" alt="OpenAuth logo">
-    </picture>
-  </a>
-</p>
-<p align="center">
-  <a href="https://sst.dev/discord"><img alt="Discord" src="https://img.shields.io/discord/983865673656705025?style=flat-square&label=Discord" /></a>
-  <a href="https://www.npmjs.com/package/@openauthjs/openauth"><img alt="npm" src="https://img.shields.io/npm/v/%40openauthjs%2Fcore?style=flat-square" /></a>
-  <a href="https://github.com/openauthjs/openauth/actions/workflows/release.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/openauthjs/openauth/release.yml?style=flat-square&branch=master" /></a>
-</p>
-
+---
+title: OpenAuth
+description: Introduction to OpenAuth.
 ---
 
-[OpenAuth](https://openauth.js.org) is a standards-based auth provider for web apps, mobile apps, single pages apps, APIs, or 3rd party clients. It is currently in beta.
+import { Image } from "astro:assets"
+
+import themeDark from "./themes-dark.png"
+import themeLight from "./themes-light.png"
+
+[OpenAuth](/) is a standards-based auth provider for web apps, mobile apps, single pages apps, APIs, or 3rd party clients. It is currently in beta.
 
 - **Universal**: You can deploy it as a standalone service or embed it into an existing application. It works with any framework or platform.
 - **Self-hosted**: It runs entirely on your infrastructure and can be deployed on Node.js, Bun, AWS Lambda, or Cloudflare Workers.
@@ -23,14 +16,22 @@
 - **Customizable**: It comes with prebuilt themeable UI that you can customize or opt out of.
 
 <picture>
-  <source srcset="https://raw.githubusercontent.com/openauthjs/identity/main/assets/themes-dark.png" media="(prefers-color-scheme: dark)">
-  <source srcset="https://raw.githubusercontent.com/openauthjs/identity/main/assets/themes-light.png" media="(prefers-color-scheme: dark)">
-  <img src="https://raw.githubusercontent.com/openauthjs/identity/main/assets/themes-light.png" alt="OpenAuth themes">
+  <source srcset={themeDark.src} media="(prefers-color-scheme: dark)" />
+  <source srcset={themeLight.src} media="(prefers-color-scheme: light)" />
+  <Image src={themeLight} alt="OpenAuth themes" />
 </picture>
 
-## Quick Start
+:::tip
+Check out the [launch video](https://www.youtube.com/watch?v=SSjNUuQ06tk) to learn more.
+:::
+
+---
+
+## Get started
 
 If you just want to get started as fast as possible you can jump straight into the [code examples](https://github.com/openauthjs/openauthjs/tree/master/examples) folder and copy paste away. There are also [SST components](https://sst.dev/docs/component/aws/auth) for deploying everything OpenAuth needs.
+
+---
 
 ## Approach
 
@@ -48,13 +49,17 @@ While OpenAuth tries to be mostly stateless, it does need to store a minimal amo
 
 There is also a themeable UI that you can use to get going without implementing any designs yourself. This is built on top of a lower level system so you can copy paste the default UI and tweak it or opt out entirely and implement your own.
 
-Finally, OpenAuth is created by the maintainers of [SST](https://sst.dev) which is a tool to manage all the infrastructure for your app. It contains components for OpenAuth that make deploying it to AWS or Cloudflare as simple as it can get.
+Finally, OpenAuth is created by the maintainers of [SST](https://sst.dev") which is a tool to manage all the infrastructure for your app. It contains components for OpenAuth that make deploying it to AWS or Cloudflare as simple as it can get.
+
+---
 
 ## Tutorial
 
 We'll show how to deploy the auth server and then a sample app that uses it.
 
-### Auth server
+---
+
+### Server
 
 Start by importing the `authorizer` function from the `@openauthjs/openauth` package.
 
@@ -214,7 +219,9 @@ serve(app)
 
 You now have a centralized auth server. Test it out by visiting `/.well-known/oauth-authorization-server` - you can see a live example [here](https://auth.terminal.shop/.well-known/oauth-authorization-server).
 
-### Auth client
+---
+
+### Client
 
 Since this is a standard OAuth server you can use any libraries for OAuth and it will work. OpenAuth does provide some light tooling for this although even a manual flow is pretty simple. You can create a client like this:
 
@@ -226,6 +233,8 @@ const client = createClient({
   issuer: "https://auth.myserver.com", // this is the url for your auth server
 })
 ```
+
+---
 
 #### SSR Sites
 
@@ -261,6 +270,8 @@ console.log(
 ```
 
 Passing in the refresh token is optional but if you do, this function will automatically refresh the access token if it has expired. It will return a new access token and refresh token which you should set back into the cookies.
+
+---
 
 #### SPA Sites, Mobile apps, etc
 
@@ -303,9 +314,3 @@ And then you can verify the access token on the server.
 const verified = await client.verify(subjects, accessToken)
 console.log(verified.subject)
 ```
-
----
-
-OpenAuth is created by the maintainers of [SST](https://sst.dev).
-
-**Join our community** [Discord](https://sst.dev/discord) | [YouTube](https://www.youtube.com/c/sst-dev) | [X.com](https://x.com/SST_dev)

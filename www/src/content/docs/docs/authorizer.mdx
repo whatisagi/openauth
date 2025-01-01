@@ -1,0 +1,187 @@
+---
+title: authorizer
+editUrl: false
+description: A page for the authorizer.
+---
+
+import Segment from '../../../components/tsdoc/Segment.astro';
+import Section from '../../../components/tsdoc/Section.astro';
+import NestedTitle from '../../../components/tsdoc/NestedTitle.astro';
+import InlineSection from '../../../components/tsdoc/InlineSection.astro';
+
+<div class="tsdoc">
+## Methods
+### authorizer
+<Segment>
+<Section type="signature">
+```ts
+authorizer(input)
+```
+</Section>
+<Section type="parameters">
+#### Parameters
+- <p><code class="key">input</code> [<code class="type">AuthorizerInput</code>](#authorizerinput)</p>
+The input object containing the subjects, storage, providers, theme, and optional success responder.
+</Section>
+<InlineSection>
+**Returns** <code class="type">Hono</code>
+</InlineSection>
+Create an authorizer object for handling OAuth 2.0 authorization requests.
+</Segment>
+## AuthorizerInput
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">providers</code>](#authorizerinput.providers) [<code class="type">Providers</code>](#providers)</p>
+- <p>[<code class="key">storage?</code>](#authorizerinput.storage) <code class="type">StorageAdapter</code></p>
+- <p>[<code class="key">subjects</code>](#authorizerinput.subjects) [<code class="type">Subjects</code>](#subjects)</p>
+- <p>[<code class="key">theme?</code>](#authorizerinput.theme) [<code class="type">Theme</code>](#theme)</p>
+- <p>[<code class="key">ttl?</code>](#authorizerinput.ttl) <code class="primitive">object type</code></p>
+  - <p>[<code class="key">access?</code>](#ttl.access) <code class="primitive">number</code></p>
+  - <p>[<code class="key">refresh?</code>](#ttl.refresh) <code class="primitive">number</code></p>
+- <p>[<code class="key">allow?</code>](#authorizerinput.allow) <code class="primitive">(input: <code class="primitive">object type</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">boolean</code><code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">error?</code>](#authorizerinput.error) <code class="primitive">(error: [<code class="type">UnknownStateError</code>](/docs/authorizer#unknownstateerror), req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">select?</code>](#authorizerinput.select) <code class="primitive">(providers: <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">start?</code>](#authorizerinput.start) <code class="primitive">(req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">void</code><code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">success</code>](#authorizerinput.success) <code class="primitive">(response: [<code class="type">OnSuccessResponder</code>](#onsuccessresponder), input: [<code class="type">Result</code>](#result), req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
+</Section>
+</Segment>
+<NestedTitle id="authorizerinput.providers" Tag="h4" parent="AuthorizerInput.">providers</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** [<code class="type">Providers</code>](#providers)
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizerinput.storage" Tag="h4" parent="AuthorizerInput.">storage?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="type">StorageAdapter</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizerinput.subjects" Tag="h4" parent="AuthorizerInput.">subjects</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** [<code class="type">Subjects</code>](#subjects)
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizerinput.theme" Tag="h4" parent="AuthorizerInput.">theme?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** [<code class="type">Theme</code>](#theme)
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizerinput.ttl" Tag="h4" parent="AuthorizerInput.">ttl?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">object type</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="ttl.access" Tag="h5" parent="AuthorizerInput.ttl.">access?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">number</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="ttl.refresh" Tag="h5" parent="AuthorizerInput.ttl.">refresh?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">number</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizerinput.allow" Tag="h4" parent="AuthorizerInput.">allow?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">(input: <code class="primitive">object type</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">boolean</code><code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizerinput.error" Tag="h4" parent="AuthorizerInput.">error?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">(error: [<code class="type">UnknownStateError</code>](/docs/authorizer#unknownstateerror), req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizerinput.select" Tag="h4" parent="AuthorizerInput.">select?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">(providers: <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizerinput.start" Tag="h4" parent="AuthorizerInput.">start?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">(req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">void</code><code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizerinput.success" Tag="h4" parent="AuthorizerInput.">success</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">(response: [<code class="type">OnSuccessResponder</code>](#onsuccessresponder), input: [<code class="type">Result</code>](#result), req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+## OnSuccessResponder
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">subject</code>](#onsuccessresponder.subject) <code class="primitive">(type: [<code class="type">Type</code>](#type), properties: <code class="primitive">indexedAccess</code>, opts?: <code class="primitive">object type</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
+</Section>
+The interface for the success responder.
+</Segment>
+<NestedTitle id="onsuccessresponder.subject" Tag="h4" parent="OnSuccessResponder.">subject</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">(type: [<code class="type">Type</code>](#type), properties: <code class="primitive">indexedAccess</code>, opts?: <code class="primitive">object type</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+## Errors
+### InvalidAccessTokenError
+<Segment>
+</Segment>
+### InvalidAuthorizationCodeError
+<Segment>
+</Segment>
+### InvalidRefreshTokenError
+<Segment>
+</Segment>
+### InvalidSubjectError
+<Segment>
+</Segment>
+### MissingParameterError
+<Segment>
+</Segment>
+### MissingProviderError
+<Segment>
+</Segment>
+### OauthError
+<Segment>
+</Segment>
+### UnauthorizedClientError
+<Segment>
+</Segment>
+### UnknownStateError
+<Segment>
+</Segment>
+</div>

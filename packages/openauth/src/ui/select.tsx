@@ -1,12 +1,58 @@
+/**
+ * The UI that's displayed when loading the root page of the authorizer. You can configure
+ * which providers should be displayed in the select UI.
+ *
+ * ```ts
+ * import { Select } from "@openauthjs/openauth/ui/select"
+ *
+ * export default authorizer({
+ *   select: Select({
+ *     providers: {
+ *       github: {
+ *         hide: true
+ *       },
+ *       google: {
+ *         display: "Google"
+ *       }
+ *     }
+ *   })
+ *   // ...
+ * })
+ * ```
+ *
+ * @packageDocumentation
+ */
 /** @jsxImportSource hono/jsx */
 
 import { Layout } from "./base.js"
 
 export interface SelectProps {
+  /**
+   * An object with all the providers and their config; where the key is the provider name.
+   *
+   * @example
+   * ```ts
+   * {
+   *   github: {
+   *     hide: true
+   *   },
+   *   google: {
+   *     display: "Google"
+   *   }
+   * }
+   * ```
+   */
   providers?: Record<
     string,
     {
+      /**
+       * Whether to hide the provider from the select UI.
+       * @default false
+       */
       hide?: boolean
+      /**
+       * The display name of the provider.
+       */
       display?: string
     }
   >

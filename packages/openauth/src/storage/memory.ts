@@ -1,8 +1,51 @@
+/**
+ * Configure OpenAuth to use a simple in-memory store.
+ *
+ * :::caution
+ * This is not meant to be used in production.
+ * :::
+ *
+ * This is useful for testing and development. It's not meant to be used in production.
+ *
+ * ```ts
+ * import { MemoryStorage } from "@openauthjs/openauth/storage/memory";
+ *
+ * const storage = MemoryStorage()
+ *
+ * export default authorizer({
+ *   storage,
+ *   // ...
+ * })
+ * ```
+ *
+ * Optionally, you can persist the store to a file.
+ *
+ * ```ts
+ * MemoryStorage({
+ *   persist: "./persist.json"
+ * })
+ * ```
+ *
+ * @packageDocumentation
+ */
 import { joinKey, splitKey, StorageAdapter } from "./storage.js"
 import { existsSync, readFileSync } from "node:fs"
 import { writeFile } from "node:fs/promises"
 
+/**
+ * Configure the memory store.
+ */
 export interface MemoryStorageOptions {
+  /**
+   * Optionally, backup the store to a file. So it'll be persisted when the authorizer restarts.
+   *
+   * @example
+   * ```ts
+   * {
+   *   persist: "./persist.json"
+   * }
+   * ```
+   */
   persist?: string
 }
 export function MemoryStorage(input?: MemoryStorageOptions): StorageAdapter {

@@ -1,3 +1,43 @@
+/**
+ * Use the OpenAuth client kick off your authorization flows, exchange tokens, refresh tokens,
+ * and verify tokens.
+ *
+ * First, create a client.
+ *
+ * ```ts
+ * import { createClient } from "@openauthjs/openauth/client"
+ *
+ * const client = createClient({
+ *   clientID: "my-client",
+ *   issuer: "https://auth.myserver.com"
+ * })
+ * ```
+ *
+ * Kick off the authorization flow by calling `authorize`.
+ *
+ * ```ts
+ * const redirect_uri = "https://myserver.com/callback"
+ *
+ * const { url } = await client.authorize(
+ *   redirect_uri,
+ *   "code",
+ * )
+ * ```
+ *
+ * When the user completes the flow, `exchange` the code for tokens.
+ *
+ * ```ts
+ * const tokens = await client.exchange(query.get("code"), redirect_uri)
+ * ```
+ *
+ * And `verify` the tokens.
+ *
+ * ```ts
+ * const verified = await client.verify(subjects, tokens.access)
+ * ```
+ *
+ * @packageDocumentation
+ */
 import {
   createLocalJWKSet,
   errors,
@@ -59,19 +99,38 @@ export type Challenge = {
 }
 
 /**
- * The input object for the client.
+ * Configure the client.
  */
 export interface ClientInput {
   /**
-   * The client ID.
+   * The client ID. This is just a string to identify your app.
+   *
+   * If you have a web app and a mobile app, you want to use different client IDs both.
+   *
+   * @example
+   * ```ts
+   * {
+   *   clientID: "my-client"
+   * }
+   * ```
    */
   clientID: string
   /**
-   * The issuer URL.
+   * The URL of your authorization server.
+   *
+   * @example
+   * ```ts
+   * {
+   *   issuer: "https://auth.myserver.com"
+   * }
+   * ```
    */
   issuer?: string
   /**
-   * The fetch function to use.
+   * Optionally, override the internally used fetch function.
+   *
+   * This is useful if you are using a polyfilled fetch function in your application and you
+   * want the client to use it too.
    */
   fetch?: FetchLike
 }
