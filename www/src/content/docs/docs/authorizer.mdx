@@ -159,15 +159,19 @@ The interface for the success responder.
 ## Errors
 ### InvalidAccessTokenError
 <Segment>
+The given access token is invalid.
 </Segment>
 ### InvalidAuthorizationCodeError
 <Segment>
+The given authorization code is invalid.
 </Segment>
 ### InvalidRefreshTokenError
 <Segment>
+The given refresh token is invalid.
 </Segment>
 ### InvalidSubjectError
 <Segment>
+The given subject is invalid.
 </Segment>
 ### MissingParameterError
 <Segment>
@@ -183,5 +187,9 @@ The interface for the success responder.
 </Segment>
 ### UnknownStateError
 <Segment>
+The browser was in an unknown state.
+
+This can happen when certain cookies have expired. Or the browser was switched in the middle
+of the authentication flow.
 </Segment>
 </div>

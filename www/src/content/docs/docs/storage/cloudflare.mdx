@@ -40,12 +40,27 @@ CloudflareStorage(options)
 </Section>
 <Section type="parameters">
 #### Parameters
-- <p><code class="key">options</code> <code class="type">CloudflareStorageOptions</code></p>
+- <p><code class="key">options</code> [<code class="type">CloudflareStorageOptions</code>](#cloudflarestorageoptions)</p>
 The config for the adapter.
 </Section>
 <InlineSection>
 **Returns** <code class="type">StorageAdapter</code>
 </InlineSection>
 Creates a Cloudflare KV store.
+</Segment>
+## CloudflareStorageOptions
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">namespace</code>](#cloudflarestorageoptions.namespace) <code class="type">KVNamespace</code></p>
+</Section>
+Configure the DynamoDB table that's created.
+</Segment>
+<NestedTitle id="cloudflarestorageoptions.namespace" Tag="h4" parent="CloudflareStorageOptions.">namespace</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="type">KVNamespace</code>
+</InlineSection>
+</Section>
 </Segment>
 </div>

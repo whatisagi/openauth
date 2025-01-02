@@ -301,10 +301,21 @@ export interface Client {
    * For SPA sites, the code is passed in through the URL hash.
    * :::
    *
-   * This returns the access and refresh tokens. Or an error if something went wrong.
+   * This returns the access and refresh tokens. Or if it fails it returns an error that you can
+   * handle depending on the error.
    *
    * ```ts
-   * if (exchanged.err) throw new Error(exchanged.err)
+   * import { InvalidAuthorizationCodeError } from "@openauthjs/openauth/error"
+   *
+   * if (exchanged.err) {
+   *   if (exchanged.err instanceof InvalidAuthorizationCodeError) {
+   *     // handle invalid code error
+   *   }
+   *   else {
+   *     // handle other errors
+   *   }
+   * }
+   *
    * const { access, refresh } = exchanged.tokens
    * ```
    *
