@@ -79,18 +79,16 @@ export function DynamoStorage(options: DynamoStorageOptions): StorageAdapter {
 
   async function dynamo(action: string, payload: any) {
     const client = await c
-    const endpoint = options.endpoint || `https://dynamodb.${client.region}.amazonaws.com`
-    const response = await client.fetch(
-      endpoint,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-amz-json-1.0",
-          "X-Amz-Target": `DynamoDB_20120810.${action}`,
-        },
-        body: JSON.stringify(payload),
+    const endpoint =
+      options.endpoint || `https://dynamodb.${client.region}.amazonaws.com`
+    const response = await client.fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-amz-json-1.0",
+        "X-Amz-Target": `DynamoDB_20120810.${action}`,
       },
-    )
+      body: JSON.stringify(payload),
+    })
 
     if (!response.ok) {
       throw new Error(`DynamoDB request failed: ${response.statusText}`)
