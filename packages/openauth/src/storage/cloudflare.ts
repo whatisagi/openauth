@@ -24,7 +24,7 @@ import { joinKey, splitKey, StorageAdapter } from "./storage.js"
 /**
  * Configure the DynamoDB table that's created.
  */
-interface CloudflareStorageOptions {
+export interface CloudflareStorageOptions {
   namespace: KVNamespace
 }
 /**
