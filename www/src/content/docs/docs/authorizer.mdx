@@ -28,6 +28,83 @@ The input object containing the subjects, storage, providers, theme, and optiona
 </InlineSection>
 Create an authorizer object for handling OAuth 2.0 authorization requests.
 </Segment>
+## AuthorizationState
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">audience?</code>](#authorizationstate.audience) <code class="primitive">string</code></p>
+- <p>[<code class="key">client_id</code>](#authorizationstate.client_id) <code class="primitive">string</code></p>
+- <p>[<code class="key">pkce?</code>](#authorizationstate.pkce) <code class="primitive">object type</code></p>
+  - <p>[<code class="key">challenge</code>](#pkce.challenge) <code class="primitive">string</code></p>
+  - <p>[<code class="key">method</code>](#pkce.method) <code class="symbol">&ldquo;</code><code class="primitive">S256</code><code class="symbol">&rdquo;</code></p>
+- <p>[<code class="key">redirect_uri</code>](#authorizationstate.redirect_uri) <code class="primitive">string</code></p>
+- <p>[<code class="key">response_type</code>](#authorizationstate.response_type) <code class="primitive">string</code></p>
+- <p>[<code class="key">state</code>](#authorizationstate.state) <code class="primitive">string</code></p>
+</Section>
+</Segment>
+<NestedTitle id="authorizationstate.audience" Tag="h4" parent="AuthorizationState.">audience?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizationstate.client_id" Tag="h4" parent="AuthorizationState.">client_id</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizationstate.pkce" Tag="h4" parent="AuthorizationState.">pkce?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">object type</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="pkce.challenge" Tag="h5" parent="AuthorizationState.pkce.">challenge</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="pkce.method" Tag="h5" parent="AuthorizationState.pkce.">method</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="symbol">&ldquo;</code><code class="primitive">S256</code><code class="symbol">&rdquo;</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizationstate.redirect_uri" Tag="h4" parent="AuthorizationState.">redirect_uri</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizationstate.response_type" Tag="h4" parent="AuthorizationState.">response_type</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizationstate.state" Tag="h4" parent="AuthorizationState.">state</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
 ## AuthorizerInput
 <Segment>
 <Section type="parameters">

@@ -57,6 +57,7 @@ import { generatePKCE } from "./pkce.js"
 
 /**
  * The well-known information for an OAuth 2.0 authorization server.
+ * @internal
  */
 export interface WellKnown {
   /**
@@ -222,47 +223,121 @@ export interface ExchangeError {
    * ```ts
    * import { InvalidAuthorizationCodeError } from "@openauthjs/openauth/error"
    *
-   * if (exchanged.err instanceof InvalidAuthorizationCodeError) {
-   *   // handle invalid code error
-   * }
-   * ```
+   * console.log(err instanceof InvalidAuthorizationCodeError)
+   *```
    */
   err: InvalidAuthorizationCodeError
 }
 
 export interface RefreshOptions {
+  /**
+   * Optionally, pass in the access token.
+   */
   access?: string
 }
 
+/**
+ * Returned when the refresh is successful.
+ */
 export interface RefreshSuccess {
+  /**
+   * This is always `false` when the refresh is successful.
+   */
   err: false
+  /**
+   * Returns the refreshed tokens only if they've been refreshed.
+   *
+   * If they are still valid, this will be `undefined`.
+   */
   tokens?: Tokens
 }
 
+/**
+ * Returned when the refresh fails.
+ */
 export interface RefreshError {
+  /**
+   * The type of error that occurred. You can handle this by checking the type.
+   *
+   * @example
+   * ```ts
+   * import { InvalidRefreshTokenError } from "@openauthjs/openauth/error"
+   *
+   * console.log(err instanceof InvalidRefreshTokenError)
+   *```
+   */
   err: InvalidRefreshTokenError | InvalidAccessTokenError
 }
 
 export interface VerifyOptions {
+  /**
+   * Optionally, pass in the refresh token.
+   *
+   * If passed in, this will automatically refresh the access token if it has expired.
+   */
   refresh?: string
+  /**
+   * @internal
+   */
   issuer?: string
+  /**
+   * @internal
+   */
   audience?: string
-  fetch?: typeof fetch
+  /**
+   * Optionally, override the internally used fetch function.
+   *
+   * This is useful if you are using a polyfilled fetch function in your application and you
+   * want the client to use it too.
+   */
+  fetch?: FetchLike
 }
 
 export interface VerifyResult<T extends SubjectSchema> {
+  /**
+   * This is always `undefined` when the verify is successful.
+   */
   err?: undefined
+  /**
+   * Returns the refreshed tokens only if they’ve been refreshed.
+   *
+   * If they are still valid, this will be undefined.
+   */
   tokens?: Tokens
+  /**
+   * @internal
+   */
   aud: string
+  /**
+   * The decoded subjects from the access token.
+   *
+   * Has the same shape as the subjects you defined when creating the authorizer.
+   */
   subject: {
     [type in keyof T]: { type: type; properties: v1.InferOutput<T[type]> }
   }[keyof T]
 }
 
+/**
+ * Returned when the verify call fails.
+ */
 export interface VerifyError {
+  /**
+   * The type of error that occurred. You can handle this by checking the type.
+   *
+   * @example
+   * ```ts
+   * import { InvalidRefreshTokenError } from "@openauthjs/openauth/error"
+   *
+   * console.log(err instanceof InvalidRefreshTokenError)
+   *```
+   */
   err: InvalidRefreshTokenError | InvalidAccessTokenError
 }
 
+/**
+ * An instance of the OpenAuth client contains the following methods.
+ */
 export interface Client {
   /**
    * Start the autorization flow. For example, in SSR sites.
@@ -295,10 +370,6 @@ export interface Client {
    * ```
    *
    * This returns a redirect URL and a challenge that you need to use later to verify the code.
-   *
-   * @param redirectURI - The redirect URI.
-   * @param response - The response type.
-   * @param opts - Authorization options.
    */
   authorize(
     redirectURI: string,
@@ -355,10 +426,6 @@ export interface Client {
    *
    * const { access, refresh } = exchanged.tokens
    * ```
-   *
-   * @param code - The authorization code.
-   * @param redirectURI - The redirect URI that was passed in to `authorize`.
-   * @param verifier - The challenge verifier for PKCE flows.
    */
   exchange(
     code: string,
@@ -366,19 +433,99 @@ export interface Client {
     verifier?: string,
   ): Promise<ExchangeSuccess | ExchangeError>
   /**
-   * Refresh the tokens.
-   * @param refresh - The refresh token.
-   * @param opts - Refresh options.
+   * Refreshes the tokens if they have expired. This is used in an SPA app to maintain the
+   * session, without logging the user out.
+   *
+   * ```ts
+   * const next = await client.refresh(<refresh_token>)
+   * ```
+   *
+   * Can optionally take the access token as well. If passed in, this will skip the refresh
+   * if the access token is still valid.
+   *
+   * ```ts
+   * const next = await client.refresh(<refresh_token>, { access: <access_token> })
+   * ```
+   *
+   * This returns the refreshed tokens only if they've been refreshed.
+   *
+   * ```ts
+   * if (!next.err) {
+   *   // tokens are still valid
+   * }
+   * if (next.tokens) {
+   *   const { access, refresh } = next.tokens
+   * }
+   * ```
+   *
+   * Or if it fails, it returns an error that you can handle depending on the error.
+   *
+   * ```ts
+   * import { InvalidRefreshTokenError } from "@openauthjs/openauth/error"
+   *
+   * if (next.err) {
+   *   if (next.err instanceof InvalidRefreshTokenError) {
+   *     // handle invalid refresh token error
+   *   }
+   *   else {
+   *     // handle other errors
+   *   }
+   * }
+   * ```
    */
   refresh(
     refresh: string,
     opts?: RefreshOptions,
   ): Promise<RefreshSuccess | RefreshError>
   /**
-   * Verify the token.
-   * @param subjects - The subjects.
-   * @param token - The token.
-   * @param options - Verification options.
+   * Verify the token in the incoming request.
+   *
+   * This is typically used for SSR sites where the token is stored in an HTTP only cookie. And
+   * is passed to the server on every request.
+   *
+   * ```ts
+   * const verified = await client.verify(<subjects>, <token>)
+   * ```
+   *
+   * This takes the subjects that you had previously defined when creating the authorizer.
+   *
+   * :::tip
+   * If the refresh token is passed in, it'll automatically refresh the access token.
+   * :::
+   *
+   * This can optionally take the refresh token as well. If passed in, it'll automatically
+   * refresh the access token if it has expired.
+   *
+   * ```ts
+   * const verified = await client.verify(<subjects>, <token>, { refresh: <refresh_token> })
+   * ```
+   *
+   * This returns the decoded subjects from the access token. And the tokens if they've been
+   * refreshed.
+   *
+   * ```ts
+   * // based on the subjects you defined earlier
+   * console.log(verified.subject.properties.userID)
+   *
+   * if (verified.tokens) {
+   *   const { access, refresh } = verified.tokens
+   * }
+   * ```
+   *
+   * Or if it fails, it returns an error that you can handle depending on the error.
+   *
+   * ```ts
+   * import { InvalidRefreshTokenError } from "@openauthjs/openauth/error"
+   *
+   * if (verified.err) {
+   *   if (verified.err instanceof InvalidRefreshTokenError) {
+   *     // handle invalid refresh token error
+   *   }
+   *   else {
+   *     // handle other errors
+   *   }
+   * }
+   * ```
    */
   verify<T extends SubjectSchema>(
     subjects: T,

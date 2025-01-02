@@ -50,6 +50,7 @@ Creates a DynamoDB store.
 ## DynamoStorageOptions
 <Segment>
 <Section type="parameters">
+- <p>[<code class="key">endpoint?</code>](#dynamostorageoptions.endpoint) <code class="primitive">string</code></p>
 - <p>[<code class="key">pk?</code>](#dynamostorageoptions.pk) <code class="primitive">string</code></p>
 - <p>[<code class="key">sk?</code>](#dynamostorageoptions.sk) <code class="primitive">string</code></p>
 - <p>[<code class="key">table</code>](#dynamostorageoptions.table) <code class="primitive">string</code></p>
@@ -62,6 +63,19 @@ Configure the DynamoDB table that's created.
   sk: "sk"
 }
 ```
+</Segment>
+<NestedTitle id="dynamostorageoptions.endpoint" Tag="h4" parent="DynamoStorageOptions.">endpoint?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+
+<InlineSection>
+**Default** "https://dynamodb.{region}.amazonaws.com"
+</InlineSection>
+Endpoint URL for the DynamoDB service. Useful for local testing.
 </Segment>
 <NestedTitle id="dynamostorageoptions.pk" Tag="h4" parent="DynamoStorageOptions.">pk?</NestedTitle>
 <Segment>
