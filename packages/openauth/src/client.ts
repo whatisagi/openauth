@@ -1,5 +1,5 @@
 /**
- * Use the OpenAuth client kick off your authorization flows, exchange tokens, refresh tokens,
+ * Use the OpenAuth client kick off your OAuth flows, exchange tokens, refresh tokens,
  * and verify tokens.
  *
  * First, create a client.
@@ -13,14 +13,14 @@
  * })
  * ```
  *
- * Kick off the authorization flow by calling `authorize`.
+ * Kick off the OAuth flow by calling `authorize`.
  *
  * ```ts
  * const redirect_uri = "https://myserver.com/callback"
  *
  * const { url } = await client.authorize(
  *   redirect_uri,
- *   "code",
+ *   "code"
  * )
  * ```
  *
@@ -93,8 +93,17 @@ interface ResponseLike {
 }
 type FetchLike = (...args: any[]) => Promise<ResponseLike>
 
+/**
+ * The challenge that you can use to verify the code.
+ */
 export type Challenge = {
+  /**
+   * The state that was sent to the redirect URI.
+   */
   state: string
+  /**
+   * The verifier that was sent to the redirect URI.
+   */
   verifier?: string
 }
 
@@ -136,12 +145,55 @@ export interface ClientInput {
 }
 
 export interface AuthorizeOptions {
+  /**
+   * Enable the PKCE flow. This is for SPA apps.
+   *
+   * ```ts
+   * {
+   *   pkce: true
+   * }
+   * ```
+   *
+   * @default false
+   */
   pkce?: boolean
+  /**
+   * The provider you want to use for the OAuth flow.
+   *
+   * ```ts
+   * {
+   *   provider: "google"
+   * }
+   * ```
+   *
+   * If no provider is specified, the user is directed to a page where they can select from the
+   * list of configured providers.
+   *
+   * If there's only one provider configured, the user will be redirected to that.
+   */
   provider?: string
 }
 
 export interface AuthorizeResult {
+  /**
+   * The challenge that you can use to verify the code. This is for the PKCE flow for SPA apps.
+   *
+   * This is an object that you _stringify_ and store it in session storage.
+   *
+   * ```ts
+   * sessionStorage.setItem("challenge", JSON.stringify(challenge))
+   * ```
+   */
   challenge: Challenge
+  /**
+   * The URL to redirect the user to. This starts the OAuth flow.
+   *
+   * For example, for SPA apps.
+   *
+   * ```ts
+   * location.href = url
+   * ```
+   */
   url: string
 }
 
@@ -189,7 +241,37 @@ export interface VerifyError {
 
 export interface Client {
   /**
-   * Authorize the client.
+   * Start the autorization flow. For example, in SSR sites you do.
+   *
+   * ```ts
+   * const { url } = await client.authorize(<redirect_uri>, "code")
+   * ```
+   *
+   * This takes a redirect URI and the type of flow you want to use. The redirect URI is the
+   * location where the user will be redirected to after the flow is complete.
+   *
+   * Supports both the _code_ and _token_ flows. We recommend using the _code_ flow as it's more
+   *
+   * :::tip
+   * This returns a URL to the auth server that you redirect to. This starts the flow.
+   * :::
+   *
+   * This returns a URL that you can redirect the user to. And this starts the OAuth flow.
+   * secure.
+   *
+   * For SPA apps, we recommend using the PKCE flow.
+   *
+   * ```ts {4}
+   * const { challenge, url } = await client.authorize(
+   *   <redirect_uri>,
+   *   "code",
+   *   { pkce: true }
+   * )
+   * ```
+   *
+   * This returns the URL that you redirect to, to start the flow. It also returns a challenge
+   * that you can use to later verify the code.
+   *
    * @param redirectURI - The redirect URI.
    * @param response - The response type.
    * @param opts - Authorization options.
@@ -200,10 +282,48 @@ export interface Client {
     opts?: AuthorizeOptions,
   ): Promise<AuthorizeResult>
   /**
-   * Exchange the authorization code for tokens.
+   * Exchange the code that's passed in for the access and refresh tokens.
+   *
+   * ```ts
+   * const exchanged = await client.exchange(<code>, <redirect_uri>)
+   * ```
+   *
+   * You call this after the user has been redirected back to your app after the OAuth flow.
+   *
+   * :::tip
+   * For SSR sites, the code is passed in as a query parameter.
+   * :::
+   *
+   * So the code comes from the query parameter in the redirect URI. The redirect URI that you
+   * pass in is the one that you passed in to `authorize` when starting the flow.
+   *
+   * :::tip
+   * For SPA sites, the code is passed in through the URL hash.
+   * :::
+   *
+   * This returns the access and refresh tokens. Or an error if something went wrong.
+   *
+   * ```ts
+   * if (exchanged.err) throw new Error(exchanged.err)
+   * const { access, refresh } = exchanged.tokens
+   * ```
+   *
+   * If you used the PKCE flow for an SPA app, the code is returned as a part of the redirect URL
+   * hash.
+   *
+   * ```ts
+   * const exchanged = await client.exchange(
+   *   <code>,
+   *   <redirect_uri>,
+   *   <verifier>
+   * )
+   * ```
+   *
+   * You also need to pass in the previously stored challenge verifier.
+   *
    * @param code - The authorization code.
-   * @param redirectURI - The redirect URI.
-   * @param verifier - The verifier.
+   * @param redirectURI - The redirect URI that was passed in to `authorize`.
+   * @param verifier - The challenge verifier for PKCE flows.
    */
   exchange(
     code: string,
@@ -233,9 +353,9 @@ export interface Client {
 }
 
 /**
- * Create a client object for interacting with an OAuth 2.0 authorization server.
- * @param input - The input object containing the client ID, issuer, and optional fetch function.
- * @returns An object containing methods for authorizing, exchanging tokens, refreshing tokens, and verifying tokens.
+ * Create an OpenAuth client.
+ *
+ * @param input - Configure the client.
  */
 export function createClient(input: ClientInput): Client {
   const jwksCache = new Map<string, ReturnType<typeof createLocalJWKSet>>()

@@ -2,7 +2,7 @@
  * Configure OpenAuth to use [DynamoDB](https://aws.amazon.com/dynamodb/) as a storage adapter.
  *
  * ```ts
- * import { DynamoStorage } from "@openauthjs/openauth/storage/dynamo";
+ * import { DynamoStorage } from "@openauthjs/openauth/storage/dynamo"
  *
  * const storage = DynamoStorage({
  *   table: "my-table",
@@ -120,8 +120,8 @@ export function DynamoStorage(options: DynamoStorageOptions): StorageAdapter {
           [sk]: { S: parsed.sk },
           ...(expiry
             ? {
-                expiry: { N: Math.floor(expiry.getTime() / 1000).toString() },
-              }
+              expiry: { N: Math.floor(expiry.getTime() / 1000).toString() },
+            }
             : {}),
           value: { S: JSON.stringify(value) },
         },

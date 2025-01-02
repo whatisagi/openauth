@@ -11,10 +11,10 @@ import InlineSection from '../../../components/tsdoc/InlineSection.astro';
 
 <div class="tsdoc">
 <Section type="about">
-Use the OpenAuth client kick off your authorization flows, exchange tokens, refresh tokens,
+Use the OpenAuth client kick off your OAuth flows, exchange tokens, refresh tokens,
 and verify tokens.
 
-Start by creating a client.
+First, create a client.
 
 
 ```ts
@@ -27,7 +27,7 @@ const client = createClient({
 ```
 
 
-Start the authorization flow by calling 
+Kick off the OAuth flow by calling 
 `authorize`
 .
 
@@ -37,12 +37,14 @@ const redirect_uri = "https://myserver.com/callback"
 
 const { url } = await client.authorize(
   redirect_uri,
-  "code",
+  "code"
 )
 ```
 
 
-When the user completes the flow, exchange the code for tokens.
+When the user completes the flow, 
+`exchange`
+ the code for tokens.
 
 
 ```ts
@@ -50,7 +52,9 @@ const tokens = await client.exchange(query.get("code"), redirect_uri)
 ```
 
 
-Verify the tokens.
+And 
+`verify`
+ the tokens.
 
 
 ```ts
@@ -69,12 +73,12 @@ createClient(input)
 <Section type="parameters">
 #### Parameters
 - <p><code class="key">input</code> [<code class="type">ClientInput</code>](#clientinput)</p>
-The input object containing the client ID, issuer, and optional fetch function.
+Configure the client.
 </Section>
 <InlineSection>
 **Returns** [<code class="type">Client</code>](#client)
 </InlineSection>
-Create a client object for interacting with an OAuth 2.0 authorization server.
+Create an OpenAuth client.
 </Segment>
 ## AuthorizeOptions
 <Segment>
@@ -90,6 +94,18 @@ Create a client object for interacting with an OAuth 2.0 authorization server.
 **Type** <code class="primitive">boolean</code>
 </InlineSection>
 </Section>
+
+<InlineSection>
+**Default** false
+</InlineSection>
+Enable the PKCE flow. This is for SPA apps.
+
+
+```ts
+{
+  pkce: true
+}
+```
 </Segment>
 <NestedTitle id="authorizeoptions.provider" Tag="h4" parent="AuthorizeOptions.">provider?</NestedTitle>
 <Segment>
@@ -98,6 +114,20 @@ Create a client object for interacting with an OAuth 2.0 authorization server.
 **Type** <code class="primitive">string</code>
 </InlineSection>
 </Section>
+The provider you want to use for the OAuth flow.
+
+
+```ts
+{
+  provider: "google"
+}
+```
+
+
+If no provider is specified, the user is directed to a page where they can select from the
+list of configured providers.
+
+If there's only one provider configured, the user will be redirected to that.
 </Segment>
 ## AuthorizeResult
 <Segment>
@@ -113,6 +143,14 @@ Create a client object for interacting with an OAuth 2.0 authorization server.
 **Type** [<code class="type">Challenge</code>](#challenge)
 </InlineSection>
 </Section>
+The challenge that you can use to verify the code. This is for the PKCE flow for SPA apps.
+
+This is an object that you _stringify_ and store it in session storage.
+
+
+```ts
+sessionStorage.setItem("challenge", JSON.stringify(challenge))
+```
 </Segment>
 <NestedTitle id="authorizeresult.url" Tag="h4" parent="AuthorizeResult.">url</NestedTitle>
 <Segment>
@@ -121,6 +159,14 @@ Create a client object for interacting with an OAuth 2.0 authorization server.
 **Type** <code class="primitive">string</code>
 </InlineSection>
 </Section>
+The URL to redirect the user to. This starts the OAuth flow.
+
+For example, for SPA apps.
+
+
+```ts
+location.href = url
+```
 </Segment>
 ## Client
 <Segment>
@@ -170,7 +216,7 @@ Create a client object for interacting with an OAuth 2.0 authorization server.
 - <p>[<code class="key">fetch?</code>](#clientinput.fetch) <code class="type">FetchLike</code></p>
 - <p>[<code class="key">issuer?</code>](#clientinput.issuer) <code class="primitive">string</code></p>
 </Section>
-The input object for the client.
+Configure the client.
 </Segment>
 <NestedTitle id="clientinput.clientid" Tag="h4" parent="ClientInput.">clientID</NestedTitle>
 <Segment>
@@ -179,7 +225,14 @@ The input object for the client.
 **Type** <code class="primitive">string</code>
 </InlineSection>
 </Section>
-The client ID.
+The client ID. This is just a string to identify your app.
+
+If you have a web app and a mobile app, you want to use different client IDs both.
+```ts
+{
+  clientID: "my-client"
+}
+```
 </Segment>
 <NestedTitle id="clientinput.fetch" Tag="h4" parent="ClientInput.">fetch?</NestedTitle>
 <Segment>
@@ -188,7 +241,10 @@ The client ID.
 **Type** <code class="type">FetchLike</code>
 </InlineSection>
 </Section>
-The fetch function to use.
+Optionally, override the internally used fetch function.
+
+This is useful if you are using a polyfilled fetch function in your application and you
+want the client to use it too.
 </Segment>
 <NestedTitle id="clientinput.issuer" Tag="h4" parent="ClientInput.">issuer?</NestedTitle>
 <Segment>
@@ -197,7 +253,12 @@ The fetch function to use.
 **Type** <code class="primitive">string</code>
 </InlineSection>
 </Section>
-The issuer URL.
+The URL of your authorization server.
+```ts
+{
+  issuer: "https://auth.myserver.com"
+}
+```
 </Segment>
 ## ExchangeError
 <Segment>

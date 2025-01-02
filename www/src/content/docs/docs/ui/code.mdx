@@ -66,6 +66,7 @@ Creates a UI for the Code provider flow.
   - <p>[<code class="key">code_sent</code>](#copy.code_sent) <code class="primitive">string</code></p>
   - <p>[<code class="key">email_invalid</code>](#copy.email_invalid) <code class="primitive">string</code></p>
   - <p>[<code class="key">email_placeholder</code>](#copy.email_placeholder) <code class="primitive">string</code></p>
+- <p>[<code class="key">mode?</code>](#codeuioptions.mode) <code class="symbol">&ldquo;</code><code class="primitive">email</code><code class="symbol">&rdquo;</code><code class="symbol"> | </code><code class="symbol">&ldquo;</code><code class="primitive">phone</code><code class="symbol">&rdquo;</code></p>
 - <p>[<code class="key">sendCode</code>](#codeuioptions.sendcode) <code class="primitive">object type</code></p>
 </Section>
 Configure the password UI.
@@ -168,6 +169,19 @@ Error message when the email is invalid.
 </InlineSection>
 </Section>
 Copy for the email input.
+</Segment>
+<NestedTitle id="codeuioptions.mode" Tag="h4" parent="CodeUIOptions.">mode?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="symbol">&ldquo;</code><code class="primitive">email</code><code class="symbol">&rdquo;</code><code class="symbol"> | </code><code class="symbol">&ldquo;</code><code class="primitive">phone</code><code class="symbol">&rdquo;</code>
+</InlineSection>
+</Section>
+
+<InlineSection>
+**Default** "email"
+</InlineSection>
+The mode to use for the input.
 </Segment>
 <NestedTitle id="codeuioptions.sendcode" Tag="h4" parent="CodeUIOptions.">sendCode</NestedTitle>
 <Segment>
