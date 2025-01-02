@@ -24,6 +24,9 @@ export default authorizer({
       }),
     ),
   },
+  async allow() {
+    return true
+  },
   success: async (ctx, value) => {
     if (value.provider === "password") {
       return ctx.subject("user", {

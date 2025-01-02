@@ -10,31 +10,35 @@ import {
 } from "jose"
 import { Storage, StorageAdapter } from "./storage/storage.js"
 
-const alg = "RS512"
+const signingAlg = "ES256"
+const encryptionAlg = "RSA-OAEP-512"
 
 interface SerializedKeyPair {
   id: string
   publicKey: string
   privateKey: string
   created: number
+  alg: string
+  expired?: number
 }
 
 export interface KeyPair {
   id: string
   alg: string
-  signing: {
-    public: KeyLike
-    private: KeyLike
-  }
-  encryption: {
-    public: KeyLike
-    private: KeyLike
-  }
+  public: KeyLike
+  private: KeyLike
   created: Date
+  expired?: Date
   jwk: JWK
 }
 
-export async function keys(storage: StorageAdapter): Promise<KeyPair[]> {
+/**
+ * @deprecated use `signingKeys` instead
+ */
+export async function legacySigningKeys(
+  storage: StorageAdapter,
+): Promise<KeyPair[]> {
+  const alg = "RS512"
   const results = [] as KeyPair[]
   const scanner = Storage.scan<SerializedKeyPair>(storage, ["oauth:key"])
   for await (const [_key, value] of scanner) {
@@ -48,20 +52,39 @@ export async function keys(storage: StorageAdapter): Promise<KeyPair[]> {
       id: value.id,
       alg,
       created: new Date(value.created),
-      signing: {
-        public: publicKey,
-        private: privateKey,
-      },
-      encryption: {
-        public: await importSPKI(value.publicKey, "RSA-OAEP-512"),
-        private: await importPKCS8(value.privateKey, "RSA-OAEP-512"),
-      },
+      public: publicKey,
+      private: privateKey,
+      expired: new Date(1735858114000),
       jwk,
     })
   }
-  if (results.length) return results
+  return results
+}
 
-  const key = await generateKeyPair(alg, {
+export async function signingKeys(storage: StorageAdapter): Promise<KeyPair[]> {
+  const results = [] as KeyPair[]
+  const scanner = Storage.scan<SerializedKeyPair>(storage, ["signing:key"])
+  for await (const [_key, value] of scanner) {
+    const publicKey = await importSPKI(value.publicKey, value.alg, {
+      extractable: true,
+    })
+    const privateKey = await importPKCS8(value.privateKey, value.alg)
+    const jwk = await exportJWK(publicKey)
+    jwk.kid = value.id
+    results.push({
+      id: value.id,
+      alg: signingAlg,
+      created: new Date(value.created),
+      expired: value.expired ? new Date(value.expired) : undefined,
+      public: publicKey,
+      private: privateKey,
+      jwk,
+    })
+  }
+  results.sort((a, b) => b.created.getTime() - a.created.getTime())
+  if (results.filter((item) => !item.expired).length) return results
+
+  const key = await generateKeyPair(signingAlg, {
     extractable: true,
   })
   const serialized: SerializedKeyPair = {
@@ -69,7 +92,47 @@ export async function keys(storage: StorageAdapter): Promise<KeyPair[]> {
     publicKey: await exportSPKI(key.publicKey),
     privateKey: await exportPKCS8(key.privateKey),
     created: Date.now(),
+    alg: signingAlg,
   }
-  await Storage.set(storage, ["oauth:key", serialized.id], serialized)
-  return keys(storage)
+  await Storage.set(storage, ["signing:key", serialized.id], serialized)
+  return signingKeys(storage)
+}
+
+export async function encryptionKeys(
+  storage: StorageAdapter,
+): Promise<KeyPair[]> {
+  const results = [] as KeyPair[]
+  const scanner = Storage.scan<SerializedKeyPair>(storage, ["encryption:key"])
+  for await (const [_key, value] of scanner) {
+    const publicKey = await importSPKI(value.publicKey, value.alg, {
+      extractable: true,
+    })
+    const privateKey = await importPKCS8(value.privateKey, value.alg)
+    const jwk = await exportJWK(publicKey)
+    jwk.kid = value.id
+    results.push({
+      id: value.id,
+      alg: encryptionAlg,
+      created: new Date(value.created),
+      expired: value.expired ? new Date(value.expired) : undefined,
+      public: publicKey,
+      private: privateKey,
+      jwk,
+    })
+  }
+  results.sort((a, b) => b.created.getTime() - a.created.getTime())
+  if (results.filter((item) => !item.expired).length) return results
+
+  const key = await generateKeyPair(encryptionAlg, {
+    extractable: true,
+  })
+  const serialized: SerializedKeyPair = {
+    id: crypto.randomUUID(),
+    publicKey: await exportSPKI(key.publicKey),
+    privateKey: await exportPKCS8(key.privateKey),
+    created: Date.now(),
+    alg: encryptionAlg,
+  }
+  await Storage.set(storage, ["encryption:key", serialized.id], serialized)
+  return encryptionKeys(storage)
 }

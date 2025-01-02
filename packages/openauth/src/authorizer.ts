@@ -47,7 +47,7 @@ import {
 } from "./error.js"
 import { compactDecrypt, CompactEncrypt, SignJWT } from "jose"
 import { Storage, StorageAdapter } from "./storage/storage.js"
-import { keys } from "./keys.js"
+import { encryptionKeys, legacySigningKeys, signingKeys } from "./keys.js"
 import { validatePKCE } from "./pkce.js"
 import { Select } from "./ui/select.js"
 import { setTheme, Theme } from "./ui/theme.js"
@@ -158,8 +158,13 @@ export function authorizer<
     throw new Error(
       "Store is not configured. Either set the `storage` option or set `OPENAUTH_STORAGE` environment variable.",
     )
-  const allKeys = keys(storage)
-  const primaryKey = allKeys.then((all) => all[0])
+  const allSigning = Promise.all([
+    signingKeys(storage),
+    legacySigningKeys(storage),
+  ]).then(([a, b]) => [...a, ...b])
+  const allEncryption = encryptionKeys(storage)
+  const signingKey = allSigning.then((all) => all[0])
+  const encryptionKey = allEncryption.then((all) => all[0])
 
   const auth: Omit<AdapterOptions<any>, "name"> = {
     async success(ctx: Context, properties: any, successOpts) {
@@ -275,7 +280,7 @@ export function authorizer<
       new TextEncoder().encode(JSON.stringify(value)),
     )
       .setProtectedHeader({ alg: "RSA-OAEP-512", enc: "A256GCM" })
-      .encrypt(await primaryKey.then((k) => k.encryption.public))
+      .encrypt(await encryptionKey.then((k) => k.public))
   }
 
   async function resolveSubject(type: string, properties: any) {
@@ -323,13 +328,13 @@ export function authorizer<
       })
         .setExpirationTime(Date.now() / 1000 + value.ttl.access)
         .setProtectedHeader(
-          await primaryKey.then((k) => ({
+          await signingKey.then((k) => ({
             alg: k.alg,
             kid: k.id,
             typ: "JWT",
           })),
         )
-        .sign(await primaryKey.then((v) => v.signing.private)),
+        .sign(await signingKey.then((item) => item.private)),
       refresh: [subject, refreshToken].join(":"),
     }
   }
@@ -339,7 +344,7 @@ export function authorizer<
       new TextDecoder().decode(
         await compactDecrypt(
           value,
-          await primaryKey.then((v) => v.encryption.private),
+          await encryptionKey.then((v) => v.private),
         ).then((value) => value.plaintext),
       ),
     )
@@ -371,9 +376,14 @@ export function authorizer<
   }
 
   app.get("/.well-known/jwks.json", async (c) => {
-    const all = await allKeys
+    const all = await allSigning
     return c.json({
-      keys: all.map((item) => item.jwk),
+      keys: all.map((item) => ({
+        ...item.jwk,
+        exp: item.expired
+          ? Math.floor(item.expired.getTime() / 1000)
+          : undefined,
+      })),
     })
   })
 
