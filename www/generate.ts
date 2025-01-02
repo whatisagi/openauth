@@ -338,7 +338,7 @@ function renderInterfaces(module: TypeDoc.DeclarationReflection) {
         `**Type** ${renderSignatureAsType(m.signatures![0])}`,
         `</InlineSection>`,
         `</Section>`,
-        renderComment(m.comment),
+        renderComment(m.signatures![0].comment),
         `</Segment>`,
       ]),
     ]
@@ -434,7 +434,7 @@ function renderType(type: TypeDoc.SomeType): Text {
     type.type === "reflection" &&
     type.declaration.kind === TypeDoc.ReflectionKind.TypeLiteral
   ) {
-    return `<code class="primitive">object type</code>`
+    return renderCallbackType(type)
   }
   return `<code class="primitive">${type.type}</code>`
 
@@ -502,6 +502,10 @@ function renderType(type: TypeDoc.SomeType): Text {
         )}<code class="symbol">)[]</code>`
       : `${renderType(type.elementType)}<code class="symbol">[]</code>`
   }
+  function renderCallbackType(type: TypeDoc.ReflectionType) {
+    //  return renderSignatureAsType(type.declaration.signatures![0])
+    return `<code class="primitive">object type</code>`
+  }
   function renderTypescriptType(type: TypeDoc.ReferenceType) {
     // ie. Record<string, string>
     return [
@@ -517,10 +521,20 @@ function renderType(type: TypeDoc.SomeType): Text {
 
     if (type.reflection?.kind === TypeDoc.ReflectionKind.Class) {
       const r = type.reflection as TypeDoc.DeclarationReflection
-      if (r.sources?.[0]?.fileName.endsWith("error.ts")) {
+      if (r.sources?.[0]?.fileName.endsWith("error.ts"))
         return `[<code class="type">${r.name}</code>](/docs/authorizer#${r.name.toLowerCase()})`
+    }
+
+    if (type.reflection?.kind === TypeDoc.ReflectionKind.Interface) {
+      const r = type.reflection as TypeDoc.DeclarationReflection
+      if (
+        r.sources?.[0]?.fileName.startsWith("packages/openauth/src/adapter/")
+      ) {
+        const adapter = r.sources?.[0]?.fileName.split("/").pop()?.split(".")[0]
+        return `[<code class="type">${r.name}</code>](/docs/adapter/${adapter}#${r.name.toLowerCase()})`
       }
     }
+
     return `[<code class="type">${type.name}</code>](#${type.name.toLowerCase()})`
   }
 }
@@ -643,6 +657,7 @@ async function build() {
     entryPoints: [
       "../packages/openauth/src/adapter/apple.ts",
       "../packages/openauth/src/adapter/google.ts",
+      "../packages/openauth/src/adapter/password.ts",
       "../packages/openauth/src/session.ts",
       "../packages/openauth/src/ui/theme.ts",
       "../packages/openauth/src/ui/code.tsx",

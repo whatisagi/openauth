@@ -89,6 +89,7 @@ export default defineConfig({
           items: [
             { label: "Apple", slug: "docs/adapter/apple" },
             { label: "Google", slug: "docs/adapter/google" },
+            { label: "Password", slug: "docs/adapter/password" },
           ],
         },
         {
@@ -102,7 +103,11 @@ export default defineConfig({
         },
         {
           label: "Storage",
-          items: ["docs/storage/memory", "docs/storage/dynamo", "docs/storage/cloudflare"],
+          items: [
+            "docs/storage/memory",
+            "docs/storage/dynamo",
+            "docs/storage/cloudflare",
+          ],
         },
       ],
     }),

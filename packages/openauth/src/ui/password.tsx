@@ -158,7 +158,7 @@ export interface PasswordUIOptions {
  * Creates a UI for the Password provider flow.
  * @param input - Configure the UI.
  */
-export function PasswordUI(input: PasswordUIOptions) {
+export function PasswordUI(input: PasswordUIOptions): PasswordConfig {
   const copy = {
     ...DEFAULT_COPY,
     ...input.copy,
@@ -384,5 +384,5 @@ export function PasswordUI(input: PasswordUIOptions) {
         },
       })
     },
-  } satisfies PasswordConfig
+  }
 }
