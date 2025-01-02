@@ -16,7 +16,6 @@ and verify tokens.
 
 First, create a client.
 
-
 ```ts
 import { createClient } from "@openauthjs/openauth/client"
 
@@ -26,11 +25,7 @@ const client = createClient({
 })
 ```
 
-
-Kick off the OAuth flow by calling 
-`authorize`
-.
-
+Kick off the OAuth flow by calling `authorize`.
 
 ```ts
 const redirect_uri = "https://myserver.com/callback"
@@ -41,21 +36,13 @@ const { url } = await client.authorize(
 )
 ```
 
-
-When the user completes the flow, 
-`exchange`
- the code for tokens.
-
+When the user completes the flow, `exchange` the code for tokens.
 
 ```ts
 const tokens = await client.exchange(query.get("code"), redirect_uri)
 ```
 
-
-And 
-`verify`
- the tokens.
-
+And `verify` the tokens.
 
 ```ts
 const verified = await client.verify(subjects, tokens.access)
@@ -100,7 +87,6 @@ Create an OpenAuth client.
 </InlineSection>
 Enable the PKCE flow. This is for SPA apps.
 
-
 ```ts
 {
   pkce: true
@@ -116,13 +102,11 @@ Enable the PKCE flow. This is for SPA apps.
 </Section>
 The provider you want to use for the OAuth flow.
 
-
 ```ts
 {
   provider: "google"
 }
 ```
-
 
 If no provider is specified, the user is directed to a page where they can select from the
 list of configured providers.
@@ -147,7 +131,6 @@ The challenge that you can use to verify the code. This is for the PKCE flow for
 
 This is an object that you _stringify_ and store it in session storage.
 
-
 ```ts
 sessionStorage.setItem("challenge", JSON.stringify(challenge))
 ```
@@ -162,7 +145,6 @@ sessionStorage.setItem("challenge", JSON.stringify(challenge))
 The URL to redirect the user to. This starts the OAuth flow.
 
 For example, for SPA apps.
-
 
 ```ts
 location.href = url
@@ -186,11 +168,9 @@ location.href = url
 </Section>
 Start the autorization flow. For example, in SSR sites.
 
-
 ```ts
 const { url } = await client.authorize(<redirect_uri>, "code")
 ```
-
 
 This takes a redirect URI and the type of flow you want to use. The redirect URI is the
 location where the user will be redirected to after the flow is complete.
@@ -207,7 +187,6 @@ OAuth flow.
 
 For SPA apps, we recommend using the PKCE flow.
 
-
 ```ts {4}
 const { challenge, url } = await client.authorize(
   <redirect_uri>,
@@ -215,7 +194,6 @@ const { challenge, url } = await client.authorize(
   { pkce: true }
 )
 ```
-
 
 This returns a redirect URL and a challenge that you need to use later to verify the code.
 </Segment>
@@ -228,11 +206,9 @@ This returns a redirect URL and a challenge that you need to use later to verify
 </Section>
 Exchange the code for access and refresh tokens.
 
-
 ```ts
 const exchanged = await client.exchange(<code>, <redirect_uri>)
 ```
-
 
 You call this after the user has been redirected back to your app after the OAuth flow.
 
@@ -241,9 +217,7 @@ For SSR sites, the code is returned in the query parameter.
 :::
 
 So the code comes from the query parameter in the redirect URI. The redirect URI here is
-the one that you passed in to the 
-`authorize`
- call when starting the flow.
+the one that you passed in to the `authorize` call when starting the flow.
 
 :::tip
 For SPA sites, the code is returned through the URL hash.
@@ -251,7 +225,6 @@ For SPA sites, the code is returned through the URL hash.
 
 If you used the PKCE flow for an SPA app, the code is returned as a part of the redirect URL
 hash.
-
 
 ```ts {4}
 const exchanged = await client.exchange(
@@ -261,12 +234,10 @@ const exchanged = await client.exchange(
 )
 ```
 
-
 You also need to pass in the previously stored challenge verifier.
 
 This method returns the access and refresh tokens. Or if it fails, it returns an error that
 you can handle depending on the error.
-
 
 ```ts
 import { InvalidAuthorizationCodeError } from "@openauthjs/openauth/error"
@@ -390,9 +361,7 @@ Returned when the exchange is successful.
 **Type** <code class="primitive">false</code>
 </InlineSection>
 </Section>
-This is always 
-`false`
- when the exchange is successful.
+This is always `false` when the exchange is successful.
 </Segment>
 <NestedTitle id="exchangesuccess.tokens" Tag="h4" parent="ExchangeSuccess.">tokens</NestedTitle>
 <Segment>

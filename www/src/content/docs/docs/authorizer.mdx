@@ -157,6 +157,20 @@ The interface for the success responder.
 </Section>
 </Segment>
 ## Errors
+<Section type="about">
+A list of errors that can be thrown by OpenAuth.
+
+You can use these errors to check the type of error and handle it. For example.
+
+```ts
+import { InvalidAuthorizationCodeError } from "@openauthjs/openauth/error"
+
+if (err instanceof InvalidAuthorizationCodeError) {
+  // handle invalid code error
+}
+```
+</Section>
+---
 ### InvalidAccessTokenError
 <Segment>
 The given access token is invalid.
@@ -179,9 +193,7 @@ The given parameter is missing.
 </Segment>
 ### MissingProviderError
 <Segment>
-The 
-`provider`
- needs to be passed in.
+The `provider` needs to be passed in.
 </Segment>
 ### OauthError
 <Segment>
