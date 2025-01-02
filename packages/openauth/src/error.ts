@@ -1,4 +1,9 @@
 /**
+ * All the errors that can be thrown by OpenAuth.
+ * @packageDocumentation
+ */
+
+/**
  * The OAuth server returned an error.
  */
 export class OauthError extends Error {

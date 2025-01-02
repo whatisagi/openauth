@@ -184,7 +184,9 @@ function renderAuthorizer() {
     `<div class="tsdoc">`,
     renderFunctions(authorizer),
     renderInterfaces(authorizer),
-    render(errors.length, [`## Errors`, errors.map(renderClass)]),
+    "## Errors",
+    renderAbout(renderComment(error.comment)),
+    errors.map(renderClass),
     `</div>`,
   ])
 }
@@ -370,7 +372,7 @@ function renderComment(comment?: TypeDoc.Comment) {
           `</InlineSection>`,
         ]
       }),
-    comment.summary.map((s) => s.text),
+    comment.summary.map((s) => s.text).join(""),
     comment.blockTags
       .filter((tag) => tag.tag === "@example")
       .map((tag) => tag.content.map((c) => c.text)),
