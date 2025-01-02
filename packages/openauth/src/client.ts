@@ -74,7 +74,7 @@ export interface WellKnown {
 }
 
 /**
- * The tokens returned by the authorization server.
+ * The tokens returned by the auth server.
  */
 export interface Tokens {
   /**
@@ -198,7 +198,13 @@ export interface AuthorizeResult {
 }
 
 export interface ExchangeSuccess {
+  /**
+   * This is false when the exchange is successful.
+   */
   err: false
+  /**
+   * The access and refresh tokens.
+   */
   tokens: Tokens
 }
 

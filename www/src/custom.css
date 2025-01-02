@@ -199,7 +199,7 @@ nav.sidebar a[aria-current=page]:focus {
   --pad-inline: 0px;
 }
 .right-sidebar-panel a {
-  color: var(--color-text-dimmed);
+  color: var(--sl-color-text-dimmed);
 }
 .right-sidebar-panel a:hover {
   color: var(--sl-color-text);
