@@ -168,6 +168,9 @@ nav.sidebar ul.top-level > li > details > summary .group-label > span {
 nav.sidebar summary svg.caret {
   color: var(--sl-color-text-dimmed);
 }
+nav.sidebar a:hover {
+  color: var(--sl-color-text);
+}
 nav.sidebar a[aria-current=page],
 nav.sidebar a[aria-current=page]:hover,
 nav.sidebar a[aria-current=page]:focus {
@@ -202,15 +205,14 @@ nav.sidebar a[aria-current=page]:focus {
   color: var(--sl-color-text-dimmed);
 }
 .right-sidebar-panel a:hover {
-  color: var(--sl-color-text);
+  color: var(--sl-color-text-dimmed);
 }
 .right-sidebar-panel a[aria-current=true],
 .right-sidebar-panel a[aria-current=true]:hover,
 .right-sidebar-panel a[aria-current=true]:focus {
-  font-weight: 600;
+  font-weight: 500;
   background-color: transparent;
   color: var(--sl-color-text);
-  font-weight: normal;
 }
 .right-sidebar-panel ul li > a {
   padding-inline: calc(0.75rem * var(--depth) + var(--pad-inline)) var(--pad-inline)
