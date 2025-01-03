@@ -80,7 +80,7 @@ export default defineConfig({
           label: "Core",
           items: [
             "docs/client",
-            { label: "Session", slug: "docs/session" },
+            { label: "Subject", slug: "docs/subject" },
             { label: "Issuer", slug: "docs/issuer" },
           ],
         },
