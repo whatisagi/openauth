@@ -10,7 +10,7 @@
  *   sk: "sk"
  * })
  *
- * export default authorizer({
+ * export default issuer({
  *   storage,
  *   // ...
  * })

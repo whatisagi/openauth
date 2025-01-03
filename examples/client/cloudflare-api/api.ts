@@ -12,7 +12,7 @@ export default {
   async fetch(request: Request, env: Env) {
     const client = createClient({
       clientID: "cloudflare-api",
-      // enables worker to worker communication if authorizer is also a worker
+      // enables worker to worker communication if issuer is also a worker
       fetch: (input, init) => env.CloudflareAuth.fetch(input, init),
       issuer: env.OPENAUTH_ISSUER,
     })

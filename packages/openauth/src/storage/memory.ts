@@ -12,7 +12,7 @@
  *
  * const storage = MemoryStorage()
  *
- * export default authorizer({
+ * export default issuer({
  *   storage,
  *   // ...
  * })
@@ -37,7 +37,7 @@ import { writeFile } from "node:fs/promises"
  */
 export interface MemoryStorageOptions {
   /**
-   * Optionally, backup the store to a file. So it'll be persisted when the authorizer restarts.
+   * Optionally, backup the store to a file. So it'll be persisted when the issuer restarts.
    *
    * @example
    * ```ts

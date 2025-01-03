@@ -10,7 +10,7 @@
  * })
  *
  *
- * export default authorizer({
+ * export default issuer({
  *   storage,
  *   // ...
  * })

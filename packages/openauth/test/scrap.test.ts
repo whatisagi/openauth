@@ -1,8 +1,9 @@
 import { expect, test } from "bun:test"
-import { authorizer } from "../src/authorizer.js"
+import { issuer } from "../src/issuer.js"
 import { MemoryStorage } from "../src/storage/memory.js"
-import { createClient, createSubjects } from "../src/index.js"
 import { object, string } from "valibot"
+import { createSubjects } from "../src/subject.js"
+import { createClient } from "../src/client.js"
 
 const subjects = createSubjects({
   user: object({
@@ -10,7 +11,7 @@ const subjects = createSubjects({
   }),
 })
 
-const auth = authorizer({
+const auth = issuer({
   storage: MemoryStorage(),
   subjects,
   allow: async () => true,

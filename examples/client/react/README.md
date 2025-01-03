@@ -12,7 +12,7 @@ Then visit `http://localhost:5173` in your browser.
 It needs the OpenAuth server running at `http://localhost:3000`. Start it from the `examples/` dir using.
 
 ```bash
-bun run --hot athorizer/bun/authorizer.ts
+bun run --hot athorizer/bun/issuer.ts
 ```
 
 And optionally a JWT API running to get the user subject on `http://localhost:3001`. Start it using.

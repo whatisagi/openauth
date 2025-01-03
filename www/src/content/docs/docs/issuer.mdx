@@ -1,0 +1,290 @@
+---
+title: issuer
+editUrl: false
+description: A page for the issuer.
+---
+
+import Segment from '../../../components/tsdoc/Segment.astro';
+import Section from '../../../components/tsdoc/Section.astro';
+import NestedTitle from '../../../components/tsdoc/NestedTitle.astro';
+import InlineSection from '../../../components/tsdoc/InlineSection.astro';
+
+<div class="tsdoc">
+## Methods
+### issuer
+<Segment>
+<Section type="signature">
+```ts
+issuer(input)
+```
+</Section>
+<Section type="parameters">
+#### Parameters
+- <p><code class="key">input</code> [<code class="type">IssuerInput</code>](#issuerinput)</p>
+The input object containing the subjects, storage, providers, theme, and optional success responder.
+</Section>
+<InlineSection>
+**Returns** <code class="type">Hono</code>
+</InlineSection>
+Create an issuer object for handling OAuth 2.0 authorization requests.
+</Segment>
+## AuthorizationState
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">audience?</code>](#authorizationstate.audience) <code class="primitive">string</code></p>
+- <p>[<code class="key">client_id</code>](#authorizationstate.client_id) <code class="primitive">string</code></p>
+- <p>[<code class="key">pkce?</code>](#authorizationstate.pkce) <code class="primitive">object type</code></p>
+  - <p>[<code class="key">challenge</code>](#pkce.challenge) <code class="primitive">string</code></p>
+  - <p>[<code class="key">method</code>](#pkce.method) <code class="symbol">&ldquo;</code><code class="primitive">S256</code><code class="symbol">&rdquo;</code></p>
+- <p>[<code class="key">redirect_uri</code>](#authorizationstate.redirect_uri) <code class="primitive">string</code></p>
+- <p>[<code class="key">response_type</code>](#authorizationstate.response_type) <code class="primitive">string</code></p>
+- <p>[<code class="key">state</code>](#authorizationstate.state) <code class="primitive">string</code></p>
+</Section>
+</Segment>
+<NestedTitle id="authorizationstate.audience" Tag="h4" parent="AuthorizationState.">audience?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizationstate.client_id" Tag="h4" parent="AuthorizationState.">client_id</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizationstate.pkce" Tag="h4" parent="AuthorizationState.">pkce?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">object type</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="pkce.challenge" Tag="h5" parent="AuthorizationState.pkce.">challenge</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="pkce.method" Tag="h5" parent="AuthorizationState.pkce.">method</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="symbol">&ldquo;</code><code class="primitive">S256</code><code class="symbol">&rdquo;</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizationstate.redirect_uri" Tag="h4" parent="AuthorizationState.">redirect_uri</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizationstate.response_type" Tag="h4" parent="AuthorizationState.">response_type</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="authorizationstate.state" Tag="h4" parent="AuthorizationState.">state</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+</Segment>
+## IssuerInput
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">providers</code>](#issuerinput.providers) [<code class="type">Providers</code>](#providers)</p>
+- <p>[<code class="key">storage?</code>](#issuerinput.storage) <code class="type">StorageAdapter</code></p>
+- <p>[<code class="key">subjects</code>](#issuerinput.subjects) [<code class="type">Subjects</code>](#subjects)</p>
+- <p>[<code class="key">theme?</code>](#issuerinput.theme) [<code class="type">Theme</code>](#theme)</p>
+- <p>[<code class="key">ttl?</code>](#issuerinput.ttl) <code class="primitive">object type</code></p>
+  - <p>[<code class="key">access?</code>](#ttl.access) <code class="primitive">number</code></p>
+  - <p>[<code class="key">refresh?</code>](#ttl.refresh) <code class="primitive">number</code></p>
+- <p>[<code class="key">allow?</code>](#issuerinput.allow) <code class="primitive">(input: <code class="primitive">object type</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">boolean</code><code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">error?</code>](#issuerinput.error) <code class="primitive">(error: [<code class="type">UnknownStateError</code>](/docs/issuer#unknownstateerror), req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">select?</code>](#issuerinput.select) <code class="primitive">(providers: <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">start?</code>](#issuerinput.start) <code class="primitive">(req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">void</code><code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">success</code>](#issuerinput.success) <code class="primitive">(response: [<code class="type">OnSuccessResponder</code>](#onsuccessresponder), input: [<code class="type">Result</code>](#result), req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
+</Section>
+</Segment>
+<NestedTitle id="issuerinput.providers" Tag="h4" parent="IssuerInput.">providers</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** [<code class="type">Providers</code>](#providers)
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="issuerinput.storage" Tag="h4" parent="IssuerInput.">storage?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="type">StorageAdapter</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="issuerinput.subjects" Tag="h4" parent="IssuerInput.">subjects</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** [<code class="type">Subjects</code>](#subjects)
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="issuerinput.theme" Tag="h4" parent="IssuerInput.">theme?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** [<code class="type">Theme</code>](#theme)
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="issuerinput.ttl" Tag="h4" parent="IssuerInput.">ttl?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">object type</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="ttl.access" Tag="h5" parent="IssuerInput.ttl.">access?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">number</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="ttl.refresh" Tag="h5" parent="IssuerInput.ttl.">refresh?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">number</code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="issuerinput.allow" Tag="h4" parent="IssuerInput.">allow?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">(input: <code class="primitive">object type</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">boolean</code><code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="issuerinput.error" Tag="h4" parent="IssuerInput.">error?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">(error: [<code class="type">UnknownStateError</code>](/docs/issuer#unknownstateerror), req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="issuerinput.select" Tag="h4" parent="IssuerInput.">select?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">(providers: <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="issuerinput.start" Tag="h4" parent="IssuerInput.">start?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">(req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">void</code><code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+<NestedTitle id="issuerinput.success" Tag="h4" parent="IssuerInput.">success</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">(response: [<code class="type">OnSuccessResponder</code>](#onsuccessresponder), input: [<code class="type">Result</code>](#result), req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+## OnSuccessResponder
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">subject</code>](#onsuccessresponder.subject) <code class="primitive">(type: [<code class="type">Type</code>](#type), properties: <code class="primitive">indexedAccess</code>, opts?: <code class="primitive">object type</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
+</Section>
+The interface for the success responder.
+</Segment>
+<NestedTitle id="onsuccessresponder.subject" Tag="h4" parent="OnSuccessResponder.">subject</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">(type: [<code class="type">Type</code>](#type), properties: <code class="primitive">indexedAccess</code>, opts?: <code class="primitive">object type</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+## Errors
+<Section type="about">
+A list of errors that can be thrown by OpenAuth.
+
+You can use these errors to check the type of error and handle it. For example.
+
+```ts
+import { InvalidAuthorizationCodeError } from "@openauthjs/openauth/error"
+
+if (err instanceof InvalidAuthorizationCodeError) {
+  // handle invalid code error
+}
+```
+</Section>
+---
+### InvalidAccessTokenError
+<Segment>
+The given access token is invalid.
+</Segment>
+### InvalidAuthorizationCodeError
+<Segment>
+The given authorization code is invalid.
+</Segment>
+### InvalidRefreshTokenError
+<Segment>
+The given refresh token is invalid.
+</Segment>
+### InvalidSubjectError
+<Segment>
+The given subject is invalid.
+</Segment>
+### MissingParameterError
+<Segment>
+The given parameter is missing.
+</Segment>
+### MissingProviderError
+<Segment>
+The `provider` needs to be passed in.
+</Segment>
+### OauthError
+<Segment>
+The OAuth server returned an error.
+</Segment>
+### UnauthorizedClientError
+<Segment>
+The given client is not authorized to use the redirect URI that was passed in.
+</Segment>
+### UnknownStateError
+<Segment>
+The browser was in an unknown state.
+
+This can happen when certain cookies have expired. Or the browser was switched in the middle
+of the authentication flow.
+</Segment>
+</div>

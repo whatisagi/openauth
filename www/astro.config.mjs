@@ -81,15 +81,15 @@ export default defineConfig({
           items: [
             "docs/client",
             { label: "Session", slug: "docs/session" },
-            { label: "Authorizer", slug: "docs/authorizer" },
+            { label: "Issuer", slug: "docs/issuer" },
           ],
         },
         {
           label: "Providers",
           items: [
-            { label: "Apple", slug: "docs/adapter/apple" },
-            { label: "Google", slug: "docs/adapter/google" },
-            { label: "Password", slug: "docs/adapter/password" },
+            { label: "Apple", slug: "docs/provider/apple" },
+            { label: "Google", slug: "docs/provider/google" },
+            { label: "Password", slug: "docs/provider/password" },
           ],
         },
         {

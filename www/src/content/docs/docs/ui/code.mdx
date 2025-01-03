@@ -17,7 +17,7 @@ Configure the UI that's used by the Code provider.
 import { CodeUI } from "@openauthjs/openauth/ui/code"
 import { CodeAdapter } from "@openauthjs/openauth/adapter/code"
 
-export default authorizer({
+export default issuer({
   providers: {
     code: CodeAdapter(
       CodeUI({

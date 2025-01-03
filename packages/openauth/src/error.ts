@@ -40,7 +40,7 @@ export class MissingProviderError extends OauthError {
   constructor() {
     super(
       "invalid_request",
-      "Must specify `provider` query parameter if `select` callback on authorizer is not specified",
+      "Must specify `provider` query parameter if `select` callback on issuer is not specified",
     )
   }
 }

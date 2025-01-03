@@ -4,7 +4,7 @@
   "type": "module",
   "workspaces": [
     "packages/openauth",
-    "examples/authorizer/*",
+    "examples/issuer/*",
     "examples/client/*"
   ],
   "scripts": {

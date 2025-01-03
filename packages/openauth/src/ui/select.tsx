@@ -1,11 +1,11 @@
 /**
- * The UI that's displayed when loading the root page of the authorizer. You can configure
+ * The UI that's displayed when loading the root page of the issuer. You can configure
  * which providers should be displayed in the select UI.
  *
  * ```ts
  * import { Select } from "@openauthjs/openauth/ui/select"
  *
- * export default authorizer({
+ * export default issuer({
  *   select: Select({
  *     providers: {
  *       github: {

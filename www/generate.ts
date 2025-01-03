@@ -9,12 +9,12 @@ type Text = string | Text[]
 configureLogger()
 const project = await build()
 const modules = project.getChildrenByKind(TypeDoc.ReflectionKind.Module)
-const session = modules.find((m) => m.name === "session")!
-const authorizer = modules.find((m) => m.name === "authorizer")!
+const subject = modules.find((m) => m.name === "subject")!
+const issuer = modules.find((m) => m.name === "issuer")!
 const error = modules.find((m) => m.name === "error")!
 const client = modules.find((m) => m.name === "client")!
 const uis = modules.filter((m) => m.name.startsWith("ui/"))
-const adapters = modules.filter((m) => m.name.startsWith("adapter/"))
+const providers = modules.filter((m) => m.name.startsWith("provider/"))
 const storages = modules.filter((m) => m.name.startsWith("storage/"))
 
 const FRONTMATTER: Record<
@@ -63,23 +63,23 @@ const FRONTMATTER: Record<
   },
 }
 
-renderSession()
+renderSubject()
 renderClient()
-renderAuthorizer()
-adapters.map(renderAdapter)
+renderIssuer()
+providers.map(renderProvider)
 storages.map(renderStorage)
 uis.map(renderUI)
 
-function renderAdapter(module: TypeDoc.DeclarationReflection) {
-  console.debug(`renderAdapter: ${module.name}`)
+function renderProvider(module: TypeDoc.DeclarationReflection) {
+  console.debug(`renderProvider: ${module.name}`)
 
-  const name = module.name.replace("adapter/", "")
+  const name = module.name.replace("provider/", "")
   saveFile(module.name, [
     renderHeader({
       moduleName: module.name,
       editUrl: false,
       title: name,
-      description: `A page for the ${name} adapter.`,
+      description: `A page for the ${name} provider.`,
     }),
     `<div class="tsdoc">`,
     renderAbout(renderComment(module.comment)),
@@ -130,17 +130,17 @@ function renderUI(module: TypeDoc.DeclarationReflection) {
   ])
 }
 
-function renderSession() {
-  console.debug(`renderSession`)
+function renderSubject() {
+  console.debug(`renderSubject`)
 
-  const module = session
+  const module = subject
   const name = module.name
   saveFile(name, [
     renderHeader({
       moduleName: module.name,
       editUrl: false,
       title: name,
-      description: `A page for the session.`,
+      description: `A page for the subject.`,
     }),
     `<div class="tsdoc">`,
     renderFunctions(module),
@@ -169,21 +169,21 @@ function renderClient() {
   ])
 }
 
-function renderAuthorizer() {
-  console.debug(`renderAuthorizer`)
+function renderIssuer() {
+  console.debug(`renderIssuer`)
 
   const errors = error.getChildrenByKind(TypeDoc.ReflectionKind.Class)
-  const name = authorizer.name
+  const name = issuer.name
   saveFile(name, [
     renderHeader({
-      moduleName: authorizer.name,
+      moduleName: issuer.name,
       editUrl: false,
       title: name,
-      description: `A page for the authorizer.`,
+      description: `A page for the issuer.`,
     }),
     `<div class="tsdoc">`,
-    renderFunctions(authorizer),
-    renderInterfaces(authorizer),
+    renderFunctions(issuer),
+    renderInterfaces(issuer),
     "## Errors",
     renderAbout(renderComment(error.comment)),
     errors.map(renderClass),
@@ -524,16 +524,19 @@ function renderType(type: TypeDoc.SomeType): Text {
     if (type.reflection?.kind === TypeDoc.ReflectionKind.Class) {
       const r = type.reflection as TypeDoc.DeclarationReflection
       if (r.sources?.[0]?.fileName.endsWith("error.ts"))
-        return `[<code class="type">${r.name}</code>](/docs/authorizer#${r.name.toLowerCase()})`
+        return `[<code class="type">${r.name}</code>](/docs/issuer#${r.name.toLowerCase()})`
     }
 
     if (type.reflection?.kind === TypeDoc.ReflectionKind.Interface) {
       const r = type.reflection as TypeDoc.DeclarationReflection
       if (
-        r.sources?.[0]?.fileName.startsWith("packages/openauth/src/adapter/")
+        r.sources?.[0]?.fileName.startsWith("packages/openauth/src/provider/")
       ) {
-        const adapter = r.sources?.[0]?.fileName.split("/").pop()?.split(".")[0]
-        return `[<code class="type">${r.name}</code>](/docs/adapter/${adapter}#${r.name.toLowerCase()})`
+        const provider = r.sources?.[0]?.fileName
+          .split("/")
+          .pop()
+          ?.split(".")[0]
+        return `[<code class="type">${r.name}</code>](/docs/provider/${provider}#${r.name.toLowerCase()})`
       }
     }
 
@@ -657,16 +660,16 @@ async function build() {
     },
 
     entryPoints: [
-      "../packages/openauth/src/adapter/apple.ts",
-      "../packages/openauth/src/adapter/google.ts",
-      "../packages/openauth/src/adapter/password.ts",
-      "../packages/openauth/src/session.ts",
+      "../packages/openauth/src/provider/apple.ts",
+      "../packages/openauth/src/provider/google.ts",
+      "../packages/openauth/src/provider/password.ts",
+      "../packages/openauth/src/subject.ts",
       "../packages/openauth/src/ui/theme.ts",
       "../packages/openauth/src/ui/code.tsx",
       "../packages/openauth/src/ui/select.tsx",
       "../packages/openauth/src/ui/password.tsx",
       "../packages/openauth/src/client.ts",
-      "../packages/openauth/src/authorizer.ts",
+      "../packages/openauth/src/issuer.ts",
       "../packages/openauth/src/storage/memory.ts",
       "../packages/openauth/src/storage/dynamo.ts",
       "../packages/openauth/src/storage/cloudflare.ts",

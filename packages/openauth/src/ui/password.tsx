@@ -5,7 +5,7 @@
  * import { PasswordUI } from "@openauthjs/openauth/ui/password"
  * import { PasswordAdapter } from "@openauthjs/openauth/adapter/password"
  *
- * export default authorizer({
+ * export default issuer({
  *   providers: {
  *     password: PasswordAdapter(
  *       PasswordUI({
@@ -29,7 +29,7 @@ import {
   PasswordConfig,
   PasswordLoginError,
   PasswordRegisterError,
-} from "../adapter/password.js"
+} from "../provider/password.js"
 import { Layout } from "./base.js"
 import "./form.js"
 import { FormAlert } from "./form.js"
@@ -125,10 +125,9 @@ const DEFAULT_COPY = {
    */
   button_continue: "Continue",
 } satisfies {
-  [key in `error_${
-    | PasswordLoginError["type"]
-    | PasswordRegisterError["type"]
-    | PasswordChangeError["type"]}`]: string
+  [key in `error_${| PasswordLoginError["type"]
+  | PasswordRegisterError["type"]
+  | PasswordChangeError["type"]}`]: string
 } & Record<string, string>
 
 export type PasswordUICopy = typeof DEFAULT_COPY

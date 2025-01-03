@@ -45,7 +45,7 @@ import {
   jwtVerify,
   decodeJwt,
 } from "jose"
-import { SubjectSchema } from "./session.js"
+import { SubjectSchema } from "./subject.js"
 import type { v1 } from "@standard-schema/spec"
 import {
   InvalidAccessTokenError,
@@ -311,7 +311,7 @@ export interface VerifyResult<T extends SubjectSchema> {
   /**
    * The decoded subjects from the access token.
    *
-   * Has the same shape as the subjects you defined when creating the authorizer.
+   * Has the same shape as the subjects you defined when creating the issuer.
    */
   subject: {
     [type in keyof T]: { type: type; properties: v1.InferOutput<T[type]> }
@@ -487,7 +487,7 @@ export interface Client {
    * const verified = await client.verify(<subjects>, <token>)
    * ```
    *
-   * This takes the subjects that you had previously defined when creating the authorizer.
+   * This takes the subjects that you had previously defined when creating the issuer.
    *
    * :::tip
    * If the refresh token is passed in, it'll automatically refresh the access token.

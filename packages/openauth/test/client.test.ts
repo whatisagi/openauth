@@ -10,14 +10,14 @@ import {
   mock,
 } from "bun:test"
 import { object, string } from "valibot"
-import { authorizer } from "../src/authorizer.js"
+import { issuer } from "../src/issuer.js"
 import { createClient } from "../src/client.js"
 import {
   InvalidAccessTokenError,
   InvalidRefreshTokenError,
 } from "../src/error.js"
-import { createSubjects } from "../src/index.js"
 import { MemoryStorage } from "../src/storage/memory.js"
+import { createSubjects } from "../src/subject.js"
 
 const subjects = createSubjects({
   user: object({
@@ -26,7 +26,7 @@ const subjects = createSubjects({
 })
 
 let storage = MemoryStorage()
-const auth = authorizer({
+const auth = issuer({
   storage,
   subjects,
   allow: async () => true,

@@ -56,18 +56,18 @@ We'll show how to deploy the auth server and then a sample app that uses it.
 
 ### Auth server
 
-Start by importing the `authorizer` function from the `@openauthjs/openauth` package.
+Start by importing the `issuer` function from the `@openauthjs/openauth` package.
 
 ```ts
-import { authorizer } from "@openauthjs/openauth"
+import { issuer } from "@openauthjs/openauth"
 ```
 
-OpenAuth is built on top of [Hono](https://github.com/honojs/hono) which is a minimal web framework that can run anywhere. The `authorizer` function creates a Hono app with all of the auth server implemented that you can then deploy to AWS Lambda, Cloudflare Workers, or in a container running under Node.js or Bun.
+OpenAuth is built on top of [Hono](https://github.com/honojs/hono) which is a minimal web framework that can run anywhere. The `issuer` function creates a Hono app with all of the auth server implemented that you can then deploy to AWS Lambda, Cloudflare Workers, or in a container running under Node.js or Bun.
 
-The `authorizer` function requires a few things:
+The `issuer` function requires a few things:
 
 ```ts
-const app = authorizer({
+const app = issuer({
   providers: { ... },
   storage,
   subjects,
@@ -80,7 +80,7 @@ First we need to define some providers that are enabled - these are either third
 ```ts
 import { GithubAdapter } from "@openauthjs/openauth/adapter/github";
 
-const app = authorizer({
+const app = issuer({
   providers: {
     github: GithubAdapter({
       clientID: process.env.GITHUB_CLIENT_ID!,
@@ -97,7 +97,7 @@ Adapters take some configuration - since this is a third party identity provider
 ```ts
 import { PasswordAdapter } from "@openauthjs/openauth/adapter/password";
 
-const app = authorizer({
+const app = issuer({
   providers: {
     github: ...,
     password: PasswordAdapter(...),
@@ -112,7 +112,7 @@ The password adapter is quite complicated as username/password involve a lot of 
 import { PasswordAdapter } from "@openauthjs/openauth/adapter/password";
 import { PasswordUI } from "@openauthjs/openauth/ui/password";
 
-const app = authorizer({
+const app = issuer({
   providers: {
     github: ...,
     password: PasswordAdapter(
@@ -143,12 +143,12 @@ const subjects = createSubjects({
 
 Note we are using [valibot](https://github.com/fabian-hiller/valibot) to define the shape of the subject so it can be validated properly. You can use any validation library that is following the [standard-schema specification](https://github.com/standard-schema/standard-schema) - the next version of Zod will support this.
 
-You typically will want to place subjects in its own file as it can be imported by all of your apps. You can pass it to the authorizer in the `subjects` field.
+You typically will want to place subjects in its own file as it can be imported by all of your apps. You can pass it to the issuer in the `subjects` field.
 
 ```ts
 import { subjects } from "./subjects.js";
 
-const app = authorizer({
+const app = issuer({
   providers: { ... },
   subjects,
   ...
@@ -158,7 +158,7 @@ const app = authorizer({
 Next we'll implement the `success` callback which receives the payload when a user successfully completes a provider flow.
 
 ```ts
-const app = authorizer({
+const app = issuer({
   providers: { ... },
   subjects,
   async success(ctx, value) {
@@ -186,7 +186,7 @@ Next we have the `storage` field which defines where things like refresh tokens 
 ```ts
 import { MemoryStorage } from "@openauthjs/openauth/storage/memory";
 
-const app = authorizer({
+const app = issuer({
   providers: { ... },
   subjects,
   async success(ctx, value) { ... },

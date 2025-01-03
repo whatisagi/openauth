@@ -1,11 +1,11 @@
 # Examples
 
-There are two sets of examples here, authorizers and clients. Authorizers are examples of setting up an OpenAuth server. The clients are examples of using OpenAuth in a client application and work with any of the authorizer servers.
+There are two sets of examples here, issuers and clients. Issuers are examples of setting up an OpenAuth server. The clients are examples of using OpenAuth in a client application and work with any of the issuer servers.
 
-The fastest way to play around is to use the bun authorizer. You can bring it up with:
+The fastest way to play around is to use the bun issuer. You can bring it up with:
 
 ```shell
-$ bun run --hot ./authorizer/bun/authorizer.ts
+$ bun run --hot ./issuer/bun/issuer.ts
 ```
 
 You might have to install some workspace packages first, run this in the root:

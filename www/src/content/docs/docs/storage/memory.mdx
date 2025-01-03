@@ -24,7 +24,7 @@ import { MemoryStorage } from "@openauthjs/openauth/storage/memory"
 
 const storage = MemoryStorage()
 
-export default authorizer({
+export default issuer({
   storage,
   // ...
 })
@@ -69,7 +69,7 @@ Configure the memory store.
 **Type** <code class="primitive">string</code>
 </InlineSection>
 </Section>
-Optionally, backup the store to a file. So it'll be persisted when the authorizer restarts.
+Optionally, backup the store to a file. So it'll be persisted when the issuer restarts.
 ```ts
 {
   persist: "./persist.json"

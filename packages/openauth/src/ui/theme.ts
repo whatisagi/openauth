@@ -6,7 +6,7 @@
  * ```ts
  * import { THEME_SST } from "@openauthjs/openauth/ui/theme"
  *
- * export default authorizer({
+ * export default issuer({
  *   theme: THEME_SST,
  *   // ...
  * })
@@ -24,7 +24,7 @@
  *   // ...
  * }
  *
- * export default authorizer({
+ * export default issuer({
  *   theme: MY_THEME,
  *   // ...
  * })

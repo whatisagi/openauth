@@ -5,7 +5,7 @@
  * import { CodeUI } from "@openauthjs/openauth/ui/code"
  * import { CodeAdapter } from "@openauthjs/openauth/adapter/code"
  *
- * export default authorizer({
+ * export default issuer({
  *   providers: {
  *     code: CodeAdapter(
  *       CodeUI({
@@ -24,7 +24,7 @@
  */
 /** @jsxImportSource hono/jsx */
 
-import { CodeAdapterOptions } from "../adapter/code.js"
+import { CodeProviderOptions } from "../provider/code.js"
 import { UnknownStateError } from "../error.js"
 import { Layout } from "./base.js"
 import { FormAlert } from "./form.js"
@@ -205,5 +205,5 @@ export function CodeUI(props: CodeUIOptions) {
 
       throw new UnknownStateError()
     },
-  } satisfies CodeAdapterOptions
+  } satisfies CodeProviderOptions
 }
