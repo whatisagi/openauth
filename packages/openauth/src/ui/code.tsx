@@ -3,7 +3,7 @@
  *
  * ```ts {1,7-12}
  * import { CodeUI } from "@openauthjs/openauth/ui/code"
- * import { CodeAdapter } from "@openauthjs/openauth/adapter/code"
+ * import { CodeProvider } from "@openauthjs/openauth/provider/code"
  *
  * export default issuer({
  *   providers: {

@@ -78,7 +78,7 @@ const app = issuer({
 First we need to define some providers that are enabled - these are either third party identity providers like Google, GitHub, etc or built in flows like email/password or pin code. You can also implement your own. Let's try the GitHub provider.
 
 ```ts
-import { GithubAdapter } from "@openauthjs/openauth/adapter/github";
+import { GithubProvider } from "@openauthjs/openauth/provider/github";
 
 const app = issuer({
   providers: {
@@ -95,7 +95,7 @@ const app = issuer({
 Adapters take some configuration - since this is a third party identity provider there is no UI to worry about and all it needs is a client ID, secret and some scopes. Let's add the password provider which is a bit more complicated.
 
 ```ts
-import { PasswordAdapter } from "@openauthjs/openauth/adapter/password";
+import { PasswordProvider } from "@openauthjs/openauth/provider/password";
 
 const app = issuer({
   providers: {
@@ -109,7 +109,7 @@ const app = issuer({
 The password adapter is quite complicated as username/password involve a lot of flows so there are a lot of callbacks to implement. However you can opt into the default UI which has all of this already implemented for you. The only thing you have to specify is how to send a code for forgot password/email verification. In this case we'll log the code but you would send this over email.
 
 ```ts
-import { PasswordAdapter } from "@openauthjs/openauth/adapter/password";
+import { PasswordProvider } from "@openauthjs/openauth/provider/password";
 import { PasswordUI } from "@openauthjs/openauth/ui/password";
 
 const app = issuer({

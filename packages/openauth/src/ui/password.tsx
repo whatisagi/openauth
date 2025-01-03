@@ -3,7 +3,7 @@
  *
  * ```ts {1,7-12}
  * import { PasswordUI } from "@openauthjs/openauth/ui/password"
- * import { PasswordAdapter } from "@openauthjs/openauth/adapter/password"
+ * import { PasswordProvider } from "@openauthjs/openauth/provider/password"
  *
  * export default issuer({
  *   providers: {
@@ -125,10 +125,9 @@ const DEFAULT_COPY = {
    */
   button_continue: "Continue",
 } satisfies {
-  [key in `error_${
-    | PasswordLoginError["type"]
-    | PasswordRegisterError["type"]
-    | PasswordChangeError["type"]}`]: string
+  [key in `error_${| PasswordLoginError["type"]
+  | PasswordRegisterError["type"]
+  | PasswordChangeError["type"]}`]: string
 } & Record<string, string>
 
 export type PasswordUICopy = typeof DEFAULT_COPY

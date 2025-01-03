@@ -75,7 +75,7 @@ export function OidcProvider(
       })
 
       routes.post("/callback", async (c) => {
-        const provider = await ctx.get<ProviderState>(c, "adapter")
+        const provider = await ctx.get<ProviderState>(c, "provider")
         if (!provider) return c.redirect(getRelativeUrl(c, "./authorize"))
         const body = await c.req.formData()
         const error = body.get("error")
