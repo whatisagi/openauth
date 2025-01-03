@@ -19,6 +19,7 @@ export interface OnSuccessResponder<
         access?: number
         refresh?: number
       }
+      subject?: string
     },
   ): Promise<Response>
 }
@@ -172,12 +173,16 @@ export function issuer<
         {
           async subject(type, properties, subjectOpts) {
             const authorization = await getAuthorization(ctx)
+            const subject = subjectOpts?.subject
+              ? subjectOpts.subject
+              : await resolveSubject(type, properties)
             await successOpts?.invalidate?.(
               await resolveSubject(type, properties),
             )
             if (authorization.response_type === "token") {
               const location = new URL(authorization.redirect_uri)
               const tokens = await generateTokens(ctx, {
+                subject,
                 type: type as string,
                 properties,
                 clientID: authorization.client_id,
@@ -202,6 +207,7 @@ export function issuer<
                 {
                   type,
                   properties,
+                  subject,
                   redirectURI: authorization.redirect_uri,
                   clientID: authorization.client_id,
                   pkce: authorization.pkce,
@@ -300,6 +306,7 @@ export function issuer<
     value: {
       type: string
       properties: any
+      subject: string
       clientID: string
       ttl: {
         access: number
@@ -307,11 +314,10 @@ export function issuer<
       }
     },
   ) {
-    const subject = await resolveSubject(value.type, value.properties)
     const refreshToken = crypto.randomUUID()
     await Storage.set(
       storage!,
-      ["oauth:refresh", subject, refreshToken],
+      ["oauth:refresh", value.subject, refreshToken],
       {
         ...value,
       },
@@ -324,7 +330,7 @@ export function issuer<
         properties: value.properties,
         aud: value.clientID,
         iss: issuer(ctx),
-        sub: subject,
+        sub: value.subject,
       })
         .setExpirationTime(Date.now() / 1000 + value.ttl.access)
         .setProtectedHeader(
@@ -335,7 +341,7 @@ export function issuer<
           })),
         )
         .sign(await signingKey.then((item) => item.private)),
-      refresh: [subject, refreshToken].join(":"),
+      refresh: [value.subject, refreshToken].join(":"),
     }
   }
 
@@ -426,6 +432,7 @@ export function issuer<
           properties: any
           clientID: string
           redirectURI: string
+          subject: string
           ttl: {
             access: number
             refresh: number
@@ -514,6 +521,7 @@ export function issuer<
           type: string
           properties: any
           clientID: string
+          subject: string
           ttl: {
             access: number
             refresh: number
@@ -564,6 +572,8 @@ export function issuer<
             async subject(type, properties, opts) {
               const tokens = await generateTokens(c, {
                 type: type as string,
+                subject:
+                  opts?.subject || (await resolveSubject(type, properties)),
                 properties,
                 clientID: clientID.toString(),
                 ttl: {
