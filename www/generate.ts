@@ -555,6 +555,9 @@ function renderType(type: TypeDoc.SomeType): Text {
     ].join("")
   }
   function renderOpenAuthType(type: TypeDoc.ReferenceType) {
+    // Reference to a generic type, ie. T
+    if (type.refersToTypeParameter) return `<code class="primitive">any</code>`
+
     // Reference to a non-documented type, ie. FetchLike
     if (!type.reflection) return `<code class="type">${type.name}</code>`
 
