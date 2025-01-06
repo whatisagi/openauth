@@ -432,9 +432,11 @@ function renderType(type: TypeDoc.SomeType): Text {
     if (type.package === "typescript") return renderTypescriptType(type)
     if (type.package === "@openauthjs/openauth") return renderOpenAuthType(type)
     return `<code class="type">${type.name}</code>`
-  } else if (
+  }
+  if (
     type.type === "reflection" &&
-    type.declaration.kind === TypeDoc.ReflectionKind.TypeLiteral
+    type.declaration.kind === TypeDoc.ReflectionKind.TypeLiteral &&
+    type.declaration.signatures
   ) {
     return renderCallbackType(type)
   }
@@ -505,8 +507,8 @@ function renderType(type: TypeDoc.SomeType): Text {
       : `${renderType(type.elementType)}<code class="symbol">[]</code>`
   }
   function renderCallbackType(type: TypeDoc.ReflectionType) {
-    //  return renderSignatureAsType(type.declaration.signatures![0])
-    return `<code class="primitive">object type</code>`
+    return renderSignatureAsType(type.declaration.signatures![0])
+    //return `<code class="primitive">object type</code>`
   }
   function renderTypescriptType(type: TypeDoc.ReferenceType) {
     // ie. Record<string, string>
