@@ -33,7 +33,7 @@ Create an issuer object for handling OAuth 2.0 authorization requests.
 <Section type="parameters">
 - <p>[<code class="key">audience?</code>](#authorizationstate.audience) <code class="primitive">string</code></p>
 - <p>[<code class="key">client_id</code>](#authorizationstate.client_id) <code class="primitive">string</code></p>
-- <p>[<code class="key">pkce?</code>](#authorizationstate.pkce) <code class="primitive">object type</code></p>
+- <p>[<code class="key">pkce?</code>](#authorizationstate.pkce) <code class="symbol">&lcub; </code><code class="key">challenge</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">method</code><code class="symbol">&colon; </code><code class="symbol">&ldquo;</code><code class="primitive">S256</code><code class="symbol">&rdquo;</code><code class="symbol"> &rcub;</code></p>
   - <p>[<code class="key">challenge</code>](#pkce.challenge) <code class="primitive">string</code></p>
   - <p>[<code class="key">method</code>](#pkce.method) <code class="symbol">&ldquo;</code><code class="primitive">S256</code><code class="symbol">&rdquo;</code></p>
 - <p>[<code class="key">redirect_uri</code>](#authorizationstate.redirect_uri) <code class="primitive">string</code></p>
@@ -61,7 +61,7 @@ Create an issuer object for handling OAuth 2.0 authorization requests.
 <Segment>
 <Section type="parameters">
 <InlineSection>
-**Type** <code class="primitive">object type</code>
+**Type** <code class="symbol">&lcub; </code><code class="key">challenge</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">method</code><code class="symbol">&colon; </code><code class="symbol">&ldquo;</code><code class="primitive">S256</code><code class="symbol">&rdquo;</code><code class="symbol"> &rcub;</code>
 </InlineSection>
 </Section>
 </Segment>
@@ -108,25 +108,25 @@ Create an issuer object for handling OAuth 2.0 authorization requests.
 ## IssuerInput
 <Segment>
 <Section type="parameters">
-- <p>[<code class="key">providers</code>](#issuerinput.providers) [<code class="type">Providers</code>](#providers)</p>
+- <p>[<code class="key">providers</code>](#issuerinput.providers) <code class="primitive">any</code></p>
 - <p>[<code class="key">storage?</code>](#issuerinput.storage) <code class="type">StorageAdapter</code></p>
-- <p>[<code class="key">subjects</code>](#issuerinput.subjects) [<code class="type">Subjects</code>](#subjects)</p>
+- <p>[<code class="key">subjects</code>](#issuerinput.subjects) <code class="primitive">any</code></p>
 - <p>[<code class="key">theme?</code>](#issuerinput.theme) [<code class="type">Theme</code>](#theme)</p>
-- <p>[<code class="key">ttl?</code>](#issuerinput.ttl) <code class="primitive">object type</code></p>
+- <p>[<code class="key">ttl?</code>](#issuerinput.ttl) <code class="symbol">&lcub; </code><code class="key">access</code><code class="symbol">&colon; </code><code class="primitive">number</code><code class="symbol">, </code><code class="key">refresh</code><code class="symbol">&colon; </code><code class="primitive">number</code><code class="symbol"> &rcub;</code></p>
   - <p>[<code class="key">access?</code>](#ttl.access) <code class="primitive">number</code></p>
   - <p>[<code class="key">refresh?</code>](#ttl.refresh) <code class="primitive">number</code></p>
-- <p>[<code class="key">allow?</code>](#issuerinput.allow) <code class="primitive">(input: <code class="primitive">object type</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">boolean</code><code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">allow?</code>](#issuerinput.allow) <code class="primitive">(input: <code class="symbol">&lcub; </code><code class="key">audience</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">clientID</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">redirectURI</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol"> &rcub;</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">boolean</code><code class="symbol">&gt;</code></code></p>
 - <p>[<code class="key">error?</code>](#issuerinput.error) <code class="primitive">(error: [<code class="type">UnknownStateError</code>](/docs/issuer#unknownstateerror), req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
 - <p>[<code class="key">select?</code>](#issuerinput.select) <code class="primitive">(providers: <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
 - <p>[<code class="key">start?</code>](#issuerinput.start) <code class="primitive">(req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">void</code><code class="symbol">&gt;</code></code></p>
-- <p>[<code class="key">success</code>](#issuerinput.success) <code class="primitive">(response: [<code class="type">OnSuccessResponder</code>](#onsuccessresponder), input: [<code class="type">Result</code>](#result), req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">success</code>](#issuerinput.success) <code class="primitive">(response: [<code class="type">OnSuccessResponder</code>](#onsuccessresponder), input: <code class="primitive">any</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
 </Section>
 </Segment>
 <NestedTitle id="issuerinput.providers" Tag="h4" parent="IssuerInput.">providers</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>
-**Type** [<code class="type">Providers</code>](#providers)
+**Type** <code class="primitive">any</code>
 </InlineSection>
 </Section>
 </Segment>
@@ -142,7 +142,7 @@ Create an issuer object for handling OAuth 2.0 authorization requests.
 <Segment>
 <Section type="parameters">
 <InlineSection>
-**Type** [<code class="type">Subjects</code>](#subjects)
+**Type** <code class="primitive">any</code>
 </InlineSection>
 </Section>
 </Segment>
@@ -158,7 +158,7 @@ Create an issuer object for handling OAuth 2.0 authorization requests.
 <Segment>
 <Section type="parameters">
 <InlineSection>
-**Type** <code class="primitive">object type</code>
+**Type** <code class="symbol">&lcub; </code><code class="key">access</code><code class="symbol">&colon; </code><code class="primitive">number</code><code class="symbol">, </code><code class="key">refresh</code><code class="symbol">&colon; </code><code class="primitive">number</code><code class="symbol"> &rcub;</code>
 </InlineSection>
 </Section>
 </Segment>
@@ -182,7 +182,7 @@ Create an issuer object for handling OAuth 2.0 authorization requests.
 <Segment>
 <Section type="parameters">
 <InlineSection>
-**Type** <code class="primitive">(input: <code class="primitive">object type</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">boolean</code><code class="symbol">&gt;</code></code>
+**Type** <code class="primitive">(input: <code class="symbol">&lcub; </code><code class="key">audience</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">clientID</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">redirectURI</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol"> &rcub;</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">boolean</code><code class="symbol">&gt;</code></code>
 </InlineSection>
 </Section>
 </Segment>
@@ -214,14 +214,14 @@ Create an issuer object for handling OAuth 2.0 authorization requests.
 <Segment>
 <Section type="parameters">
 <InlineSection>
-**Type** <code class="primitive">(response: [<code class="type">OnSuccessResponder</code>](#onsuccessresponder), input: [<code class="type">Result</code>](#result), req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
+**Type** <code class="primitive">(response: [<code class="type">OnSuccessResponder</code>](#onsuccessresponder), input: <code class="primitive">any</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
 </InlineSection>
 </Section>
 </Segment>
 ## OnSuccessResponder
 <Segment>
 <Section type="parameters">
-- <p>[<code class="key">subject</code>](#onsuccessresponder.subject) <code class="primitive">(type: [<code class="type">Type</code>](#type), properties: <code class="primitive">indexedAccess</code>, opts?: <code class="primitive">object type</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">subject</code>](#onsuccessresponder.subject) <code class="primitive">(type: <code class="primitive">any</code>, properties: <code class="primitive">indexedAccess</code>, opts?: <code class="symbol">&lcub; </code><code class="key">subject</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">ttl</code><code class="symbol">&colon; </code><code class="symbol">&lcub; </code><code class="key">access</code><code class="symbol">&colon; </code><code class="primitive">number</code><code class="symbol">, </code><code class="key">refresh</code><code class="symbol">&colon; </code><code class="primitive">number</code><code class="symbol"> &rcub;</code><code class="symbol"> &rcub;</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
 </Section>
 The interface for the success responder.
 </Segment>
@@ -229,7 +229,15 @@ The interface for the success responder.
 <Segment>
 <Section type="parameters">
 <InlineSection>
-**Type** <code class="primitive">(type: [<code class="type">Type</code>](#type), properties: <code class="primitive">indexedAccess</code>, opts?: <code class="primitive">object type</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
+**Type** <code class="primitive">(type: <code class="primitive">any</code>, properties: <code class="primitive">indexedAccess</code>, opts?: <code class="symbol">&lcub; </code><code class="key">subject</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">ttl</code><code class="symbol">&colon; </code><code class="symbol">&lcub; </code><code class="key">access</code><code class="symbol">&colon; </code><code class="primitive">number</code><code class="symbol">, </code><code class="key">refresh</code><code class="symbol">&colon; </code><code class="primitive">number</code><code class="symbol"> &rcub;</code><code class="symbol"> &rcub;</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
+</InlineSection>
+</Section>
+</Segment>
+## Prettify
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">intersection</code>
 </InlineSection>
 </Section>
 </Segment>

@@ -150,13 +150,22 @@ For example, for SPA apps.
 location.href = url
 ```
 </Segment>
+## Challenge
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="symbol">&lcub; </code><code class="key">state</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">verifier</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol"> &rcub;</code>
+</InlineSection>
+</Section>
+The challenge that you can use to verify the code.
+</Segment>
 ## Client
 <Segment>
 <Section type="parameters">
 - <p>[<code class="key">authorize</code>](#client.authorize) <code class="primitive">(redirectURI: <code class="primitive">string</code>, response: <code class="symbol">&ldquo;</code><code class="primitive">code</code><code class="symbol">&rdquo;</code><code class="symbol"> | </code><code class="symbol">&ldquo;</code><code class="primitive">token</code><code class="symbol">&rdquo;</code>, opts?: [<code class="type">AuthorizeOptions</code>](#authorizeoptions)) => <code class="primitive">Promise</code><code class="symbol">&lt;</code>[<code class="type">AuthorizeResult</code>](#authorizeresult)<code class="symbol">&gt;</code></code></p>
 - <p>[<code class="key">exchange</code>](#client.exchange) <code class="primitive">(code: <code class="primitive">string</code>, redirectURI: <code class="primitive">string</code>, verifier?: <code class="primitive">string</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code>[<code class="type">ExchangeSuccess</code>](#exchangesuccess)<code class="symbol"> | </code>[<code class="type">ExchangeError</code>](#exchangeerror)<code class="symbol">&gt;</code></code></p>
 - <p>[<code class="key">refresh</code>](#client.refresh) <code class="primitive">(refresh: <code class="primitive">string</code>, opts?: [<code class="type">RefreshOptions</code>](#refreshoptions)) => <code class="primitive">Promise</code><code class="symbol">&lt;</code>[<code class="type">RefreshSuccess</code>](#refreshsuccess)<code class="symbol"> | </code>[<code class="type">RefreshError</code>](#refresherror)<code class="symbol">&gt;</code></code></p>
-- <p>[<code class="key">verify</code>](#client.verify) <code class="primitive">(subjects: [<code class="type">T</code>](#t), token: <code class="primitive">string</code>, options?: [<code class="type">VerifyOptions</code>](#verifyoptions)) => <code class="primitive">Promise</code><code class="symbol">&lt;</code>[<code class="type">VerifyError</code>](#verifyerror)<code class="symbol"> | </code>[<code class="type">VerifyResult</code>](#verifyresult)<code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">verify</code>](#client.verify) <code class="primitive">(subjects: <code class="primitive">any</code>, token: <code class="primitive">string</code>, options?: [<code class="type">VerifyOptions</code>](#verifyoptions)) => <code class="primitive">Promise</code><code class="symbol">&lt;</code>[<code class="type">VerifyError</code>](#verifyerror)<code class="symbol"> | </code>[<code class="type">VerifyResult</code>](#verifyresult)<code class="symbol">&gt;</code></code></p>
 </Section>
 An instance of the OpenAuth client contains the following methods.
 </Segment>
@@ -306,7 +315,7 @@ if (next.err) {
 <Segment>
 <Section type="parameters">
 <InlineSection>
-**Type** <code class="primitive">(subjects: [<code class="type">T</code>](#t), token: <code class="primitive">string</code>, options?: [<code class="type">VerifyOptions</code>](#verifyoptions)) => <code class="primitive">Promise</code><code class="symbol">&lt;</code>[<code class="type">VerifyError</code>](#verifyerror)<code class="symbol"> | </code>[<code class="type">VerifyResult</code>](#verifyresult)<code class="symbol">&gt;</code></code>
+**Type** <code class="primitive">(subjects: <code class="primitive">any</code>, token: <code class="primitive">string</code>, options?: [<code class="type">VerifyOptions</code>](#verifyoptions)) => <code class="primitive">Promise</code><code class="symbol">&lt;</code>[<code class="type">VerifyError</code>](#verifyerror)<code class="symbol"> | </code>[<code class="type">VerifyResult</code>](#verifyresult)<code class="symbol">&gt;</code></code>
 </InlineSection>
 </Section>
 Verify the token in the incoming request.
