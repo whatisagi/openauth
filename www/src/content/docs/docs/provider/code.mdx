@@ -1,0 +1,121 @@
+---
+title: CodeProvider
+editUrl: https://github.com/openauthjs/openauth/blob/master/packages/openauth/src/provider/code.ts
+description: Reference doc for the `CodeProvider`.
+---
+
+import Segment from '../../../../components/tsdoc/Segment.astro';
+import Section from '../../../../components/tsdoc/Section.astro';
+import NestedTitle from '../../../../components/tsdoc/NestedTitle.astro';
+import InlineSection from '../../../../components/tsdoc/InlineSection.astro';
+
+<div class="tsdoc">
+<Section type="about">
+Configures a provider that supports  authentication. This is usually paired with the
+`CodeUI`.
+
+```ts
+import { CodeUI } from "@openauthjs/openauth/ui/code"
+import { CodeProvider } from "@openauthjs/openauth/provider/code"
+
+export default issuer({
+  providers: {
+    code: CodeProvider(
+      CodeUI({
+        copy: {
+          code_info: "We'll send a pin code to your email"
+        },
+        sendCode: (claims, code) => console.log(claims.email, code)
+      })
+    )
+  },
+  // ...
+})
+```
+
+You can customize the adapter using.
+
+```ts {7-9}
+const ui = CodeUI({
+  // ...
+})
+
+export default issuer({
+  providers: {
+    code: CodeProvider(
+      { ...ui, length: 4 }
+    )
+  },
+  // ...
+})
+```
+
+Behind the scenes, the `CodeProvider` expects callbacks that implements request handlers
+that generate the UI for the following.
+
+```ts
+CodeProvider({
+  // ...
+  request: (req, state, form, error) => Promise<Response>
+})
+```
+
+This allows you to create your own UI.
+</Section>
+---
+## Methods
+### CodeProvider
+<Segment>
+<Section type="signature">
+```ts
+CodeProvider(config)
+```
+</Section>
+<Section type="parameters">
+#### Parameters
+- <p><code class="key">config</code> [<code class="type">CodeProviderConfig</code>](/docs/provider/code#codeproviderconfig)</p>
+</Section>
+<InlineSection>
+**Returns** <code class="primitive">object type</code>
+</InlineSection>
+</Segment>
+## CodeProviderConfig
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">length?</code>](#codeproviderconfig.length) <code class="primitive">number</code></p>
+- <p>[<code class="key">request</code>](#codeproviderconfig.request) <code class="primitive">object type</code></p>
+- <p>[<code class="key">sendCode</code>](#codeproviderconfig.sendcode) <code class="primitive">object type</code></p>
+</Section>
+</Segment>
+<NestedTitle id="codeproviderconfig.length" Tag="h4" parent="CodeProviderConfig.">length?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">number</code>
+</InlineSection>
+</Section>
+
+<InlineSection>
+**Default** 6
+</InlineSection>
+The length of the pin code.
+</Segment>
+<NestedTitle id="codeproviderconfig.request" Tag="h4" parent="CodeProviderConfig.">request</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">object type</code>
+</InlineSection>
+</Section>
+Callback to render the code request UI.
+</Segment>
+<NestedTitle id="codeproviderconfig.sendcode" Tag="h4" parent="CodeProviderConfig.">sendCode</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">object type</code>
+</InlineSection>
+</Section>
+Callback to send the pin code to the user.
+</Segment>
+</div>

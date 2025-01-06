@@ -6,10 +6,46 @@ import { JWTPayload } from "hono/utils/jwt/types"
 import { getRelativeUrl } from "../util.js"
 
 export interface OidcConfig {
+  /**
+  * @internal
+  */
   type?: string
+  /**
+   * The client ID.
+   *
+   * This is just a string to identify your app.
+   *
+   * @example
+   * ```ts
+   * {
+   *   clientID: "my-client"
+   * }
+   * ```
+   */
   clientID: string
   issuer: string
+  /**
+   * A list of OIDC scopes that you want to request.
+   *
+   * @example
+   * ```ts
+   * {
+   *   scopes: ["openid", "profile", "email"]
+   * }
+   * ```
+   */
   scopes?: string[]
+  /**
+   * Any additional parameters that you want to pass to the authorization endpoint.
+   * @example
+   * ```ts
+   * {
+   *   query: {
+   *     prompt: "consent"
+   *   }
+   * }
+   * ```
+   */
   query?: Record<string, string>
 }
 

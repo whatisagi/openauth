@@ -1,40 +1,107 @@
+/**
+ * Configures a provider that supports  authentication. This is usually paired with the
+ * `CodeUI`.
+ *
+ * ```ts
+ * import { CodeUI } from "@openauthjs/openauth/ui/code"
+ * import { CodeProvider } from "@openauthjs/openauth/provider/code"
+ *
+ * export default issuer({
+ *   providers: {
+ *     code: CodeProvider(
+ *       CodeUI({
+ *         copy: {
+ *           code_info: "We'll send a pin code to your email"
+ *         },
+ *         sendCode: (claims, code) => console.log(claims.email, code)
+ *       })
+ *     )
+ *   },
+ *   // ...
+ * })
+ * ```
+ *
+ * You can customize the adapter using.
+ *
+ * ```ts {7-9}
+ * const ui = CodeUI({
+ *   // ...
+ * })
+ *
+ * export default issuer({
+ *   providers: {
+ *     code: CodeProvider(
+ *       { ...ui, length: 4 }
+ *     )
+ *   },
+ *   // ...
+ * })
+ * ```
+ *
+ * Behind the scenes, the `CodeProvider` expects callbacks that implements request handlers
+ * that generate the UI for the following.
+ *
+ * ```ts
+ * CodeProvider({
+ *   // ...
+ *   request: (req, state, form, error) => Promise<Response>
+ * })
+ * ```
+ *
+ * This allows you to create your own UI.
+ *
+ * @packageDocumentation
+ */
 import { Context } from "hono"
 import { Provider } from "./provider.js"
 import { generateUnbiasedDigits, timingSafeCompare } from "../random.js"
 
-export type CodeProviderState =
-  | {
-      type: "start"
-    }
-  | {
-      type: "code"
-      resend?: boolean
-      code: string
-      claims: Record<string, string>
-    }
-
-export type CodeProviderError =
-  | {
-      type: "invalid_code"
-    }
-  | {
-      type: "invalid_claim"
-      key: string
-      value: string
-    }
-
-export function CodeProvider<
-  Claims extends Record<string, string> = Record<string, string>,
->(config: {
+export interface CodeProviderConfig<Claims extends Record<string, string> = Record<string, string>> {
+  /**
+  * The length of the pin code.
+  *
+  * @default 6
+  */
   length?: number
+  /**
+   * Callback to render the code request UI.
+   */
   request: (
     req: Request,
     state: CodeProviderState,
     form?: FormData,
     error?: CodeProviderError,
   ) => Promise<Response>
+  /**
+   * Callback to send the pin code to the user.
+   */
   sendCode: (claims: Claims, code: string) => Promise<void | CodeProviderError>
-}) {
+}
+
+export type CodeProviderState =
+  | {
+    type: "start"
+  }
+  | {
+    type: "code"
+    resend?: boolean
+    code: string
+    claims: Record<string, string>
+  }
+
+export type CodeProviderError =
+  | {
+    type: "invalid_code"
+  }
+  | {
+    type: "invalid_claim"
+    key: string
+    value: string
+  }
+
+export function CodeProvider<
+  Claims extends Record<string, string> = Record<string, string>,
+>(config: CodeProviderConfig<Claims>) {
   const length = config.length || 6
   function generate() {
     return generateUnbiasedDigits(length)

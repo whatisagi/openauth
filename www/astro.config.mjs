@@ -87,6 +87,7 @@ export default defineConfig({
         {
           label: "Providers",
           items: [
+            { label: "Code", slug: "docs/provider/code" },
             { label: "Apple", slug: "docs/provider/apple" },
             { label: "Google", slug: "docs/provider/google" },
             { label: "Password", slug: "docs/provider/password" },

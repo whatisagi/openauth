@@ -1,7 +1,7 @@
 ---
-title: apple
-editUrl: false
-description: A page for the apple provider.
+title: AppleProvider
+editUrl: https://github.com/openauthjs/openauth/blob/master/packages/openauth/src/provider/apple.ts
+description: Reference doc for the `AppleProvider`.
 ---
 
 import Segment from '../../../../components/tsdoc/Segment.astro';
@@ -91,7 +91,6 @@ AppleProvider({
 - <p>[<code class="key">clientSecret</code>](#appleconfig.clientsecret) <code class="primitive">string</code></p>
 - <p>[<code class="key">query?</code>](#appleconfig.query) <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code></p>
 - <p>[<code class="key">scopes</code>](#appleconfig.scopes) <code class="primitive">string</code><code class="symbol">[]</code></p>
-- <p>[<code class="key">type?</code>](#appleconfig.type) <code class="primitive">string</code></p>
 </Section>
 </Segment>
 <NestedTitle id="appleconfig.clientid" Tag="h4" parent="AppleConfig.">clientID</NestedTitle>
@@ -101,6 +100,14 @@ AppleProvider({
 **Type** <code class="primitive">string</code>
 </InlineSection>
 </Section>
+The client ID.
+
+This is just a string to identify your app.
+```ts
+{
+  clientID: "my-client"
+}
+```
 </Segment>
 <NestedTitle id="appleconfig.clientsecret" Tag="h4" parent="AppleConfig.">clientSecret</NestedTitle>
 <Segment>
@@ -109,6 +116,9 @@ AppleProvider({
 **Type** <code class="primitive">string</code>
 </InlineSection>
 </Section>
+The client secret.
+
+This is a private key that's used to authenticate your app. It should be kept secret.
 </Segment>
 <NestedTitle id="appleconfig.query" Tag="h4" parent="AppleConfig.">query?</NestedTitle>
 <Segment>
@@ -117,6 +127,15 @@ AppleProvider({
 **Type** <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code>
 </InlineSection>
 </Section>
+Any additional parameters that you want to pass to the authorization endpoint.
+```ts
+{
+  query: {
+    access_type: "offline",
+    prompt: "consent"
+  }
+}
+```
 </Segment>
 <NestedTitle id="appleconfig.scopes" Tag="h4" parent="AppleConfig.">scopes</NestedTitle>
 <Segment>
@@ -125,14 +144,12 @@ AppleProvider({
 **Type** <code class="primitive">string</code><code class="symbol">[]</code>
 </InlineSection>
 </Section>
-</Segment>
-<NestedTitle id="appleconfig.type" Tag="h4" parent="AppleConfig.">type?</NestedTitle>
-<Segment>
-<Section type="parameters">
-<InlineSection>
-**Type** <code class="primitive">string</code>
-</InlineSection>
-</Section>
+A list of OAuth scopes that you want to request.
+```ts
+{
+  scopes: ["email", "profile"]
+}
+```
 </Segment>
 ## AppleOidcConfig
 <Segment>
@@ -140,7 +157,6 @@ AppleProvider({
 - <p>[<code class="key">clientID</code>](#appleoidcconfig.clientid) <code class="primitive">string</code></p>
 - <p>[<code class="key">query?</code>](#appleoidcconfig.query) <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code></p>
 - <p>[<code class="key">scopes?</code>](#appleoidcconfig.scopes) <code class="primitive">string</code><code class="symbol">[]</code></p>
-- <p>[<code class="key">type?</code>](#appleoidcconfig.type) <code class="primitive">string</code></p>
 </Section>
 </Segment>
 <NestedTitle id="appleoidcconfig.clientid" Tag="h4" parent="AppleOidcConfig.">clientID</NestedTitle>
@@ -150,6 +166,14 @@ AppleProvider({
 **Type** <code class="primitive">string</code>
 </InlineSection>
 </Section>
+The client ID.
+
+This is just a string to identify your app.
+```ts
+{
+  clientID: "my-client"
+}
+```
 </Segment>
 <NestedTitle id="appleoidcconfig.query" Tag="h4" parent="AppleOidcConfig.">query?</NestedTitle>
 <Segment>
@@ -158,6 +182,14 @@ AppleProvider({
 **Type** <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code>
 </InlineSection>
 </Section>
+Any additional parameters that you want to pass to the authorization endpoint.
+```ts
+{
+  query: {
+    prompt: "consent"
+  }
+}
+```
 </Segment>
 <NestedTitle id="appleoidcconfig.scopes" Tag="h4" parent="AppleOidcConfig.">scopes?</NestedTitle>
 <Segment>
@@ -166,13 +198,11 @@ AppleProvider({
 **Type** <code class="primitive">string</code><code class="symbol">[]</code>
 </InlineSection>
 </Section>
-</Segment>
-<NestedTitle id="appleoidcconfig.type" Tag="h4" parent="AppleOidcConfig.">type?</NestedTitle>
-<Segment>
-<Section type="parameters">
-<InlineSection>
-**Type** <code class="primitive">string</code>
-</InlineSection>
-</Section>
+A list of OIDC scopes that you want to request.
+```ts
+{
+  scopes: ["openid", "profile", "email"]
+}
+```
 </Segment>
 </div>

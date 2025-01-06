@@ -3,14 +3,56 @@ import { getRelativeUrl } from "../util.js"
 import { Provider } from "./provider.js"
 
 export interface Oauth2Config {
+  /**
+  * @internal
+  */
   type?: string
+  /**
+   * The client ID.
+   *
+   * This is just a string to identify your app.
+   *
+   * @example
+   * ```ts
+   * {
+   *   clientID: "my-client"
+   * }
+   * ```
+   */
   clientID: string
+  /**
+   * The client secret.
+   *
+   * This is a private key that's used to authenticate your app. It should be kept secret.
+   */
   clientSecret: string
   endpoint: {
     authorization: string
     token: string
   }
+  /**
+   * A list of OAuth scopes that you want to request.
+   *
+   * @example
+   * ```ts
+   * {
+   *   scopes: ["email", "profile"]
+   * }
+   * ```
+   */
   scopes: string[]
+  /**
+   * Any additional parameters that you want to pass to the authorization endpoint.
+   * @example
+   * ```ts
+   * {
+   *   query: {
+   *     access_type: "offline",
+   *     prompt: "consent"
+   *   }
+   * }
+   * ```
+   */
   query?: Record<string, string>
 }
 

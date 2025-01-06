@@ -21,22 +21,22 @@ const FRONTMATTER: Record<
   string,
   { title: string; editUrl: string; description: string }
 > = {
-  theme: {
+  themeUI: {
     title: "Themes",
     description: "Reference docs for themes.",
     editUrl: `${config.github}/blob/master/packages/openauth/src/ui/theme.ts`,
   },
-  password: {
+  passwordUI: {
     title: "PasswordUI",
     description: "Reference doc for the `PasswordUI`.",
     editUrl: `${config.github}/blob/master/packages/openauth/src/ui/password.tsx`,
   },
-  code: {
+  codeUI: {
     title: "CodeUI",
     description: "Reference doc for the `CodeUI`.",
     editUrl: `${config.github}/blob/master/packages/openauth/src/ui/code.tsx`,
   },
-  select: {
+  selectUI: {
     title: "Select",
     description: "Reference doc for the `Select` UI.",
     editUrl: `${config.github}/blob/master/packages/openauth/src/ui/select.tsx`,
@@ -61,6 +61,21 @@ const FRONTMATTER: Record<
     description: "Reference doc for the client SDK.",
     editUrl: `${config.github}/blob/master/packages/openauth/src/client.ts`,
   },
+  apple: {
+    title: "AppleProvider",
+    description: "Reference doc for the `AppleProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/apple.ts`,
+  },
+  password: {
+    title: "PasswordProvider",
+    description: "Reference doc for the `PasswordProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/password.ts`,
+  },
+  code: {
+    title: "CodeProvider",
+    description: "Reference doc for the `CodeProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/code.ts`,
+  },
 }
 
 renderSubject()
@@ -74,12 +89,13 @@ function renderProvider(module: TypeDoc.DeclarationReflection) {
   console.debug(`renderProvider: ${module.name}`)
 
   const name = module.name.replace("provider/", "")
+  const { title, editUrl, description } = FRONTMATTER[name] || {}
   saveFile(module.name, [
     renderHeader({
+      title: title || name,
       moduleName: module.name,
-      editUrl: false,
-      title: name,
-      description: `A page for the ${name} provider.`,
+      editUrl: editUrl || false,
+      description: description || `A page for the ${name} provider.`,
     }),
     `<div class="tsdoc">`,
     renderAbout(renderComment(module.comment)),
@@ -113,7 +129,7 @@ function renderUI(module: TypeDoc.DeclarationReflection) {
   console.debug(`renderUI: ${module.name}`)
 
   const name = module.name.replace("ui/", "")
-  const { title, editUrl, description } = FRONTMATTER[name] || {}
+  const { title, editUrl, description } = FRONTMATTER[`${name}UI`] || {}
   saveFile(module.name, [
     renderHeader({
       title: title || name,
@@ -382,13 +398,13 @@ function renderComment(comment?: TypeDoc.Comment) {
           // Otherwise render it as a comment ie. No domains configured
           tag.content.length === 1 && tag.content[0].kind === "code"
             ? `**Default** ${renderType(
-                new TypeDoc.IntrinsicType(
-                  tag.content[0].text
-                    .replace(/`/g, "")
-                    .replace(/{/g, "&lcub;")
-                    .replace(/}/g, "&rcub;"),
-                ),
-              )}`
+              new TypeDoc.IntrinsicType(
+                tag.content[0].text
+                  .replace(/`/g, "")
+                  .replace(/{/g, "&lcub;")
+                  .replace(/}/g, "&rcub;"),
+              ),
+            )}`
             : `**Default** ${tag.content.map((c) => c.text)}`,
           `</InlineSection>`,
         ]
@@ -523,8 +539,8 @@ function renderType(type: TypeDoc.SomeType): Text {
   function renderArrayType(type: TypeDoc.ArrayType) {
     return type.elementType.type === "union"
       ? `<code class="symbol">(</code>${renderType(
-          type.elementType,
-        )}<code class="symbol">)[]</code>`
+        type.elementType,
+      )}<code class="symbol">)[]</code>`
       : `${renderType(type.elementType)}<code class="symbol">[]</code>`
   }
   function renderCallbackType(type: TypeDoc.ReflectionType) {
@@ -622,17 +638,17 @@ function flattenNestedTypes(
         { prefix, subType, depth },
         ...(subType.kind === TypeDoc.ReflectionKind.Property
           ? flattenNestedTypes(
-              subType.type!,
-              `${prefix}.${subType.name}`,
-              depth + 1,
-            )
+            subType.type!,
+            `${prefix}.${subType.name}`,
+            depth + 1,
+          )
           : []),
         ...(subType.kind === TypeDoc.ReflectionKind.Accessor
           ? flattenNestedTypes(
-              subType.getSignature?.type!,
-              `${prefix}.${subType.name}`,
-              depth + 1,
-            )
+            subType.getSignature?.type!,
+            `${prefix}.${subType.name}`,
+            depth + 1,
+          )
           : []),
       ])
   }
@@ -653,7 +669,7 @@ function saveFile(moduleName: string, content: any[]) {
 
 function configureLogger() {
   if (process.env.DEBUG) return
-  console.debug = () => {}
+  console.debug = () => { }
 }
 
 async function build() {
@@ -668,6 +684,7 @@ async function build() {
     },
 
     entryPoints: [
+      "../packages/openauth/src/provider/code.ts",
       "../packages/openauth/src/provider/apple.ts",
       "../packages/openauth/src/provider/google.ts",
       "../packages/openauth/src/provider/password.ts",
@@ -695,4 +712,4 @@ async function build() {
   return project
 }
 
-async function generate() {}
+async function generate() { }

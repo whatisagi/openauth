@@ -1,3 +1,59 @@
+/**
+ * Configures a provider that supports username and password authentication. This is usually
+ * paired with the `PasswordUI`.
+ *
+ * ```ts
+ * import { PasswordUI } from "@openauthjs/openauth/ui/password"
+ * import { PasswordProvider } from "@openauthjs/openauth/provider/password"
+ *
+ * export default issuer({
+ *   providers: {
+ *     password: PasswordProvider(
+ *       PasswordUI({
+ *         copy: {
+ *           error_email_taken: "This email is already taken."
+ *         },
+ *         sendCode: (email, code) => console.log(email, code)
+ *       })
+ *     )
+ *   },
+ *   // ...
+ * })
+ * ```
+ *
+ * You can customize the adapter using.
+ *
+ * ```ts {7-9}
+ * const ui = PasswordUI({
+ *   // ...
+ * })
+ *
+ * export default issuer({
+ *   providers: {
+ *     password: PasswordAdapter(
+ *       { ...ui, hasher: PBKDF2Hasher() }
+ *     )
+ *   },
+ *   // ...
+ * })
+ * ```
+ *
+ * Behind the scenes, the `PasswordProvider` expects callbacks that implements request handlers
+ * that generate the UI for the following.
+ *
+ * ```ts
+ * PasswordProvider({
+ *   // ...
+ *   login: (req, form, error) => Promise<Response>
+ *   register: (req, state, form, error) => Promise<Response>
+ *   change: (req, state, form, error) => Promise<Response>
+ * })
+ * ```
+ *
+ * This allows you to create your own UI for each of these screens.
+ *
+ * @packageDocumentation
+ */
 import { UnknownStateError } from "../error.js"
 import { Storage } from "../storage/storage.js"
 import { Provider } from "./provider.js"
@@ -33,70 +89,70 @@ export interface PasswordConfig {
 
 export type PasswordRegisterState =
   | {
-      type: "start"
-    }
+    type: "start"
+  }
   | {
-      type: "code"
-      code: string
-      email: string
-      password: string
-    }
+    type: "code"
+    code: string
+    email: string
+    password: string
+  }
 
 export type PasswordRegisterError =
   | {
-      type: "invalid_code"
-    }
+    type: "invalid_code"
+  }
   | {
-      type: "email_taken"
-    }
+    type: "email_taken"
+  }
   | {
-      type: "invalid_email"
-    }
+    type: "invalid_email"
+  }
   | {
-      type: "invalid_password"
-    }
+    type: "invalid_password"
+  }
   | {
-      type: "password_mismatch"
-    }
+    type: "password_mismatch"
+  }
 
 export type PasswordChangeState =
   | {
-      type: "start"
-      redirect: string
-    }
+    type: "start"
+    redirect: string
+  }
   | {
-      type: "code"
-      code: string
-      email: string
-      redirect: string
-    }
+    type: "code"
+    code: string
+    email: string
+    redirect: string
+  }
   | {
-      type: "update"
-      redirect: string
-      email: string
-    }
+    type: "update"
+    redirect: string
+    email: string
+  }
 
 export type PasswordChangeError =
   | {
-      type: "invalid_email"
-    }
+    type: "invalid_email"
+  }
   | {
-      type: "invalid_code"
-    }
+    type: "invalid_code"
+  }
   | {
-      type: "invalid_password"
-    }
+    type: "invalid_password"
+  }
   | {
-      type: "password_mismatch"
-    }
+    type: "password_mismatch"
+  }
 
 export type PasswordLoginError =
   | {
-      type: "invalid_password"
-    }
+    type: "invalid_password"
+  }
   | {
-      type: "invalid_email"
-    }
+    type: "invalid_email"
+  }
 
 export function PasswordProvider(
   config: PasswordConfig,
@@ -312,7 +368,7 @@ export function PasswordProvider(
 import * as jose from "jose"
 import { TextEncoder } from "node:util"
 
-interface HashedPassword {}
+interface HashedPassword { }
 
 export function PBKDF2Hasher(opts?: { interations?: number }): PasswordHasher<{
   hash: string
