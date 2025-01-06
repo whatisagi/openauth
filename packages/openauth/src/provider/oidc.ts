@@ -7,8 +7,8 @@ import { getRelativeUrl } from "../util.js"
 
 export interface OidcConfig {
   /**
-  * @internal
-  */
+   * @internal
+   */
   type?: string
   /**
    * The client ID.

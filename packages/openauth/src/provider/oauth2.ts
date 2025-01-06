@@ -4,8 +4,8 @@ import { Provider } from "./provider.js"
 
 export interface Oauth2Config {
   /**
-  * @internal
-  */
+   * @internal
+   */
   type?: string
   /**
    * The client ID.

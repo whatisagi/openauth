@@ -89,70 +89,70 @@ export interface PasswordConfig {
 
 export type PasswordRegisterState =
   | {
-    type: "start"
-  }
+      type: "start"
+    }
   | {
-    type: "code"
-    code: string
-    email: string
-    password: string
-  }
+      type: "code"
+      code: string
+      email: string
+      password: string
+    }
 
 export type PasswordRegisterError =
   | {
-    type: "invalid_code"
-  }
+      type: "invalid_code"
+    }
   | {
-    type: "email_taken"
-  }
+      type: "email_taken"
+    }
   | {
-    type: "invalid_email"
-  }
+      type: "invalid_email"
+    }
   | {
-    type: "invalid_password"
-  }
+      type: "invalid_password"
+    }
   | {
-    type: "password_mismatch"
-  }
+      type: "password_mismatch"
+    }
 
 export type PasswordChangeState =
   | {
-    type: "start"
-    redirect: string
-  }
+      type: "start"
+      redirect: string
+    }
   | {
-    type: "code"
-    code: string
-    email: string
-    redirect: string
-  }
+      type: "code"
+      code: string
+      email: string
+      redirect: string
+    }
   | {
-    type: "update"
-    redirect: string
-    email: string
-  }
+      type: "update"
+      redirect: string
+      email: string
+    }
 
 export type PasswordChangeError =
   | {
-    type: "invalid_email"
-  }
+      type: "invalid_email"
+    }
   | {
-    type: "invalid_code"
-  }
+      type: "invalid_code"
+    }
   | {
-    type: "invalid_password"
-  }
+      type: "invalid_password"
+    }
   | {
-    type: "password_mismatch"
-  }
+      type: "password_mismatch"
+    }
 
 export type PasswordLoginError =
   | {
-    type: "invalid_password"
-  }
+      type: "invalid_password"
+    }
   | {
-    type: "invalid_email"
-  }
+      type: "invalid_email"
+    }
 
 export function PasswordProvider(
   config: PasswordConfig,
@@ -368,7 +368,7 @@ export function PasswordProvider(
 import * as jose from "jose"
 import { TextEncoder } from "node:util"
 
-interface HashedPassword { }
+interface HashedPassword {}
 
 export function PBKDF2Hasher(opts?: { interations?: number }): PasswordHasher<{
   hash: string

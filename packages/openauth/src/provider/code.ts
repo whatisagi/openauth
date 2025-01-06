@@ -56,12 +56,14 @@ import { Context } from "hono"
 import { Provider } from "./provider.js"
 import { generateUnbiasedDigits, timingSafeCompare } from "../random.js"
 
-export interface CodeProviderConfig<Claims extends Record<string, string> = Record<string, string>> {
+export interface CodeProviderConfig<
+  Claims extends Record<string, string> = Record<string, string>,
+> {
   /**
-  * The length of the pin code.
-  *
-  * @default 6
-  */
+   * The length of the pin code.
+   *
+   * @default 6
+   */
   length?: number
   /**
    * Callback to render the code request UI.
@@ -80,24 +82,24 @@ export interface CodeProviderConfig<Claims extends Record<string, string> = Reco
 
 export type CodeProviderState =
   | {
-    type: "start"
-  }
+      type: "start"
+    }
   | {
-    type: "code"
-    resend?: boolean
-    code: string
-    claims: Record<string, string>
-  }
+      type: "code"
+      resend?: boolean
+      code: string
+      claims: Record<string, string>
+    }
 
 export type CodeProviderError =
   | {
-    type: "invalid_code"
-  }
+      type: "invalid_code"
+    }
   | {
-    type: "invalid_claim"
-    key: string
-    value: string
-  }
+      type: "invalid_claim"
+      key: string
+      value: string
+    }
 
 export function CodeProvider<
   Claims extends Record<string, string> = Record<string, string>,
