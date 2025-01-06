@@ -22,7 +22,7 @@ import type { KVNamespace } from "@cloudflare/workers-types"
 import { joinKey, splitKey, StorageAdapter } from "./storage.js"
 
 /**
- * Configure the DynamoDB table that's created.
+ * Configure the Cloudflare KV store that's created.
  */
 export interface CloudflareStorageOptions {
   namespace: KVNamespace
