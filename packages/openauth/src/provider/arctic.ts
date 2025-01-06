@@ -25,7 +25,9 @@ export function ArcticProvider(
     refreshAccessToken(refreshToken: string): Promise<OAuth2Tokens>
   },
   config: ArcticProviderOptions,
-) {
+): Provider<{
+  tokenset: OAuth2Tokens
+}> {
   function getClient(c: Context) {
     const callback = new URL(c.req.url)
     callback.pathname = callback.pathname.replace(/authorize.*$/, "callback")
@@ -64,7 +66,5 @@ export function ArcticProvider(
         })
       })
     },
-  } satisfies Provider<{
-    tokenset: OAuth2Tokens
-  }>
+  }
 }

@@ -104,7 +104,7 @@ export interface CodeUIOptions {
  * Creates a UI for the Code provider flow.
  * @param props - Configure the UI.
  */
-export function CodeUI(props: CodeUIOptions) {
+export function CodeUI(props: CodeUIOptions): CodeProviderOptions {
   const copy = {
     ...DEFAULT_COPY,
     ...props.copy,
@@ -205,5 +205,5 @@ export function CodeUI(props: CodeUIOptions) {
 
       throw new UnknownStateError()
     },
-  } satisfies CodeProviderOptions
+  }
 }

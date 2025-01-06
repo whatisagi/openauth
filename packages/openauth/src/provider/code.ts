@@ -103,7 +103,7 @@ export type CodeProviderError =
 
 export function CodeProvider<
   Claims extends Record<string, string> = Record<string, string>,
->(config: CodeProviderConfig<Claims>) {
+>(config: CodeProviderConfig<Claims>): Provider<{ claims: Claims }> {
   const length = config.length || 6
   function generate() {
     return generateUnbiasedDigits(length)
@@ -184,7 +184,7 @@ export function CodeProvider<
         }
       })
     },
-  } satisfies Provider<{ claims: Claims }>
+  }
 }
 
 export type CodeProviderOptions = Parameters<typeof CodeProvider>[0]
