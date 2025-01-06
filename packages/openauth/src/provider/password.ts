@@ -98,7 +98,9 @@ export type PasswordLoginError =
       type: "invalid_email"
     }
 
-export function PasswordProvider(config: PasswordConfig) {
+export function PasswordProvider(
+  config: PasswordConfig,
+): Provider<{ email: string }> {
   const hasher = config.hasher ?? ScryptHasher()
   function generate() {
     return generateUnbiasedDigits(6)
@@ -304,7 +306,7 @@ export function PasswordProvider(config: PasswordConfig) {
         return transition({ type: "start", redirect: provider.redirect })
       })
     },
-  } satisfies Provider<{ email: string }>
+  }
 }
 
 import * as jose from "jose"

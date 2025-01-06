@@ -284,66 +284,85 @@ function renderFunctions(module: TypeDoc.DeclarationReflection) {
 
 function renderInterfaces(module: TypeDoc.DeclarationReflection) {
   console.debug(` ∟renderInterfaces`)
-  const interfaces = module.getChildrenByKind(TypeDoc.ReflectionKind.Interface)
+  const interfaces = [
+    ...module.getChildrenByKind(TypeDoc.ReflectionKind.Interface),
+    ...module.getChildrenByKind(TypeDoc.ReflectionKind.TypeAlias),
+  ].sort((a, b) => a.name.localeCompare(b.name))
+
   return interfaces.map((i) => {
-    console.debug(`   ∟interface: ${i.name}`)
-    const properties = i.getChildrenByKind(TypeDoc.ReflectionKind.Property)
-    const methods = i.getChildrenByKind(TypeDoc.ReflectionKind.Method)
-    return [
-      `## ${i.name}`,
-      `<Segment>`,
-      `<Section type="parameters">`,
-      properties.map((p) => [
-        `- <p>[<code class="key">${renderProperty(p)}</code>](#${buildLinkHash(i.name, p.name)}) ${renderType(p.type!)}</p>`,
-        flattenNestedTypes(p.type!, p.name).map(
-          ({ depth, prefix, subType }) =>
-            `${" ".repeat(depth * 2)}- <p>[<code class="key">${renderProperty(
-              subType,
-            )}</code>](#${buildLinkHash(prefix, subType.name)}) ${renderType(subType.type!)}</p>`,
-        ),
-      ]),
-      methods.map((m) => {
-        return `- <p>[<code class="key">${renderProperty(m)}</code>](#${buildLinkHash(i.name, m.name)}) ${renderSignatureAsType(m.signatures![0])}</p>`
-      }),
-      `</Section>`,
-      renderComment(i.comment),
-      `</Segment>`,
-      properties.flatMap((p) => [
-        `<NestedTitle id="${buildLinkHash(i.name, p.name)}" Tag="h4" parent="${i.name}.">${renderProperty(p)}</NestedTitle>`,
+    // render type alias as a type
+    if (i.kindOf(TypeDoc.ReflectionKind.TypeAlias)) {
+      return [
+        `## ${i.name}`,
         `<Segment>`,
         `<Section type="parameters">`,
-        `<InlineSection>`,
-        `**Type** ${renderType(p.type!)}`,
-        `</InlineSection>`,
+        `**Type** ${renderType(i.type!)}`,
         `</Section>`,
-        renderComment(p.comment),
+        renderComment(i.comment),
         `</Segment>`,
-        flattenNestedTypes(p.type!, p.name).map(
-          ({ depth, prefix, subType }) => [
-            `<NestedTitle id="${buildLinkHash(prefix, subType.name)}" Tag="h5" parent="${i.name}.${prefix}.">${renderProperty(subType)}</NestedTitle>`,
-            `<Segment>`,
-            `<Section type="parameters">`,
-            `<InlineSection>`,
-            `**Type** ${renderType(subType.type!)}`,
-            `</InlineSection>`,
-            `</Section>`,
-            renderComment(subType.comment),
-            `</Segment>`,
-          ],
-        ),
-      ]),
-      methods.flatMap((m) => [
-        `<NestedTitle id="${buildLinkHash(i.name, m.name)}" Tag="h4" parent="${i.name}.">${renderProperty(m)}</NestedTitle>`,
+      ]
+    }
+    // render interface as a type
+    else {
+      console.debug(`   ∟interface: ${i.name}`)
+      const properties = i.getChildrenByKind(TypeDoc.ReflectionKind.Property)
+      const methods = i.getChildrenByKind(TypeDoc.ReflectionKind.Method)
+      return [
+        `## ${i.name}`,
         `<Segment>`,
         `<Section type="parameters">`,
-        `<InlineSection>`,
-        `**Type** ${renderSignatureAsType(m.signatures![0])}`,
-        `</InlineSection>`,
+        properties.map((p) => [
+          `- <p>[<code class="key">${renderProperty(p)}</code>](#${buildLinkHash(i.name, p.name)}) ${renderType(p.type!)}</p>`,
+          flattenNestedTypes(p.type!, p.name).map(
+            ({ depth, prefix, subType }) =>
+              `${" ".repeat(depth * 2)}- <p>[<code class="key">${renderProperty(
+                subType,
+              )}</code>](#${buildLinkHash(prefix, subType.name)}) ${renderType(subType.type!)}</p>`,
+          ),
+        ]),
+        methods.map((m) => {
+          return `- <p>[<code class="key">${renderProperty(m)}</code>](#${buildLinkHash(i.name, m.name)}) ${renderSignatureAsType(m.signatures![0])}</p>`
+        }),
         `</Section>`,
-        renderComment(m.signatures![0].comment),
+        renderComment(i.comment),
         `</Segment>`,
-      ]),
-    ]
+        properties.flatMap((p) => [
+          `<NestedTitle id="${buildLinkHash(i.name, p.name)}" Tag="h4" parent="${i.name}.">${renderProperty(p)}</NestedTitle>`,
+          `<Segment>`,
+          `<Section type="parameters">`,
+          `<InlineSection>`,
+          `**Type** ${renderType(p.type!)}`,
+          `</InlineSection>`,
+          `</Section>`,
+          renderComment(p.comment),
+          `</Segment>`,
+          flattenNestedTypes(p.type!, p.name).map(
+            ({ depth, prefix, subType }) => [
+              `<NestedTitle id="${buildLinkHash(prefix, subType.name)}" Tag="h5" parent="${i.name}.${prefix}.">${renderProperty(subType)}</NestedTitle>`,
+              `<Segment>`,
+              `<Section type="parameters">`,
+              `<InlineSection>`,
+              `**Type** ${renderType(subType.type!)}`,
+              `</InlineSection>`,
+              `</Section>`,
+              renderComment(subType.comment),
+              `</Segment>`,
+            ],
+          ),
+        ]),
+        methods.flatMap((m) => [
+          `<NestedTitle id="${buildLinkHash(i.name, m.name)}" Tag="h4" parent="${i.name}.">${renderProperty(m)}</NestedTitle>`,
+          `<Segment>`,
+          `<Section type="parameters">`,
+          `<InlineSection>`,
+          `**Type** ${renderSignatureAsType(m.signatures![0])}`,
+          `</InlineSection>`,
+          `</Section>`,
+          renderComment(m.signatures![0].comment),
+          `</Segment>`,
+        ]),
+      ]
+    }
   })
 }
 
@@ -435,10 +454,10 @@ function renderType(type: TypeDoc.SomeType): Text {
   }
   if (
     type.type === "reflection" &&
-    type.declaration.kind === TypeDoc.ReflectionKind.TypeLiteral &&
-    type.declaration.signatures
+    type.declaration.kind === TypeDoc.ReflectionKind.TypeLiteral
   ) {
-    return renderCallbackType(type)
+    if (type.declaration.signatures) return renderCallbackType(type)
+    if (type.declaration.children) return renderDiscriminatedUnion(type)
   }
   return `<code class="primitive">${type.type}</code>`
 
@@ -508,7 +527,21 @@ function renderType(type: TypeDoc.SomeType): Text {
   }
   function renderCallbackType(type: TypeDoc.ReflectionType) {
     return renderSignatureAsType(type.declaration.signatures![0])
-    //return `<code class="primitive">object type</code>`
+  }
+  function renderDiscriminatedUnion(type: TypeDoc.ReflectionType) {
+    return [
+      `<code class="symbol">&lcub; </code>`,
+      type.declaration
+        .children!.map((c) =>
+          [
+            `<code class="key">${c.name}</code>`,
+            `<code class="symbol">&colon; </code>`,
+            renderType(c.type!),
+          ].join(""),
+        )
+        .join(`<code class="symbol">, </code>`),
+      `<code class="symbol"> &rcub;</code>`,
+    ].join("")
   }
   function renderTypescriptType(type: TypeDoc.ReferenceType) {
     // ie. Record<string, string>
@@ -601,38 +634,6 @@ function flattenNestedTypes(
 
   return []
 }
-
-//function renderNestedTypeList(
-//  module: TypeDoc.DeclarationReflection,
-//  prop: TypeDoc.DeclarationReflection | TypeDoc.SignatureReflection
-//) {
-//  return useNestedTypes(prop.type!, prop.name).map(
-//    ({ depth, prefix, subType }) => {
-//      const hasChildren =
-//        subType.kind === TypeDoc.ReflectionKind.Property
-//          ? useNestedTypes(subType.type!).length
-//          : subType.kind === TypeDoc.ReflectionKind.Method
-//            ? useNestedTypes(subType.signatures![0].type!).length
-//            : useNestedTypes(subType.getSignature?.type!).length;
-//      const type = hasChildren ? ` ${renderType(module, subType)}` : "";
-//      const generateHash = (counter = 0): string => {
-//        const hash =
-//          `${prefix}.${subType.name}`
-//            .toLowerCase()
-//            .replace(/[^a-z0-9\.]/g, "")
-//            .replace(/\./g, "-") + (counter > 0 ? `-${counter}` : "");
-//        return Array.from(useLinkHashes(module).values()).includes(hash)
-//          ? generateHash(counter + 1)
-//          : hash;
-//      };
-//      const hash = generateHash();
-//      useLinkHashes(module).set(subType, hash);
-//      return `${" ".repeat(depth * 2)}- <p>[<code class="key">${renderName(
-//        subType
-//      )}</code>](#${hash})${type}</p>`;
-//    }
-//  );
-//}
 
 /********************/
 /** Other functions */
