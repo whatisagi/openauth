@@ -1,3 +1,27 @@
+/**
+ * Use this to connect authentication providers that support OAuth 2.0.
+ *
+ * ```ts {5-12}
+ * import { Oauth2Provider } from "@openauthjs/openauth/provider/oauth2"
+ *
+ * export default issuer({
+ *   providers: {
+ *     oauth2: Oauth2Provider({
+ *       clientId: "1234567890",
+ *       clientSecret: "0987654321",
+ *       endpoint: {
+ *         authorization: "https://auth.myserver.com/authorize",
+ *         token: "https://auth.myserver.com/token"
+ *       }
+ *     })
+ *   }
+ * })
+ * ```
+ *
+ *
+ * @packageDocumentation
+ */
+
 import { OauthError } from "../error.js"
 import { getRelativeUrl } from "../util.js"
 import { Provider } from "./provider.js"
@@ -24,10 +48,36 @@ export interface Oauth2Config {
    * The client secret.
    *
    * This is a private key that's used to authenticate your app. It should be kept secret.
+   *
+   * @example
+   * ```ts
+   * {
+   *   clientSecret: "0987654321"
+   * }
+   * ```
    */
   clientSecret: string
+  /**
+   * The URLs of the authorization and token endpoints.
+   *
+   * @example
+   * ```ts
+   * {
+   *   endpoint: {
+   *     authorization: "https://auth.myserver.com/authorize",
+   *     token: "https://auth.myserver.com/token"
+   *   }
+   * }
+   * ```
+   */
   endpoint: {
+    /**
+     * The URL of the authorization endpoint.
+     */
     authorization: string
+    /**
+     * The URL of the token endpoint.
+     */
     token: string
   }
   /**
@@ -56,8 +106,14 @@ export interface Oauth2Config {
   query?: Record<string, string>
 }
 
+/**
+ * @internal
+ */
 export type Oauth2WrappedConfig = Omit<Oauth2Config, "endpoint" | "name">
 
+/**
+ * @internal
+ */
 export interface Oauth2Token {
   access: string
   refresh: string

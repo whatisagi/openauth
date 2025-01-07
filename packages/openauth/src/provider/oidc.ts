@@ -1,3 +1,23 @@
+/**
+ * Use this to connect authentication providers that support OIDC.
+ *
+ * ```ts {5-8}
+ * import { OidcProvider } from "@openauthjs/openauth/provider/oidc"
+ *
+ * export default issuer({
+ *   providers: {
+ *     oauth2: OidcProvider({
+ *       clientId: "1234567890",
+ *       issuer: "https://auth.myserver.com"
+ *     })
+ *   }
+ * })
+ * ```
+ *
+ *
+ * @packageDocumentation
+ */
+
 import { createLocalJWKSet, JSONWebKeySet, jwtVerify } from "jose"
 import { WellKnown } from "../client.js"
 import { OauthError } from "../error.js"
@@ -23,6 +43,16 @@ export interface OidcConfig {
    * ```
    */
   clientID: string
+  /**
+   * The URL of your authorization server.
+   *
+   * @example
+   * ```ts
+   * {
+   *   issuer: "https://auth.myserver.com"
+   * }
+   * ```
+   */
   issuer: string
   /**
    * A list of OIDC scopes that you want to request.
@@ -49,6 +79,9 @@ export interface OidcConfig {
   query?: Record<string, string>
 }
 
+/**
+ * @internal
+ */
 export type OidcWrappedConfig = Omit<OidcConfig, "issuer" | "name">
 
 interface ProviderState {
@@ -57,6 +90,9 @@ interface ProviderState {
   redirect: string
 }
 
+/**
+ * @internal
+ */
 export interface IdTokenResponse {
   idToken: string
   claims: Record<string, any>

@@ -1,7 +1,7 @@
 ---
-title: GoogleProvider
-editUrl: https://github.com/openauthjs/openauth/blob/master/packages/openauth/src/provider/google.ts
-description: Reference doc for the `GoogleProvider`.
+title: FacebookProvider
+editUrl: https://github.com/openauthjs/openauth/blob/master/packages/openauth/src/provider/facebook.ts
+description: Reference doc for the `FacebookProvider`.
 ---
 
 import Segment from '../../../../components/tsdoc/Segment.astro';
@@ -11,16 +11,16 @@ import InlineSection from '../../../../components/tsdoc/InlineSection.astro';
 
 <div class="tsdoc">
 <Section type="about">
-Use this provider to authenticate with Google. Supports both OAuth2 and OIDC.
+Use this provider to authenticate with Facebook. Supports both OAuth2 and OIDC.
 
 #### Using OAuth
 
 ```ts {5-8}
-import { GoogleProvider } from "@openauthjs/openauth/provider/google"
+import { FacebookProvider } from "@openauthjs/openauth/provider/facebook"
 
 export default issuer({
   providers: {
-    google: GoogleProvider({
+    facebook: FacebookProvider({
       clientId: "1234567890",
       clientSecret: "0987654321"
     })
@@ -31,11 +31,11 @@ export default issuer({
 #### Using OIDC
 
 ```ts {5-7}
-import { GoogleOidcProvider } from "@openauthjs/openauth/provider/google"
+import { FacebookOidcProvider } from "@openauthjs/openauth/provider/facebook"
 
 export default issuer({
   providers: {
-    google: GoogleOidcProvider({
+    facebook: FacebookOidcProvider({
       clientId: "1234567890"
     })
   }
@@ -44,63 +44,63 @@ export default issuer({
 </Section>
 ---
 ## Methods
-### GoogleOidcProvider
+### FacebookOidcProvider
 <Segment>
 <Section type="signature">
 ```ts
-GoogleOidcProvider(config)
+FacebookOidcProvider(config)
 ```
 </Section>
 <Section type="parameters">
 #### Parameters
-- <p><code class="key">config</code> [<code class="type">GoogleOidcConfig</code>](/docs/provider/google#googleoidcconfig)</p>
+- <p><code class="key">config</code> [<code class="type">FacebookOidcConfig</code>](/docs/provider/facebook#facebookoidcconfig)</p>
 The config for the provider.
 </Section>
 <InlineSection>
 **Returns** <code class="type">Provider</code>
 </InlineSection>
-Create a Google OIDC provider.
+Create a Facebook OIDC provider.
 
 This is useful if you just want to verify the user's email address.
 ```ts
-GoogleOidcProvider({
+FacebookOidcProvider({
   clientId: "1234567890"
 })
 ```
 </Segment>
-### GoogleProvider
+### FacebookProvider
 <Segment>
 <Section type="signature">
 ```ts
-GoogleProvider(config)
+FacebookProvider(config)
 ```
 </Section>
 <Section type="parameters">
 #### Parameters
-- <p><code class="key">config</code> [<code class="type">GoogleConfig</code>](/docs/provider/google#googleconfig)</p>
+- <p><code class="key">config</code> [<code class="type">FacebookConfig</code>](/docs/provider/facebook#facebookconfig)</p>
 The config for the provider.
 </Section>
 <InlineSection>
 **Returns** <code class="type">Provider</code>
 </InlineSection>
-Create a Google OAuth2 provider.
+Create a Facebook OAuth2 provider.
 ```ts
-GoogleProvider({
+FacebookProvider({
   clientId: "1234567890",
   clientSecret: "0987654321"
 })
 ```
 </Segment>
-## GoogleConfig
+## FacebookConfig
 <Segment>
 <Section type="parameters">
-- <p>[<code class="key">clientID</code>](#googleconfig.clientid) <code class="primitive">string</code></p>
-- <p>[<code class="key">clientSecret</code>](#googleconfig.clientsecret) <code class="primitive">string</code></p>
-- <p>[<code class="key">query?</code>](#googleconfig.query) <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code></p>
-- <p>[<code class="key">scopes</code>](#googleconfig.scopes) <code class="primitive">string</code><code class="symbol">[]</code></p>
+- <p>[<code class="key">clientID</code>](#facebookconfig.clientid) <code class="primitive">string</code></p>
+- <p>[<code class="key">clientSecret</code>](#facebookconfig.clientsecret) <code class="primitive">string</code></p>
+- <p>[<code class="key">query?</code>](#facebookconfig.query) <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code></p>
+- <p>[<code class="key">scopes</code>](#facebookconfig.scopes) <code class="primitive">string</code><code class="symbol">[]</code></p>
 </Section>
 </Segment>
-<NestedTitle id="googleconfig.clientid" Tag="h4" parent="GoogleConfig.">clientID</NestedTitle>
+<NestedTitle id="facebookconfig.clientid" Tag="h4" parent="FacebookConfig.">clientID</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>
@@ -116,7 +116,7 @@ This is just a string to identify your app.
 }
 ```
 </Segment>
-<NestedTitle id="googleconfig.clientsecret" Tag="h4" parent="GoogleConfig.">clientSecret</NestedTitle>
+<NestedTitle id="facebookconfig.clientsecret" Tag="h4" parent="FacebookConfig.">clientSecret</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>
@@ -132,7 +132,7 @@ This is a private key that's used to authenticate your app. It should be kept se
 }
 ```
 </Segment>
-<NestedTitle id="googleconfig.query" Tag="h4" parent="GoogleConfig.">query?</NestedTitle>
+<NestedTitle id="facebookconfig.query" Tag="h4" parent="FacebookConfig.">query?</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>
@@ -149,7 +149,7 @@ Any additional parameters that you want to pass to the authorization endpoint.
 }
 ```
 </Segment>
-<NestedTitle id="googleconfig.scopes" Tag="h4" parent="GoogleConfig.">scopes</NestedTitle>
+<NestedTitle id="facebookconfig.scopes" Tag="h4" parent="FacebookConfig.">scopes</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>
@@ -163,15 +163,15 @@ A list of OAuth scopes that you want to request.
 }
 ```
 </Segment>
-## GoogleOidcConfig
+## FacebookOidcConfig
 <Segment>
 <Section type="parameters">
-- <p>[<code class="key">clientID</code>](#googleoidcconfig.clientid) <code class="primitive">string</code></p>
-- <p>[<code class="key">query?</code>](#googleoidcconfig.query) <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code></p>
-- <p>[<code class="key">scopes?</code>](#googleoidcconfig.scopes) <code class="primitive">string</code><code class="symbol">[]</code></p>
+- <p>[<code class="key">clientID</code>](#facebookoidcconfig.clientid) <code class="primitive">string</code></p>
+- <p>[<code class="key">query?</code>](#facebookoidcconfig.query) <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code></p>
+- <p>[<code class="key">scopes?</code>](#facebookoidcconfig.scopes) <code class="primitive">string</code><code class="symbol">[]</code></p>
 </Section>
 </Segment>
-<NestedTitle id="googleoidcconfig.clientid" Tag="h4" parent="GoogleOidcConfig.">clientID</NestedTitle>
+<NestedTitle id="facebookoidcconfig.clientid" Tag="h4" parent="FacebookOidcConfig.">clientID</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>
@@ -187,7 +187,7 @@ This is just a string to identify your app.
 }
 ```
 </Segment>
-<NestedTitle id="googleoidcconfig.query" Tag="h4" parent="GoogleOidcConfig.">query?</NestedTitle>
+<NestedTitle id="facebookoidcconfig.query" Tag="h4" parent="FacebookOidcConfig.">query?</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>
@@ -203,7 +203,7 @@ Any additional parameters that you want to pass to the authorization endpoint.
 }
 ```
 </Segment>
-<NestedTitle id="googleoidcconfig.scopes" Tag="h4" parent="GoogleOidcConfig.">scopes?</NestedTitle>
+<NestedTitle id="facebookoidcconfig.scopes" Tag="h4" parent="FacebookOidcConfig.">scopes?</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>

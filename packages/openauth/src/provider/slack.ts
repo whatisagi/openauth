@@ -1,43 +1,59 @@
+/**
+ * Use this provider to authenticate with Slack.
+ *
+ * ```ts {5-10}
+ * import { SlackProvider } from "@openauthjs/openauth/provider/slack"
+ *
+ * export default issuer({
+ *   providers: {
+ *     slack: SlackProvider({
+ *       team: "T1234567890",
+ *       clientId: "1234567890",
+ *       clientSecret: "0987654321",
+ *       scopes: ["openid", "email", "profile"]
+ *     })
+ *   }
+ * })
+ * ```
+ *
+ * @packageDocumentation
+ */
+
 import { Oauth2Provider, Oauth2WrappedConfig } from "./oauth2.js"
 
-/**
- * Represents the possible OAuth scopes for the Slack provider.
- *
- * @typedef {("openid" | "email" | "profile")} Scopes
- *
- * @property {"openid"} openid - Grants permission to use OpenID Connect to verify the user's identity.
- * @property {"email"} email - Grants permission to access the user's email address.
- * @property {"profile"} profile - Grants permission to access the user's profile information.
- *
- * @see {@link https://api.slack.com/authentication/sign-in-with-slack}
- */
-type Scope = "openid" | "email" | "profile"
-
-/**
- * @interface SlackConfig
- * @extends Oauth2WrappedConfig
- *
- * @property {string} team - The workspace the user is intending to authenticate. If that workspace
- * has been previously authenticated, the user will be signed in directly, bypassing the consent screen.
- * @property {Scopes[]} scopes - The scopes to request from the user.
- *
- * @see {@link https://api.slack.com/authentication/sign-in-with-slack}
- */
 export interface SlackConfig extends Oauth2WrappedConfig {
+  /**
+   * The workspace the user is intending to authenticate.
+   *
+   * If that workspace has been previously authenticated, the user will be signed in directly,
+   * bypassing the consent screen.
+   */
   team: string
-  // NOTE: We overrode the scopes to be constrained to the Slack scopes. Scopes will be
-  // redundant with different providers, we may want to create a larger union type
-  // and use `Extract` or `Exclude` to constrain the scopes.
-  scopes: Scope[]
+  /**
+   * The scopes to request from the user.
+   *
+   * | Scope | Description |
+   * |-|-|
+   * | `email` | Grants permission to access the user's email address. |
+   * | `profile` | Grants permission to access the user's profile information. |
+   * | `openid` | Grants permission to use OpenID Connect to verify the user's identity. |
+   */
+  scopes: ("email" | "profile" | "openid")[]
 }
 
 /**
- * Creates an OAuth2 provider for Slack authentication.
+ * Creates a [Slack OAuth2 provider](https://api.slack.com/authentication/sign-in-with-slack).
  *
- * This function configures an OAuth2 provider specifically for Slack by
- * providing the necessary authorization and token endpoints.
- *
- * @see {@link https://api.slack.com/authentication/sign-in-with-slack}
+ * @param {SlackConfig} config - The config for the provider.
+ * @example
+ * ```ts
+ * SlackProvider({
+ *   team: "T1234567890",
+ *   clientId: "1234567890",
+ *   clientSecret: "0987654321",
+ *   scopes: ["openid", "email", "profile"]
+ * })
+ * ```
  */
 export function SlackProvider(config: SlackConfig) {
   return Oauth2Provider({

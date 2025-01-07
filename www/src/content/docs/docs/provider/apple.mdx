@@ -11,30 +11,35 @@ import InlineSection from '../../../../components/tsdoc/InlineSection.astro';
 
 <div class="tsdoc">
 <Section type="about">
-This is the Apple provider.
-
-Use this provider to authenticate with Apple.
+Use this provider to authenticate with Apple. Supports both OAuth2 and OIDC.
 
 #### Using OAuth
 
-```ts
-import { AppleProvider } from "@openauthjs/openauth/provider/apple";
+```ts {5-8}
+import { AppleProvider } from "@openauthjs/openauth/provider/apple"
 
-AppleProvider({
-  clientId: "1234567890",
-  clientSecret: "0987654321",
-});
+export default issuer({
+  providers: {
+    apple: AppleProvider({
+      clientId: "1234567890",
+      clientSecret: "0987654321"
+    })
+  }
+})
 ```
 
 #### Using OIDC
 
-```ts
-import { AppleOidcProvider } from "@openauthjs/openauth/provider/apple";
+```ts {5-7}
+import { AppleOidcProvider } from "@openauthjs/openauth/provider/apple"
 
-AppleOidcProvider({
-  clientId: "1234567890",
-  clientSecret: "0987654321",
-});
+export default issuer({
+  providers: {
+    apple: AppleOidcProvider({
+      clientId: "1234567890"
+    })
+  }
+})
 ```
 </Section>
 ---
@@ -49,16 +54,18 @@ AppleOidcProvider(config)
 <Section type="parameters">
 #### Parameters
 - <p><code class="key">config</code> [<code class="type">AppleOidcConfig</code>](/docs/provider/apple#appleoidcconfig)</p>
+The config for the provider.
 </Section>
 <InlineSection>
 **Returns** <code class="type">Provider</code>
 </InlineSection>
-This function creates an Apple OIDC provider.
+Create an Apple OIDC provider.
+
+This is useful if you just want to verify the user's email address.
 ```ts
 AppleOidcProvider({
-  clientId: "1234567890",
-  clientSecret: "0987654321",
-});
+  clientId: "1234567890"
+})
 ```
 </Segment>
 ### AppleProvider
@@ -71,17 +78,17 @@ AppleProvider(config)
 <Section type="parameters">
 #### Parameters
 - <p><code class="key">config</code> [<code class="type">AppleConfig</code>](/docs/provider/apple#appleconfig)</p>
-The configuration for the provider.
+The config for the provider.
 </Section>
 <InlineSection>
 **Returns** <code class="type">Provider</code>
 </InlineSection>
-This function creates an Apple OAuth2 provider.
+Create an Apple OAuth2 provider.
 ```ts
 AppleProvider({
   clientId: "1234567890",
-  clientSecret: "0987654321",
-});
+  clientSecret: "0987654321"
+})
 ```
 </Segment>
 ## AppleConfig
@@ -119,6 +126,11 @@ This is just a string to identify your app.
 The client secret.
 
 This is a private key that's used to authenticate your app. It should be kept secret.
+```ts
+{
+  clientSecret: "0987654321"
+}
+```
 </Segment>
 <NestedTitle id="appleconfig.query" Tag="h4" parent="AppleConfig.">query?</NestedTitle>
 <Segment>

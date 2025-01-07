@@ -66,10 +66,85 @@ const FRONTMATTER: Record<
     description: "Reference doc for the `AppleProvider`.",
     editUrl: `${config.github}/blob/master/packages/openauth/src/provider/apple.ts`,
   },
+  google: {
+    title: "GoogleProvider",
+    description: "Reference doc for the `GoogleProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/google.ts`,
+  },
+  x: {
+    title: "XProvider",
+    description: "Reference doc for the `XProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/x.ts`,
+  },
+  yahoo: {
+    title: "YahooProvider",
+    description: "Reference doc for the `YahooProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/yahoo.ts`,
+  },
+  github: {
+    title: "GithubProvider",
+    description: "Reference doc for the `GithubProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/github.ts`,
+  },
+  microsoft: {
+    title: "MicrosoftProvider",
+    description: "Reference doc for the `MicrosoftProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/microsoft.ts`,
+  },
   password: {
     title: "PasswordProvider",
     description: "Reference doc for the `PasswordProvider`.",
     editUrl: `${config.github}/blob/master/packages/openauth/src/provider/password.ts`,
+  },
+  keycloak: {
+    title: "KeycloakProvider",
+    description: "Reference doc for the `KeycloakProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/keycloak.ts`,
+  },
+  slack: {
+    title: "SlackProvider",
+    description: "Reference doc for the `SlackProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/slack.ts`,
+  },
+  jumpcloud: {
+    title: "JumpCloudProvider",
+    description: "Reference doc for the `JumpCloudProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/jumpcloud.ts`,
+  },
+  spotify: {
+    title: "SpotifyProvider",
+    description: "Reference doc for the `SpotifyProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/spotify.ts`,
+  },
+  discord: {
+    title: "DiscordProvider",
+    description: "Reference doc for the `DiscordProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/discord.ts`,
+  },
+  cognito: {
+    title: "CognitoProvider",
+    description: "Reference doc for the `CognitoProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/cognito.ts`,
+  },
+  facebook: {
+    title: "FacebookProvider",
+    description: "Reference doc for the `FacebookProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/facebook.ts`,
+  },
+  twitch: {
+    title: "TwitchProvider",
+    description: "Reference doc for the `TwitchProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/twitch.ts`,
+  },
+  oidc: {
+    title: "OidcProvider",
+    description: "Reference doc for the `OidcProvider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/oidc.ts`,
+  },
+  oauth2: {
+    title: "Oauth2Provider",
+    description: "Reference doc for the `Oauth2Provider`.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/provider/oauth2.ts`,
   },
   code: {
     title: "CodeProvider",
@@ -398,13 +473,13 @@ function renderComment(comment?: TypeDoc.Comment) {
           // Otherwise render it as a comment ie. No domains configured
           tag.content.length === 1 && tag.content[0].kind === "code"
             ? `**Default** ${renderType(
-                new TypeDoc.IntrinsicType(
-                  tag.content[0].text
-                    .replace(/`/g, "")
-                    .replace(/{/g, "&lcub;")
-                    .replace(/}/g, "&rcub;"),
-                ),
-              )}`
+              new TypeDoc.IntrinsicType(
+                tag.content[0].text
+                  .replace(/`/g, "")
+                  .replace(/{/g, "&lcub;")
+                  .replace(/}/g, "&rcub;"),
+              ),
+            )}`
             : `**Default** ${tag.content.map((c) => c.text)}`,
           `</InlineSection>`,
         ]
@@ -539,8 +614,8 @@ function renderType(type: TypeDoc.SomeType): Text {
   function renderArrayType(type: TypeDoc.ArrayType) {
     return type.elementType.type === "union"
       ? `<code class="symbol">(</code>${renderType(
-          type.elementType,
-        )}<code class="symbol">)[]</code>`
+        type.elementType,
+      )}<code class="symbol">)[]</code>`
       : `${renderType(type.elementType)}<code class="symbol">[]</code>`
   }
   function renderCallbackType(type: TypeDoc.ReflectionType) {
@@ -638,17 +713,17 @@ function flattenNestedTypes(
         { prefix, subType, depth },
         ...(subType.kind === TypeDoc.ReflectionKind.Property
           ? flattenNestedTypes(
-              subType.type!,
-              `${prefix}.${subType.name}`,
-              depth + 1,
-            )
+            subType.type!,
+            `${prefix}.${subType.name}`,
+            depth + 1,
+          )
           : []),
         ...(subType.kind === TypeDoc.ReflectionKind.Accessor
           ? flattenNestedTypes(
-              subType.getSignature?.type!,
-              `${prefix}.${subType.name}`,
-              depth + 1,
-            )
+            subType.getSignature?.type!,
+            `${prefix}.${subType.name}`,
+            depth + 1,
+          )
           : []),
       ])
   }
@@ -669,7 +744,7 @@ function saveFile(moduleName: string, content: any[]) {
 
 function configureLogger() {
   if (process.env.DEBUG) return
-  console.debug = () => {}
+  console.debug = () => { }
 }
 
 async function build() {
@@ -687,7 +762,21 @@ async function build() {
       "../packages/openauth/src/provider/code.ts",
       "../packages/openauth/src/provider/apple.ts",
       "../packages/openauth/src/provider/google.ts",
+      "../packages/openauth/src/provider/github.ts",
       "../packages/openauth/src/provider/password.ts",
+      "../packages/openauth/src/provider/oauth2.ts",
+      "../packages/openauth/src/provider/oidc.ts",
+      "../packages/openauth/src/provider/slack.ts",
+      "../packages/openauth/src/provider/spotify.ts",
+      "../packages/openauth/src/provider/twitch.ts",
+      "../packages/openauth/src/provider/yahoo.ts",
+      "../packages/openauth/src/provider/microsoft.ts",
+      "../packages/openauth/src/provider/keycloak.ts",
+      "../packages/openauth/src/provider/jumpcloud.ts",
+      "../packages/openauth/src/provider/facebook.ts",
+      "../packages/openauth/src/provider/discord.ts",
+      "../packages/openauth/src/provider/cognito.ts",
+      "../packages/openauth/src/provider/x.ts",
       "../packages/openauth/src/subject.ts",
       "../packages/openauth/src/ui/theme.ts",
       "../packages/openauth/src/ui/code.tsx",
@@ -712,4 +801,4 @@ async function build() {
   return project
 }
 
-async function generate() {}
+async function generate() { }

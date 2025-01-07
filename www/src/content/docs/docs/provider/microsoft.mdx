@@ -1,7 +1,7 @@
 ---
-title: GoogleProvider
-editUrl: https://github.com/openauthjs/openauth/blob/master/packages/openauth/src/provider/google.ts
-description: Reference doc for the `GoogleProvider`.
+title: MicrosoftProvider
+editUrl: https://github.com/openauthjs/openauth/blob/master/packages/openauth/src/provider/microsoft.ts
+description: Reference doc for the `MicrosoftProvider`.
 ---
 
 import Segment from '../../../../components/tsdoc/Segment.astro';
@@ -11,16 +11,17 @@ import InlineSection from '../../../../components/tsdoc/InlineSection.astro';
 
 <div class="tsdoc">
 <Section type="about">
-Use this provider to authenticate with Google. Supports both OAuth2 and OIDC.
+Use this provider to authenticate with Microsoft. Supports both OAuth2 and OIDC.
 
 #### Using OAuth
 
-```ts {5-8}
-import { GoogleProvider } from "@openauthjs/openauth/provider/google"
+```ts {5-9}
+import { MicrosoftProvider } from "@openauthjs/openauth/provider/microsoft"
 
 export default issuer({
   providers: {
-    google: GoogleProvider({
+    microsoft: MicrosoftProvider({
+      tenant: "1234567890",
       clientId: "1234567890",
       clientSecret: "0987654321"
     })
@@ -31,11 +32,11 @@ export default issuer({
 #### Using OIDC
 
 ```ts {5-7}
-import { GoogleOidcProvider } from "@openauthjs/openauth/provider/google"
+import { MicrosoftOidcProvider } from "@openauthjs/openauth/provider/microsoft"
 
 export default issuer({
   providers: {
-    google: GoogleOidcProvider({
+    microsoft: MicrosoftOidcProvider({
       clientId: "1234567890"
     })
   }
@@ -44,63 +45,65 @@ export default issuer({
 </Section>
 ---
 ## Methods
-### GoogleOidcProvider
+### MicrosoftOidcProvider
 <Segment>
 <Section type="signature">
 ```ts
-GoogleOidcProvider(config)
+MicrosoftOidcProvider(config)
 ```
 </Section>
 <Section type="parameters">
 #### Parameters
-- <p><code class="key">config</code> [<code class="type">GoogleOidcConfig</code>](/docs/provider/google#googleoidcconfig)</p>
+- <p><code class="key">config</code> [<code class="type">MicrosoftOidcConfig</code>](/docs/provider/microsoft#microsoftoidcconfig)</p>
 The config for the provider.
 </Section>
 <InlineSection>
 **Returns** <code class="type">Provider</code>
 </InlineSection>
-Create a Google OIDC provider.
+Create a Microsoft OIDC provider.
 
 This is useful if you just want to verify the user's email address.
 ```ts
-GoogleOidcProvider({
+MicrosoftOidcProvider({
   clientId: "1234567890"
 })
 ```
 </Segment>
-### GoogleProvider
+### MicrosoftProvider
 <Segment>
 <Section type="signature">
 ```ts
-GoogleProvider(config)
+MicrosoftProvider(config)
 ```
 </Section>
 <Section type="parameters">
 #### Parameters
-- <p><code class="key">config</code> [<code class="type">GoogleConfig</code>](/docs/provider/google#googleconfig)</p>
+- <p><code class="key">config</code> [<code class="type">MicrosoftConfig</code>](/docs/provider/microsoft#microsoftconfig)</p>
 The config for the provider.
 </Section>
 <InlineSection>
 **Returns** <code class="type">Provider</code>
 </InlineSection>
-Create a Google OAuth2 provider.
+Create a Microsoft OAuth2 provider.
 ```ts
-GoogleProvider({
+MicrosoftProvider({
+  tenant: "1234567890",
   clientId: "1234567890",
   clientSecret: "0987654321"
 })
 ```
 </Segment>
-## GoogleConfig
+## MicrosoftConfig
 <Segment>
 <Section type="parameters">
-- <p>[<code class="key">clientID</code>](#googleconfig.clientid) <code class="primitive">string</code></p>
-- <p>[<code class="key">clientSecret</code>](#googleconfig.clientsecret) <code class="primitive">string</code></p>
-- <p>[<code class="key">query?</code>](#googleconfig.query) <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code></p>
-- <p>[<code class="key">scopes</code>](#googleconfig.scopes) <code class="primitive">string</code><code class="symbol">[]</code></p>
+- <p>[<code class="key">clientID</code>](#microsoftconfig.clientid) <code class="primitive">string</code></p>
+- <p>[<code class="key">clientSecret</code>](#microsoftconfig.clientsecret) <code class="primitive">string</code></p>
+- <p>[<code class="key">query?</code>](#microsoftconfig.query) <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code></p>
+- <p>[<code class="key">scopes</code>](#microsoftconfig.scopes) <code class="primitive">string</code><code class="symbol">[]</code></p>
+- <p>[<code class="key">tenant</code>](#microsoftconfig.tenant) <code class="primitive">string</code></p>
 </Section>
 </Segment>
-<NestedTitle id="googleconfig.clientid" Tag="h4" parent="GoogleConfig.">clientID</NestedTitle>
+<NestedTitle id="microsoftconfig.clientid" Tag="h4" parent="MicrosoftConfig.">clientID</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>
@@ -116,7 +119,7 @@ This is just a string to identify your app.
 }
 ```
 </Segment>
-<NestedTitle id="googleconfig.clientsecret" Tag="h4" parent="GoogleConfig.">clientSecret</NestedTitle>
+<NestedTitle id="microsoftconfig.clientsecret" Tag="h4" parent="MicrosoftConfig.">clientSecret</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>
@@ -132,7 +135,7 @@ This is a private key that's used to authenticate your app. It should be kept se
 }
 ```
 </Segment>
-<NestedTitle id="googleconfig.query" Tag="h4" parent="GoogleConfig.">query?</NestedTitle>
+<NestedTitle id="microsoftconfig.query" Tag="h4" parent="MicrosoftConfig.">query?</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>
@@ -149,7 +152,7 @@ Any additional parameters that you want to pass to the authorization endpoint.
 }
 ```
 </Segment>
-<NestedTitle id="googleconfig.scopes" Tag="h4" parent="GoogleConfig.">scopes</NestedTitle>
+<NestedTitle id="microsoftconfig.scopes" Tag="h4" parent="MicrosoftConfig.">scopes</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>
@@ -163,15 +166,31 @@ A list of OAuth scopes that you want to request.
 }
 ```
 </Segment>
-## GoogleOidcConfig
+<NestedTitle id="microsoftconfig.tenant" Tag="h4" parent="MicrosoftConfig.">tenant</NestedTitle>
 <Segment>
 <Section type="parameters">
-- <p>[<code class="key">clientID</code>](#googleoidcconfig.clientid) <code class="primitive">string</code></p>
-- <p>[<code class="key">query?</code>](#googleoidcconfig.query) <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code></p>
-- <p>[<code class="key">scopes?</code>](#googleoidcconfig.scopes) <code class="primitive">string</code><code class="symbol">[]</code></p>
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+The tenant ID of the Microsoft account.
+
+This is usually the same as the client ID.
+```ts
+{
+  tenant: "1234567890"
+}
+```
+</Segment>
+## MicrosoftOidcConfig
+<Segment>
+<Section type="parameters">
+- <p>[<code class="key">clientID</code>](#microsoftoidcconfig.clientid) <code class="primitive">string</code></p>
+- <p>[<code class="key">query?</code>](#microsoftoidcconfig.query) <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code></p>
+- <p>[<code class="key">scopes?</code>](#microsoftoidcconfig.scopes) <code class="primitive">string</code><code class="symbol">[]</code></p>
 </Section>
 </Segment>
-<NestedTitle id="googleoidcconfig.clientid" Tag="h4" parent="GoogleOidcConfig.">clientID</NestedTitle>
+<NestedTitle id="microsoftoidcconfig.clientid" Tag="h4" parent="MicrosoftOidcConfig.">clientID</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>
@@ -187,7 +206,7 @@ This is just a string to identify your app.
 }
 ```
 </Segment>
-<NestedTitle id="googleoidcconfig.query" Tag="h4" parent="GoogleOidcConfig.">query?</NestedTitle>
+<NestedTitle id="microsoftoidcconfig.query" Tag="h4" parent="MicrosoftOidcConfig.">query?</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>
@@ -203,7 +222,7 @@ Any additional parameters that you want to pass to the authorization endpoint.
 }
 ```
 </Segment>
-<NestedTitle id="googleoidcconfig.scopes" Tag="h4" parent="GoogleOidcConfig.">scopes?</NestedTitle>
+<NestedTitle id="microsoftoidcconfig.scopes" Tag="h4" parent="MicrosoftOidcConfig.">scopes?</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>

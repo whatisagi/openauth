@@ -1,28 +1,33 @@
 /**
- * This is the Apple provider.
- *
- * Use this provider to authenticate with Apple.
+ * Use this provider to authenticate with Apple. Supports both OAuth2 and OIDC.
  *
  * #### Using OAuth
  *
- * ```ts
- * import { AppleProvider } from "@openauthjs/openauth/provider/apple";
+ * ```ts {5-8}
+ * import { AppleProvider } from "@openauthjs/openauth/provider/apple"
  *
- * AppleProvider({
- *   clientId: "1234567890",
- *   clientSecret: "0987654321",
- * });
+ * export default issuer({
+ *   providers: {
+ *     apple: AppleProvider({
+ *       clientId: "1234567890",
+ *       clientSecret: "0987654321"
+ *     })
+ *   }
+ * })
  * ```
  *
  * #### Using OIDC
  *
- * ```ts
- * import { AppleOidcProvider } from "@openauthjs/openauth/provider/apple";
+ * ```ts {5-7}
+ * import { AppleOidcProvider } from "@openauthjs/openauth/provider/apple"
  *
- * AppleOidcProvider({
- *   clientId: "1234567890",
- *   clientSecret: "0987654321",
- * });
+ * export default issuer({
+ *   providers: {
+ *     apple: AppleOidcProvider({
+ *       clientId: "1234567890"
+ *     })
+ *   }
+ * })
  * ```
  *
  * @packageDocumentation
@@ -31,18 +36,19 @@
 import { Oauth2Provider, Oauth2WrappedConfig } from "./oauth2.js"
 import { OidcProvider, OidcWrappedConfig } from "./oidc.js"
 
-export interface AppleConfig extends Oauth2WrappedConfig {}
-export interface AppleOidcConfig extends OidcWrappedConfig {}
+export interface AppleConfig extends Oauth2WrappedConfig { }
+export interface AppleOidcConfig extends OidcWrappedConfig { }
 
 /**
- * This function creates an Apple OAuth2 provider.
- * @param config - The configuration for the provider.
+ * Create an Apple OAuth2 provider.
+ *
+ * @param config - The config for the provider.
  * @example
  * ```ts
  * AppleProvider({
  *   clientId: "1234567890",
- *   clientSecret: "0987654321",
- * });
+ *   clientSecret: "0987654321"
+ * })
  * ```
  */
 export function AppleProvider(config: AppleConfig) {
@@ -57,13 +63,16 @@ export function AppleProvider(config: AppleConfig) {
 }
 
 /**
- * This function creates an Apple OIDC provider.
+ * Create an Apple OIDC provider.
+ *
+ * This is useful if you just want to verify the user's email address.
+ *
+ * @param config - The config for the provider.
  * @example
  * ```ts
  * AppleOidcProvider({
- *   clientId: "1234567890",
- *   clientSecret: "0987654321",
- * });
+ *   clientId: "1234567890"
+ * })
  * ```
  */
 export function AppleOidcProvider(config: AppleOidcConfig) {
