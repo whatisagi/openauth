@@ -173,7 +173,7 @@ function renderProvider(module: TypeDoc.DeclarationReflection) {
       description: description || `A page for the ${name} provider.`,
     }),
     `<div class="tsdoc">`,
-    renderAbout(renderComment(module.comment)),
+    renderAbout(renderComment(module)),
     renderFunctions(module),
     renderInterfaces(module),
     `</div>`,
@@ -193,7 +193,7 @@ function renderStorage(module: TypeDoc.DeclarationReflection) {
       description: description || `A page for the ${name} storage.`,
     }),
     `<div class="tsdoc">`,
-    renderAbout(renderComment(module.comment)),
+    renderAbout(renderComment(module)),
     renderFunctions(module),
     renderInterfaces(module),
     `</div>`,
@@ -213,7 +213,7 @@ function renderUI(module: TypeDoc.DeclarationReflection) {
       description: description || `A page for the ${name} UI.`,
     }),
     `<div class="tsdoc">`,
-    renderAbout(renderComment(module.comment)),
+    renderAbout(renderComment(module)),
     renderVariables(module, { title: "Themes" }),
     renderFunctions(module),
     renderInterfaces(module),
@@ -253,7 +253,7 @@ function renderClient() {
       description: description || `A page for the client.`,
     }),
     `<div class="tsdoc">`,
-    renderAbout(renderComment(module.comment)),
+    renderAbout(renderComment(module)),
     renderFunctions(module),
     renderInterfaces(module),
     `</div>`,
@@ -276,7 +276,7 @@ function renderIssuer() {
     renderFunctions(issuer),
     renderInterfaces(issuer),
     "## Errors",
-    renderAbout(renderComment(error.comment)),
+    renderAbout(renderComment(error)),
     errors.map(renderClass),
     `</div>`,
   ])
@@ -314,7 +314,7 @@ function renderAbout(content: Text) {
 
 function renderClass(c: TypeDoc.DeclarationReflection) {
   console.debug(`   ∟class: ${c.name}`)
-  return [`### ${c.name}`, `<Segment>`, renderComment(c.comment), `</Segment>`]
+  return [`### ${c.name}`, `<Segment>`, renderComment(c), `</Segment>`]
 }
 
 function renderVariables(
@@ -329,12 +329,7 @@ function renderVariables(
     `## ${options.title}`,
     variables.map((v) => {
       console.debug(`   ∟variable: ${v.name}`)
-      return [
-        `### ${v.name}`,
-        `<Segment>`,
-        renderComment(v.comment),
-        `</Segment>`,
-      ]
+      return [`### ${v.name}`, `<Segment>`, renderComment(v), `</Segment>`]
     }),
   ])
 }
@@ -358,7 +353,7 @@ function renderFunctions(module: TypeDoc.DeclarationReflection) {
           f.signatures![0].parameters!.map((p) => {
             return [
               `- <p><code class="key">${renderParameter(p)}</code> ${renderType(p.type!)}</p>`,
-              renderComment(p.comment),
+              renderComment(p),
             ]
           }),
           `</Section>`,
@@ -366,7 +361,7 @@ function renderFunctions(module: TypeDoc.DeclarationReflection) {
         `<InlineSection>`,
         `**Returns** ${renderType(f.signatures![0].type!)}`,
         `</InlineSection>`,
-        renderComment(f.signatures![0].comment),
+        renderComment(f.signatures![0]),
         `</Segment>`,
       ]
     }),
@@ -391,7 +386,7 @@ function renderInterfaces(module: TypeDoc.DeclarationReflection) {
         `**Type** ${renderType(i.type!)}`,
         `</InlineSection>`,
         `</Section>`,
-        renderComment(i.comment),
+        renderComment(i),
         `</Segment>`,
       ]
     }
@@ -417,7 +412,7 @@ function renderInterfaces(module: TypeDoc.DeclarationReflection) {
           return `- <p>[<code class="key">${renderProperty(m)}</code>](#${buildLinkHash(i.name, m.name)}) ${renderSignatureAsType(m.signatures![0])}</p>`
         }),
         `</Section>`,
-        renderComment(i.comment),
+        renderComment(i),
         `</Segment>`,
         properties.flatMap((p) => [
           `<NestedTitle id="${buildLinkHash(i.name, p.name)}" Tag="h4" parent="${i.name}.">${renderProperty(p)}</NestedTitle>`,
@@ -427,7 +422,7 @@ function renderInterfaces(module: TypeDoc.DeclarationReflection) {
           `**Type** ${renderType(p.type!)}`,
           `</InlineSection>`,
           `</Section>`,
-          renderComment(p.comment),
+          renderComment(p),
           `</Segment>`,
           flattenNestedTypes(p.type!, p.name).map(
             ({ depth, prefix, subType }) => [
@@ -438,7 +433,7 @@ function renderInterfaces(module: TypeDoc.DeclarationReflection) {
               `**Type** ${renderType(subType.type!)}`,
               `</InlineSection>`,
               `</Section>`,
-              renderComment(subType.comment),
+              renderComment(subType),
               `</Segment>`,
             ],
           ),
@@ -451,7 +446,7 @@ function renderInterfaces(module: TypeDoc.DeclarationReflection) {
           `**Type** ${renderSignatureAsType(m.signatures![0])}`,
           `</InlineSection>`,
           `</Section>`,
-          renderComment(m.signatures![0].comment),
+          renderComment(m.signatures![0]),
           `</Segment>`,
         ]),
       ]
@@ -459,11 +454,23 @@ function renderInterfaces(module: TypeDoc.DeclarationReflection) {
   })
 }
 
-function renderComment(comment?: TypeDoc.Comment) {
-  if (!comment) return []
+function renderComment(declaration: TypeDoc.Reflection) {
+  if (!declaration.comment) return []
 
   return [
-    comment.blockTags
+    declaration instanceof TypeDoc.DeclarationReflection &&
+    declaration.defaultValue
+      ? [
+          ``,
+          `<InlineSection>`,
+          `**Default** ${renderType({
+            type: "literal",
+            value: declaration.defaultValue.replace(/"/g, ""),
+          } as TypeDoc.LiteralType)}`,
+          `</InlineSection>`,
+        ]
+      : [],
+    declaration.comment.blockTags
       .filter((tag) => tag.tag === "@default")
       .map((tag) => {
         return [
@@ -484,8 +491,8 @@ function renderComment(comment?: TypeDoc.Comment) {
           `</InlineSection>`,
         ]
       }),
-    comment.summary.map((s) => s.text).join(""),
-    comment.blockTags
+    declaration.comment.summary.map((s) => s.text).join(""),
+    declaration.comment.blockTags
       .filter((tag) => tag.tag === "@example")
       .map((tag) => tag.content.map((c) => c.text)),
   ]
@@ -550,7 +557,7 @@ function renderType(type: TypeDoc.SomeType): Text {
     type.declaration.kind === TypeDoc.ReflectionKind.TypeLiteral
   ) {
     if (type.declaration.signatures) return renderCallbackType(type)
-    if (type.declaration.children) return renderDiscriminatedUnion(type)
+    return `<code class="primitive">Object</code>`
   }
   return `<code class="primitive">${type.type}</code>`
 
@@ -608,7 +615,17 @@ function renderType(type: TypeDoc.SomeType): Text {
   }
   function renderUnionType(type: TypeDoc.UnionType) {
     return type.types
-      .map((t) => renderType(t))
+      .map((t) => {
+        // Handle discriminated unions
+        if (
+          t.type === "reflection" &&
+          t.declaration.kind === TypeDoc.ReflectionKind.TypeLiteral &&
+          t.declaration.children
+        ) {
+          return renderDiscriminatedUnionType(t)
+        }
+        return renderType(t)
+      })
       .join(`<code class="symbol"> | </code>`)
   }
   function renderArrayType(type: TypeDoc.ArrayType) {
@@ -621,7 +638,7 @@ function renderType(type: TypeDoc.SomeType): Text {
   function renderCallbackType(type: TypeDoc.ReflectionType) {
     return renderSignatureAsType(type.declaration.signatures![0])
   }
-  function renderDiscriminatedUnion(type: TypeDoc.ReflectionType) {
+  function renderDiscriminatedUnionType(type: TypeDoc.ReflectionType) {
     return [
       `<code class="symbol">&lcub; </code>`,
       type.declaration
@@ -637,6 +654,9 @@ function renderType(type: TypeDoc.SomeType): Text {
     ].join("")
   }
   function renderTypescriptType(type: TypeDoc.ReferenceType) {
+    // ie. Partial<>T
+    if (type.name === "Partial") return renderType(type.typeArguments![0])
+
     // ie. Record<string, string>
     return [
       `<code class="primitive">${type.name}</code>`,
