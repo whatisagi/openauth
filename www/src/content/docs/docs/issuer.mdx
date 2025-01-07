@@ -164,9 +164,7 @@ Create an OpenAuth server, a Hono app.
   - <p>[<code class="key">access?</code>](#ttl.access) <code class="primitive">number</code></p>
   - <p>[<code class="key">refresh?</code>](#ttl.refresh) <code class="primitive">number</code></p>
 - <p>[<code class="key">allow?</code>](#issuerinput.allow) <code class="primitive">(input: <code class="primitive">Object</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">boolean</code><code class="symbol">&gt;</code></code></p>
-- <p>[<code class="key">error?</code>](#issuerinput.error) <code class="primitive">(error: [<code class="type">UnknownStateError</code>](/docs/issuer#unknownstateerror), req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
 - <p>[<code class="key">select?</code>](#issuerinput.select) <code class="primitive">(providers: <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
-- <p>[<code class="key">start?</code>](#issuerinput.start) <code class="primitive">(req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">void</code><code class="symbol">&gt;</code></code></p>
 - <p>[<code class="key">success</code>](#issuerinput.success) <code class="primitive">(response: [<code class="type">OnSuccessResponder</code>](#onsuccessresponder), input: <code class="primitive">any</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
 </Section>
 </Segment>
@@ -332,14 +330,21 @@ The TTL for refresh tokens.
 **Type** <code class="primitive">(input: <code class="primitive">Object</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">boolean</code><code class="symbol">&gt;</code></code>
 </InlineSection>
 </Section>
-</Segment>
-<NestedTitle id="issuerinput.error" Tag="h4" parent="IssuerInput.">error?</NestedTitle>
-<Segment>
-<Section type="parameters">
-<InlineSection>
-**Type** <code class="primitive">(error: [<code class="type">UnknownStateError</code>](/docs/issuer#unknownstateerror), req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
-</InlineSection>
-</Section>
+Override the logic for whether a client request is allowed to call the issuer.
+
+By default, it uses the following:
+
+- Allow if the `redirectURI` is localhost.
+- Compare `redirectURI` to the request's hostname or the `x-forwarded-host` header. If they
+  are from the same sub-domain level, then allow.
+```ts
+{
+  allow: async (input, req) => {
+    // Allow all clients
+    return true
+  }
+}
+```
 </Segment>
 <NestedTitle id="issuerinput.select" Tag="h4" parent="IssuerInput.">select?</NestedTitle>
 <Segment>
@@ -368,14 +373,6 @@ issuer({
   // ...
 })
 ```
-</Segment>
-<NestedTitle id="issuerinput.start" Tag="h4" parent="IssuerInput.">start?</NestedTitle>
-<Segment>
-<Section type="parameters">
-<InlineSection>
-**Type** <code class="primitive">(req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">void</code><code class="symbol">&gt;</code></code>
-</InlineSection>
-</Section>
 </Segment>
 <NestedTitle id="issuerinput.success" Tag="h4" parent="IssuerInput.">success</NestedTitle>
 <Segment>

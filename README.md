@@ -223,7 +223,7 @@ import { createClient } from "@openauthjs/openauth/client"
 
 const client = createClient({
   clientID: "my-client",
-  issuer: "https://auth.myserver.com", // this is the url for your auth server
+  issuer: "https://auth.myserver.com" // url to the OpenAuth server
 })
 ```
 
@@ -233,16 +233,16 @@ If your frontend has a server component you can use the code flow. Redirect the 
 
 ```ts
 const { url } = await client.authorize(
-  <client-id>,
   <redirect-uri>,
-  "code",
+  "code"
 )
 ```
 
 You can make up a `client_id` that represents your app. This will initiate the auth flow and user will be redirected to the `redirect_uri` you provided with a query parameter `code` which you can exchange for an access token.
 
 ```ts
-const tokens = await client.exchange(query.get("code"), redirect_uri) // the redirect_uri is the original redirect_uri you passed in and is used for verification
+// the redirect_uri is the original redirect_uri you passed in and is used for verification
+const tokens = await client.exchange(query.get("code"), redirect_uri)
 console.log(tokens.access, tokens.refresh)
 ```
 
@@ -267,7 +267,7 @@ Passing in the refresh token is optional but if you do, this function will autom
 In cases where you do not have a server, you can use the `token` flow with `pkce` on the frontend.
 
 ```ts
-const { challenge, url } = await client.authorize(<client_id>, <redirect_uri>, { pkce: true })
+const { challenge, url } = await client.authorize(<redirect_uri>, "code", { pkce: true })
 localStorage.setItem("challenge", JSON.stringify(challenge))
 location.href = url
 ```
@@ -279,7 +279,7 @@ const challenge = JSON.parse(localStorage.getItem("challenge"))
 const exchanged = await client.exchange(
   query.get("code"),
   redirect_uri,
-  challenge.verifier,
+  challenge.verifier
 )
 if (exchanged.err) throw new Error("Invalid code")
 localStorage.setItem("access_token", exchanged.tokens.access)
@@ -293,7 +293,7 @@ const accessToken = localStorage.getItem("access_token")
 fetch("https://auth.example.com/api/user", {
   headers: {
     Authorization: `Bearer ${accessToken}`,
-  },
+  }
 })
 ```
 

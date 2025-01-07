@@ -347,6 +347,9 @@ export interface IssuerInput<
    * @default Select()
    */
   select?(providers: Record<string, string>, req: Request): Promise<Response>
+  /**
+   * @internal
+   */
   start?(req: Request): Promise<void>
   /**
    * The success callback that's called when the user completes the flow.
@@ -379,7 +382,29 @@ export interface IssuerInput<
     input: Result,
     req: Request,
   ): Promise<Response>
+  /**
+   * @internal
+   */
   error?(error: UnknownStateError, req: Request): Promise<Response>
+  /**
+   * Override the logic for whether a client request is allowed to call the issuer.
+   *
+   * By default, it uses the following:
+   *
+   * - Allow if the `redirectURI` is localhost.
+   * - Compare `redirectURI` to the request's hostname or the `x-forwarded-host` header. If they
+   *   are from the same sub-domain level, then allow.
+   *
+   * @example
+   * ```ts
+   * {
+   *   allow: async (input, req) => {
+   *     // Allow all clients
+   *     return true
+   *   }
+   * }
+   * ```
+   */
   allow?(
     input: {
       clientID: string
