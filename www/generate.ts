@@ -240,6 +240,7 @@ function renderSubject() {
     }),
     `<div class="tsdoc">`,
     renderFunctions(module),
+    renderInterfaces(module),
     `</div>`,
   ])
 }
@@ -558,6 +559,8 @@ function renderType(type: TypeDoc.SomeType): Text {
   if (type.type === "reference") {
     if (type.package === "typescript") return renderTypescriptType(type)
     if (type.package === "@openauthjs/openauth") return renderOpenAuthType(type)
+    if (type.package === "@standard-schema/spec")
+      return renderStandardSchemaType(type)
     return `<code class="type">${type.name}</code>`
   }
   if (
@@ -662,7 +665,7 @@ function renderType(type: TypeDoc.SomeType): Text {
     ].join("")
   }
   function renderTypescriptType(type: TypeDoc.ReferenceType) {
-    // ie. Partial<>T
+    // ie. Partial<Foo> => just render Foo
     if (type.name === "Partial") return renderType(type.typeArguments![0])
 
     // ie. Record<string, string>
@@ -674,32 +677,40 @@ function renderType(type: TypeDoc.SomeType): Text {
     ].join("")
   }
   function renderOpenAuthType(type: TypeDoc.ReferenceType) {
-    // Reference to a generic type, ie. T
-    if (type.refersToTypeParameter) return `<code class="primitive">any</code>`
-
     // Reference to a non-documented type, ie. FetchLike
     if (!type.reflection) return `<code class="type">${type.name}</code>`
 
-    if (type.reflection?.kind === TypeDoc.ReflectionKind.Class) {
-      const r = type.reflection as TypeDoc.DeclarationReflection
-      if (r.sources?.[0]?.fileName.endsWith("error.ts"))
-        return `[<code class="type">${r.name}</code>](/docs/issuer#${r.name.toLowerCase()})`
+    // Reference to a generic type
+    // ie.
+    // export function createSubjects<Schema extends SubjectSchema>(types: Schema): Schema {
+    //   return { ...types }
+    // }
+    if (type.reflection.kind === TypeDoc.ReflectionKind.TypeParameter) {
+      const t = (type.reflection as TypeDoc.TypeParameterReflection).type
+      if (t) return renderType(t)
     }
 
-    if (type.reflection?.kind === TypeDoc.ReflectionKind.Interface) {
-      const r = type.reflection as TypeDoc.DeclarationReflection
-      if (
-        r.sources?.[0]?.fileName.startsWith("packages/openauth/src/provider/")
-      ) {
-        const provider = r.sources?.[0]?.fileName
-          .split("/")
-          .pop()
-          ?.split(".")[0]
-        return `[<code class="type">${r.name}</code>](/docs/provider/${provider}#${r.name.toLowerCase()})`
+    if (
+      type.reflection.kind === TypeDoc.ReflectionKind.TypeAlias ||
+      type.reflection.kind === TypeDoc.ReflectionKind.Interface ||
+      type.reflection.kind === TypeDoc.ReflectionKind.Class
+    ) {
+      const t = type.reflection as TypeDoc.DeclarationReflection
+      const fileName = t.sources?.[0]?.fileName
+      if (fileName?.startsWith("packages/openauth/src/subject.ts"))
+        return `[<code class="type">${t.name}</code>](/docs/subject#${t.name.toLowerCase()})`
+      if (fileName?.startsWith("packages/openauth/src/error.ts"))
+        return `[<code class="type">${t.name}</code>](/docs/issuer#${t.name.toLowerCase()})`
+      if (fileName?.startsWith("packages/openauth/src/provider/")) {
+        const provider = fileName.split("/").pop()?.split(".")[0]
+        return `[<code class="type">${t.name}</code>](/docs/provider/${provider}#${t.name.toLowerCase()})`
       }
     }
 
     return `[<code class="type">${type.name}</code>](#${type.name.toLowerCase()})`
+  }
+  function renderStandardSchemaType(type: TypeDoc.ReferenceType) {
+    return `[<code class="type">${type.name}</code>](https://github.com/standard-schema/standard-schema)`
   }
 }
 
@@ -829,4 +840,8 @@ async function build() {
   return project
 }
 
-async function generate() {}
+function print(type: TypeDoc.SomeType) {
+  // @ts-ignore
+  delete type._project
+  console.log(type)
+}

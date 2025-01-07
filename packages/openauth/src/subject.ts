@@ -1,8 +1,12 @@
 import type { v1 } from "@standard-schema/spec"
 import { Prettify } from "./util.js"
 
+/**
+ * Subject schema is a map of types that are used to define the subjects.
+ */
 export type SubjectSchema = Record<string, v1.StandardSchema>
 
+/** @internal */
 export type SubjectPayload<T extends SubjectSchema> = Prettify<
   {
     [type in keyof T & string]: {
@@ -14,8 +18,6 @@ export type SubjectPayload<T extends SubjectSchema> = Prettify<
 
 export function createSubjects<Schema extends SubjectSchema = {}>(
   types: Schema,
-) {
-  return {
-    ...types,
-  } as Schema
+): Schema {
+  return { ...types }
 }
