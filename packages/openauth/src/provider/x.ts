@@ -19,7 +19,7 @@
 
 import { Oauth2Provider, Oauth2WrappedConfig } from "./oauth2.js"
 
-export interface XProviderConfig extends Oauth2WrappedConfig { }
+export interface XProviderConfig extends Oauth2WrappedConfig {}
 
 /**
  * Create a X.com OAuth2 provider.

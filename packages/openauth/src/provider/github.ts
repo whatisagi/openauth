@@ -19,7 +19,7 @@
 
 import { Oauth2Provider, Oauth2WrappedConfig } from "./oauth2.js"
 
-export interface GithubConfig extends Oauth2WrappedConfig { }
+export interface GithubConfig extends Oauth2WrappedConfig {}
 
 /**
  * Create a Github OAuth2 provider.

@@ -36,8 +36,8 @@
 import { Oauth2Provider, Oauth2WrappedConfig } from "./oauth2.js"
 import { OidcProvider, OidcWrappedConfig } from "./oidc.js"
 
-export interface FacebookConfig extends Oauth2WrappedConfig { }
-export interface FacebookOidcConfig extends OidcWrappedConfig { }
+export interface FacebookConfig extends Oauth2WrappedConfig {}
+export interface FacebookOidcConfig extends OidcWrappedConfig {}
 
 /**
  * Create a Facebook OAuth2 provider.

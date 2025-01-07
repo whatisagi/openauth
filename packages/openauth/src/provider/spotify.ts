@@ -19,7 +19,7 @@
 
 import { Oauth2Provider, type Oauth2WrappedConfig } from "./oauth2.js"
 
-export interface SpotifyConfig extends Oauth2WrappedConfig { }
+export interface SpotifyConfig extends Oauth2WrappedConfig {}
 
 /**
  * Create a Spotify OAuth2 provider.

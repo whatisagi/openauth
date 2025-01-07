@@ -36,8 +36,8 @@
 import { Oauth2Provider, Oauth2WrappedConfig } from "./oauth2.js"
 import { OidcProvider, OidcWrappedConfig } from "./oidc.js"
 
-export interface AppleConfig extends Oauth2WrappedConfig { }
-export interface AppleOidcConfig extends OidcWrappedConfig { }
+export interface AppleConfig extends Oauth2WrappedConfig {}
+export interface AppleOidcConfig extends OidcWrappedConfig {}
 
 /**
  * Create an Apple OAuth2 provider.

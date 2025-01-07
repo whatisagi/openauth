@@ -137,14 +137,14 @@ export interface PasswordConfig {
  */
 export type PasswordRegisterState =
   | {
-    type: "start"
-  }
+      type: "start"
+    }
   | {
-    type: "code"
-    code: string
-    email: string
-    password: string
-  }
+      type: "code"
+      code: string
+      email: string
+      password: string
+    }
 
 /**
  * The errors that can happen on the register screen.
@@ -159,20 +159,20 @@ export type PasswordRegisterState =
  */
 export type PasswordRegisterError =
   | {
-    type: "invalid_code"
-  }
+      type: "invalid_code"
+    }
   | {
-    type: "email_taken"
-  }
+      type: "email_taken"
+    }
   | {
-    type: "invalid_email"
-  }
+      type: "invalid_email"
+    }
   | {
-    type: "invalid_password"
-  }
+      type: "invalid_password"
+    }
   | {
-    type: "password_mismatch"
-  }
+      type: "password_mismatch"
+    }
 
 /**
  * The state of the password change flow.
@@ -185,20 +185,20 @@ export type PasswordRegisterError =
  */
 export type PasswordChangeState =
   | {
-    type: "start"
-    redirect: string
-  }
+      type: "start"
+      redirect: string
+    }
   | {
-    type: "code"
-    code: string
-    email: string
-    redirect: string
-  }
+      type: "code"
+      code: string
+      email: string
+      redirect: string
+    }
   | {
-    type: "update"
-    redirect: string
-    email: string
-  }
+      type: "update"
+      redirect: string
+      email: string
+    }
 
 /**
  * The errors that can happen on the change password screen.
@@ -212,17 +212,17 @@ export type PasswordChangeState =
  */
 export type PasswordChangeError =
   | {
-    type: "invalid_email"
-  }
+      type: "invalid_email"
+    }
   | {
-    type: "invalid_code"
-  }
+      type: "invalid_code"
+    }
   | {
-    type: "invalid_password"
-  }
+      type: "invalid_password"
+    }
   | {
-    type: "password_mismatch"
-  }
+      type: "password_mismatch"
+    }
 
 /**
  * The errors that can happen on the login screen.
@@ -234,11 +234,11 @@ export type PasswordChangeError =
  */
 export type PasswordLoginError =
   | {
-    type: "invalid_password"
-  }
+      type: "invalid_password"
+    }
   | {
-    type: "invalid_email"
-  }
+      type: "invalid_email"
+    }
 
 export function PasswordProvider(
   config: PasswordConfig,
@@ -454,7 +454,7 @@ export function PasswordProvider(
 import * as jose from "jose"
 import { TextEncoder } from "node:util"
 
-interface HashedPassword { }
+interface HashedPassword {}
 
 /**
  * @internal

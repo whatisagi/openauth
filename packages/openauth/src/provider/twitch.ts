@@ -19,7 +19,7 @@
 
 import { Oauth2Provider, Oauth2WrappedConfig } from "./oauth2.js"
 
-export interface TwitchConfig extends Oauth2WrappedConfig { }
+export interface TwitchConfig extends Oauth2WrappedConfig {}
 
 /**
  * Create a Twitch OAuth2 provider.

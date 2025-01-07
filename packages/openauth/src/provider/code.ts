@@ -108,14 +108,14 @@ export interface CodeProviderConfig<
  */
 export type CodeProviderState =
   | {
-    type: "start"
-  }
+      type: "start"
+    }
   | {
-    type: "code"
-    resend?: boolean
-    code: string
-    claims: Record<string, string>
-  }
+      type: "code"
+      resend?: boolean
+      code: string
+      claims: Record<string, string>
+    }
 
 /**
  * The errors that can happen on the code flow.
@@ -127,13 +127,13 @@ export type CodeProviderState =
  */
 export type CodeProviderError =
   | {
-    type: "invalid_code"
-  }
+      type: "invalid_code"
+    }
   | {
-    type: "invalid_claim"
-    key: string
-    value: string
-  }
+      type: "invalid_claim"
+      key: string
+      value: string
+    }
 
 export function CodeProvider<
   Claims extends Record<string, string> = Record<string, string>,

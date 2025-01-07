@@ -19,7 +19,7 @@
 
 import { Oauth2Provider, Oauth2WrappedConfig } from "./oauth2.js"
 
-export interface JumpCloudConfig extends Oauth2WrappedConfig { }
+export interface JumpCloudConfig extends Oauth2WrappedConfig {}
 
 /**
  * Create a JumpCloud OAuth2 provider.

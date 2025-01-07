@@ -25,7 +25,7 @@ export interface KeycloakConfig extends Oauth2WrappedConfig {
   /**
    * The base URL of the Keycloak server.
    *
-   * @example 
+   * @example
    * ```ts
    * {
    *   baseUrl: "https://your-keycloak-domain"

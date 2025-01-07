@@ -52,7 +52,7 @@ export interface MicrosoftConfig extends Oauth2WrappedConfig {
    */
   tenant: string
 }
-export interface MicrosoftOidcConfig extends OidcWrappedConfig { }
+export interface MicrosoftOidcConfig extends OidcWrappedConfig {}
 
 /**
  * Create a Microsoft OAuth2 provider.

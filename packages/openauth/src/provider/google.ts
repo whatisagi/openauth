@@ -36,8 +36,8 @@
 import { Oauth2Provider, Oauth2WrappedConfig } from "./oauth2.js"
 import { OidcProvider, OidcWrappedConfig } from "./oidc.js"
 
-export interface GoogleConfig extends Oauth2WrappedConfig { }
-export interface GoogleOidcConfig extends OidcWrappedConfig { }
+export interface GoogleConfig extends Oauth2WrappedConfig {}
+export interface GoogleOidcConfig extends OidcWrappedConfig {}
 
 /**
  * Create a Google OAuth2 provider.

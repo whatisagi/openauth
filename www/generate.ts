@@ -473,13 +473,13 @@ function renderComment(comment?: TypeDoc.Comment) {
           // Otherwise render it as a comment ie. No domains configured
           tag.content.length === 1 && tag.content[0].kind === "code"
             ? `**Default** ${renderType(
-              new TypeDoc.IntrinsicType(
-                tag.content[0].text
-                  .replace(/`/g, "")
-                  .replace(/{/g, "&lcub;")
-                  .replace(/}/g, "&rcub;"),
-              ),
-            )}`
+                new TypeDoc.IntrinsicType(
+                  tag.content[0].text
+                    .replace(/`/g, "")
+                    .replace(/{/g, "&lcub;")
+                    .replace(/}/g, "&rcub;"),
+                ),
+              )}`
             : `**Default** ${tag.content.map((c) => c.text)}`,
           `</InlineSection>`,
         ]
@@ -614,8 +614,8 @@ function renderType(type: TypeDoc.SomeType): Text {
   function renderArrayType(type: TypeDoc.ArrayType) {
     return type.elementType.type === "union"
       ? `<code class="symbol">(</code>${renderType(
-        type.elementType,
-      )}<code class="symbol">)[]</code>`
+          type.elementType,
+        )}<code class="symbol">)[]</code>`
       : `${renderType(type.elementType)}<code class="symbol">[]</code>`
   }
   function renderCallbackType(type: TypeDoc.ReflectionType) {
@@ -713,17 +713,17 @@ function flattenNestedTypes(
         { prefix, subType, depth },
         ...(subType.kind === TypeDoc.ReflectionKind.Property
           ? flattenNestedTypes(
-            subType.type!,
-            `${prefix}.${subType.name}`,
-            depth + 1,
-          )
+              subType.type!,
+              `${prefix}.${subType.name}`,
+              depth + 1,
+            )
           : []),
         ...(subType.kind === TypeDoc.ReflectionKind.Accessor
           ? flattenNestedTypes(
-            subType.getSignature?.type!,
-            `${prefix}.${subType.name}`,
-            depth + 1,
-          )
+              subType.getSignature?.type!,
+              `${prefix}.${subType.name}`,
+              depth + 1,
+            )
           : []),
       ])
   }
@@ -744,7 +744,7 @@ function saveFile(moduleName: string, content: any[]) {
 
 function configureLogger() {
   if (process.env.DEBUG) return
-  console.debug = () => { }
+  console.debug = () => {}
 }
 
 async function build() {
@@ -801,4 +801,4 @@ async function build() {
   return project
 }
 
-async function generate() { }
+async function generate() {}

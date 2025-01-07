@@ -19,7 +19,7 @@
 
 import { Oauth2Provider, Oauth2WrappedConfig } from "./oauth2.js"
 
-export interface YahooConfig extends Oauth2WrappedConfig { }
+export interface YahooConfig extends Oauth2WrappedConfig {}
 
 /**
  * Create a Yahoo OAuth2 provider.

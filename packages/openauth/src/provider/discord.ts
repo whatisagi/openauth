@@ -19,7 +19,7 @@
 
 import { Oauth2Provider, Oauth2WrappedConfig } from "./oauth2.js"
 
-export interface DiscordConfig extends Oauth2WrappedConfig { }
+export interface DiscordConfig extends Oauth2WrappedConfig {}
 
 /**
  * Create a Discord OAuth2 provider.
