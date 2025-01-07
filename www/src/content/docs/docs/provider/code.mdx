@@ -11,7 +11,7 @@ import InlineSection from '../../../../components/tsdoc/InlineSection.astro';
 
 <div class="tsdoc">
 <Section type="about">
-Configures a provider that supports  authentication. This is usually paired with the
+Configures a provider that supports pin code authentication. This is usually paired with the
 `CodeUI`.
 
 ```ts
@@ -76,15 +76,15 @@ CodeProvider(config)
 - <p><code class="key">config</code> [<code class="type">CodeProviderConfig</code>](/docs/provider/code#codeproviderconfig)</p>
 </Section>
 <InlineSection>
-**Returns** <code class="primitive">object type</code>
+**Returns** <code class="type">Provider</code>
 </InlineSection>
 </Segment>
 ## CodeProviderConfig
 <Segment>
 <Section type="parameters">
 - <p>[<code class="key">length?</code>](#codeproviderconfig.length) <code class="primitive">number</code></p>
-- <p>[<code class="key">request</code>](#codeproviderconfig.request) <code class="primitive">object type</code></p>
-- <p>[<code class="key">sendCode</code>](#codeproviderconfig.sendcode) <code class="primitive">object type</code></p>
+- <p>[<code class="key">request</code>](#codeproviderconfig.request) <code class="primitive">(req: <code class="type">Request</code>, state: [<code class="type">CodeProviderState</code>](#codeproviderstate), form?: <code class="type">FormData</code>, error?: [<code class="type">CodeProviderError</code>](#codeprovidererror)) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">sendCode</code>](#codeproviderconfig.sendcode) <code class="primitive">(claims: <code class="primitive">any</code>, code: <code class="primitive">string</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">void</code><code class="symbol"> | </code>[<code class="type">CodeProviderError</code>](#codeprovidererror)<code class="symbol">&gt;</code></code></p>
 </Section>
 </Segment>
 <NestedTitle id="codeproviderconfig.length" Tag="h4" parent="CodeProviderConfig.">length?</NestedTitle>
@@ -104,18 +104,62 @@ The length of the pin code.
 <Segment>
 <Section type="parameters">
 <InlineSection>
-**Type** <code class="primitive">object type</code>
+**Type** <code class="primitive">(req: <code class="type">Request</code>, state: [<code class="type">CodeProviderState</code>](#codeproviderstate), form?: <code class="type">FormData</code>, error?: [<code class="type">CodeProviderError</code>](#codeprovidererror)) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
 </InlineSection>
 </Section>
-Callback to render the code request UI.
+The request handler to generate the UI for the code flow.
+
+Takes the standard [`Request`](https://developer.mozilla.org/en-US/docs/Web/API/Request)
+and optionally [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
+ojects.
+
+Also passes in the current `state` of the flow and any `error` that occurred.
+
+Expects the [`Response`](https://developer.mozilla.org/en-US/docs/Web/API/Response) object
+in return.
 </Segment>
 <NestedTitle id="codeproviderconfig.sendcode" Tag="h4" parent="CodeProviderConfig.">sendCode</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>
-**Type** <code class="primitive">object type</code>
+**Type** <code class="primitive">(claims: <code class="primitive">any</code>, code: <code class="primitive">string</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">void</code><code class="symbol"> | </code>[<code class="type">CodeProviderError</code>](#codeprovidererror)<code class="symbol">&gt;</code></code>
 </InlineSection>
 </Section>
 Callback to send the pin code to the user.
+```ts
+{
+  sendCode: async (claims, code) => {
+    // Send the code through the email or phone number based on the claims
+  }
+}
+```
+</Segment>
+## CodeProviderError
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="symbol">&lcub; </code><code class="key">type</code><code class="symbol">&colon; </code><code class="symbol">&ldquo;</code><code class="primitive">invalid_code</code><code class="symbol">&rdquo;</code><code class="symbol"> &rcub;</code><code class="symbol"> | </code><code class="symbol">&lcub; </code><code class="key">key</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">type</code><code class="symbol">&colon; </code><code class="symbol">&ldquo;</code><code class="primitive">invalid_claim</code><code class="symbol">&rdquo;</code><code class="symbol">, </code><code class="key">value</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol"> &rcub;</code>
+</InlineSection>
+</Section>
+The errors that can happen on the code flow.
+
+| Error | Description |
+| ----- | ----------- |
+| `invalid_code` | The code is invalid. |
+| `invalid_claim` | The _claim_, email or phone number, is invalid. |
+</Segment>
+## CodeProviderState
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="symbol">&lcub; </code><code class="key">type</code><code class="symbol">&colon; </code><code class="symbol">&ldquo;</code><code class="primitive">start</code><code class="symbol">&rdquo;</code><code class="symbol"> &rcub;</code><code class="symbol"> | </code><code class="symbol">&lcub; </code><code class="key">claims</code><code class="symbol">&colon; </code><code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code><code class="symbol">, </code><code class="key">code</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">resend</code><code class="symbol">&colon; </code><code class="primitive">boolean</code><code class="symbol">, </code><code class="key">type</code><code class="symbol">&colon; </code><code class="symbol">&ldquo;</code><code class="primitive">code</code><code class="symbol">&rdquo;</code><code class="symbol"> &rcub;</code>
+</InlineSection>
+</Section>
+The state of the code flow.
+
+| State | Description |
+| ----- | ----------- |
+| `start` | The user is asked to enter their email address or phone number to start the flow. |
+| `code` | The user needs to enter the pin code to verify their _claim_. |
 </Segment>
 </div>
