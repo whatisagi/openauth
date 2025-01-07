@@ -1,13 +1,14 @@
 ---
 title: Client
 editUrl: https://github.com/openauthjs/openauth/blob/master/packages/openauth/src/client.ts
-description: Reference doc for the client SDK.
+description: Reference doc for the OpenAuth client.
 ---
 
 import Segment from '../../../components/tsdoc/Segment.astro';
 import Section from '../../../components/tsdoc/Section.astro';
 import NestedTitle from '../../../components/tsdoc/NestedTitle.astro';
 import InlineSection from '../../../components/tsdoc/InlineSection.astro';
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 <div class="tsdoc">
 <Section type="about">
@@ -16,7 +17,7 @@ and verify tokens.
 
 First, create a client.
 
-```ts
+```ts title="client.ts"
 import { createClient } from "@openauthjs/openauth/client"
 
 const client = createClient({
@@ -411,7 +412,7 @@ want the client to use it too.
 **Type** <code class="primitive">string</code>
 </InlineSection>
 </Section>
-The URL of your authorization server.
+The URL of your OpenAuth server.
 ```ts
 {
   issuer: "https://auth.myserver.com"

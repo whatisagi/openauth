@@ -1,3 +1,129 @@
+/**
+ * The `issuer` create an OpentAuth server, a [Hono](https://hono.dev) app that's
+ * designed to run anywhere.
+ *
+ * The `issuer` function requires a few things:
+ *
+ * ```ts title="issuer.ts"
+ * import { issuer } from "@openauthjs/openauth"
+ *
+ * const app = issuer({
+ *   providers: { ... },
+ *   storage,
+ *   subjects,
+ *   success: async (ctx, value) => { ... }
+ * })
+ * ```
+ *
+ * #### Add providers
+ *
+ * You start by specifying the auth providers you are going to use. Let's say you want your users
+ * to be able to authenticate with GitHub and with their email and password.
+ *
+ * ```ts title="issuer.ts"
+ * import { GithubProvider } from "@openauthjs/openauth/provider/github"
+ * import { PasswordProvider } from "@openauthjs/openauth/provider/password"
+ *
+ * const app = issuer({
+ *   providers: {
+ *     github: GithubAdapter({
+ *       // ...
+ *     }),
+ *     password: PasswordProvider({
+ *       // ...
+ *     }),
+ *   },
+ * })
+ * ```
+ *
+ * #### Handle success
+ *
+ * The `success` callback receives the payload when a user completes a provider's auth flow.
+ *
+ * ```ts title="issuer.ts"
+ * const app = issuer({
+ *   providers: { ... },
+ *   subjects,
+ *   async success(ctx, value) {
+ *     let userID
+ *     if (value.provider === "password") {
+ *       console.log(value.email)
+ *       userID = ... // lookup user or create them
+ *     }
+ *     if (value.provider === "github") {
+ *       console.log(value.tokenset.access)
+ *       userID = ... // lookup user or create them
+ *     }
+ *     return ctx.subject("user", {
+ *       userID
+ *     })
+ *   }
+ * })
+ * ```
+ *
+ * Once complete, the `issuer` issues the access tokens that a client can use. The `ctx.subject`
+ * call is what is placed in the access token as a JWT.
+ *
+ * #### Define subjects
+ *
+ * You define the shape of these in the `subjects` field.
+ *
+ * ```ts title="subjects.ts"
+ * import { object, string } from "valibot"
+ * import { createSubjects } from "@openauthjs/openauth/subject"
+ *
+ * const subjects = createSubjects({
+ *   user: object({
+ *     userID: string()
+ *   })
+ * })
+ * ```
+ *
+ * It's good to place this in a separate file since this'll be used in your client apps as well.
+ *
+ * ```ts title="issuer.ts"
+ * import { subjects } from "./subjects.js"
+ *
+ * const app = issuer({
+ *   providers: { ... },
+ *   subjects,
+ *   ...
+ * })
+ * ```
+ *
+ * #### Deploy
+ *
+ * Since `issuer` is a Hono app, you can deploy it anywhere Hono supports.
+ *
+ * <Tabs>
+ *   <TabItem label="Node">
+ *   ```ts
+ *   import { serve } from "@hono/node-server"
+ *
+ *   serve(app)
+ *   ```
+ *   </TabItem>
+ *   <TabItem label="Lambda">
+ *   ```ts
+ *   import { handle } from "hono/aws-lambda"
+ *
+ *   export const handler = handle(app)
+ *   ```
+ *   </TabItem>
+ *   <TabItem label="Bun">
+ *   ```ts
+ *   export default app
+ *   ```
+ *   </TabItem>
+ *   <TabItem label="Workers">
+ *   ```ts
+ *   export default app
+ *   ```
+ *   </TabItem>
+ * </Tabs>
+ *
+ * @packageDocumentation
+ */
 import { Provider, ProviderOptions } from "./provider/provider.js"
 import { SubjectPayload, SubjectSchema } from "./subject.js"
 import { Hono } from "hono/tiny"
@@ -24,6 +150,9 @@ export interface OnSuccessResponder<
   ): Promise<Response>
 }
 
+/**
+ * @internal
+ */
 export interface AuthorizationState {
   redirect_uri: string
   response_type: string
@@ -36,6 +165,9 @@ export interface AuthorizationState {
   }
 }
 
+/**
+ * @internal
+ */
 export type Prettify<T> = {
   [K in keyof T]: T[K]
 } & {}
@@ -71,16 +203,177 @@ export interface IssuerInput<
     >
   }[keyof Providers],
 > {
+  /**
+   * The shape of the subjects that you want to return.
+   *
+   * @example
+   *
+   * ```ts title="issuer.ts"
+   * import { object, string } from "valibot"
+   * import { createSubjects } from "@openauthjs/openauth/subject"
+   *
+   * issuer({
+   *   subjects: createSubjects({
+   *     user: object({
+   *       userID: string()
+   *     })
+   *   })
+   *   // ...
+   * })
+   * ```
+   */
   subjects: Subjects
+  /**
+   * The storage adapter that you want to use.
+   *
+   * @example
+   * ```ts title="issuer.ts"
+   * import { DynamoStorage } from "@openauthjs/openauth/storage/dynamo"
+   *
+   * issuer({
+   *   storage: DynamoStorage()
+   *   // ...
+   * })
+   * ```
+   */
   storage?: StorageAdapter
+  /**
+   * The providers that you want your OpenAuth server to support.
+   *
+   * @example
+   *
+   * ```ts title="issuer.ts"
+   * import { GithubProvider } from "@openauthjs/openauth/provider/github"
+   *
+   * issuer({
+   *   providers: {
+   *     github: GithubProvider()
+   *   }
+   * })
+   * ```
+   *
+   * The key is just a string that you can use to identify the provider. It's passed back to
+   * the `success` callback.
+   *
+   * You can also specify multiple providers.
+   *
+   * ```ts
+   * {
+   *   providers: {
+   *     github: GithubProvider(),
+   *     google: GoogleProvider()
+   *   }
+   * }
+   * ```
+   */
   providers: Providers
+  /**
+   * The theme you want to use for the UI.
+   *
+   * This includes the UI the user sees when selecting a provider. And the `PasswordUI` and
+   * `CodeUI` that are used by the `PasswordProvider` and `CodeProvider`.
+   *
+   * @example
+   * ```ts title="issuer.ts"
+   * import { THEME_SST } from "@openauthjs/openauth/ui/theme"
+   *
+   * issuer({
+   *   theme: THEME_SST
+   *   // ...
+   * })
+   * ```
+   *
+   * Or define your own.
+   *
+   * ```ts title="issuer.ts"
+   * import type { Theme } from "@openauthjs/openauth/ui/theme"
+   *
+   * const MY_THEME: Theme = {
+   *   // ...
+   * }
+   *
+   * issuer({
+   *   theme: MY_THEME
+   *   // ...
+   * })
+   * ```
+   */
   theme?: Theme
+  /**
+   * Set the TTL, in seconds, for access and refresh tokens.
+   *
+   * @example
+   * ```ts
+   * {
+   *   ttl: {
+   *     access: 60 * 60 * 24 * 30,
+   *     refresh: 60 * 60 * 24 * 365
+   *   }
+   * }
+   * ```
+   */
   ttl?: {
+    /**
+     * The TTL for access tokens.
+     *
+     * @default 60 * 60 * 24 * 30
+     */
     access?: number
+    /**
+     * The TTL for refresh tokens.
+     *
+     * @default 60 * 60 * 24 * 365
+     */
     refresh?: number
   }
+  /**
+   * Optionally, configure the UI that's displayed when the user visits the root URL of the
+   * of the OpenAuth server.
+   *
+   * ```ts title="issuer.ts"
+   * import { Select } from "@openauthjs/openauth/ui/select"
+   *
+   * issuer({
+   *   select: Select({
+   *     providers: {
+   *       github: { hide: true },
+   *       google: { display: "Google" }
+   *     }
+   *   })
+   *   // ...
+   * })
+   * ```
+   *
+   * @default Select()
+   */
   select?(providers: Record<string, string>, req: Request): Promise<Response>
   start?(req: Request): Promise<void>
+  /**
+   * The success callback that's called when the user completes the flow.
+   *
+   * This is called after the user has been redirected back to your app after the OAuth flow.
+   *
+   * @example
+   * ```ts
+   * {
+   *   success: async (ctx, value) => {
+   *     let userID
+   *     if (value.provider === "password") {
+   *       console.log(value.email)
+   *       userID = ... // lookup user or create them
+   *     }
+   *     if (value.provider === "github") {
+   *       console.log(value.tokenset.access)
+   *       userID = ... // lookup user or create them
+   *     }
+   *     return ctx.subject("user", {
+   *       userID
+   *     })
+   *   },
+   *   // ...
+   * }
+   * ```
+   */
   success(
     response: OnSuccessResponder<SubjectPayload<Subjects>>,
     input: Result,
@@ -98,9 +391,7 @@ export interface IssuerInput<
 }
 
 /**
- * Create an issuer object for handling OAuth 2.0 authorization requests.
- * @param input - The input object containing the subjects, storage, providers, theme, and optional success responder.
- * @returns An object containing methods for authorizing, exchanging tokens, refreshing tokens, and verifying tokens.
+ * Create an OpenAuth server, a Hono app.
  */
 export function issuer<
   Providers extends Record<string, Provider<any>>,
@@ -115,7 +406,7 @@ export function issuer<
 >(input: IssuerInput<Providers, Subjects, Result>) {
   const error =
     input.error ??
-    function (err) {
+    function(err) {
       return new Response(err.message, {
         status: 400,
         headers: {
@@ -617,9 +908,9 @@ export function issuer<
       pkce:
         code_challenge && code_challenge_method
           ? {
-              challenge: code_challenge,
-              method: code_challenge_method,
-            }
+            challenge: code_challenge,
+            method: code_challenge_method,
+          }
           : undefined,
     } as AuthorizationState
     c.set("authorization", authorization)

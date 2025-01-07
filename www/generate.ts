@@ -56,9 +56,14 @@ const FRONTMATTER: Record<
     description: "Reference doc for the Cloudflare KV storage adapter.",
     editUrl: `${config.github}/blob/master/packages/openauth/src/storage/cloudflare.ts`,
   },
+  issuer: {
+    title: "Issuer",
+    description: "Reference doc for the OpenAuth server.",
+    editUrl: `${config.github}/blob/master/packages/openauth/src/issuer.ts`,
+  },
   client: {
     title: "Client",
-    description: "Reference doc for the client SDK.",
+    description: "Reference doc for the OpenAuth client.",
     editUrl: `${config.github}/blob/master/packages/openauth/src/client.ts`,
   },
   apple: {
@@ -265,14 +270,16 @@ function renderIssuer() {
 
   const errors = error.getChildrenByKind(TypeDoc.ReflectionKind.Class)
   const name = issuer.name
+  const { title, editUrl, description } = FRONTMATTER[name] || {}
   saveFile(name, [
     renderHeader({
+      title,
+      editUrl,
+      description,
       moduleName: issuer.name,
-      editUrl: false,
-      title: name,
-      description: `A page for the issuer.`,
     }),
     `<div class="tsdoc">`,
+    renderAbout(renderComment(issuer.comment)),
     renderFunctions(issuer),
     renderInterfaces(issuer),
     "## Errors",
@@ -303,6 +310,7 @@ function renderHeader(input: {
     `import Section from '${relativePath}/Section.astro';`,
     `import NestedTitle from '${relativePath}/NestedTitle.astro';`,
     `import InlineSection from '${relativePath}/InlineSection.astro';`,
+    `import { Tabs, TabItem } from '@astrojs/starlight/components';`,
     "",
   ]
 }
@@ -480,13 +488,13 @@ function renderComment(declaration: TypeDoc.Reflection) {
           // Otherwise render it as a comment ie. No domains configured
           tag.content.length === 1 && tag.content[0].kind === "code"
             ? `**Default** ${renderType(
-                new TypeDoc.IntrinsicType(
-                  tag.content[0].text
-                    .replace(/`/g, "")
-                    .replace(/{/g, "&lcub;")
-                    .replace(/}/g, "&rcub;"),
-                ),
-              )}`
+              new TypeDoc.IntrinsicType(
+                tag.content[0].text
+                  .replace(/`/g, "")
+                  .replace(/{/g, "&lcub;")
+                  .replace(/}/g, "&rcub;"),
+              ),
+            )}`
             : `**Default** ${tag.content.map((c) => c.text)}`,
           `</InlineSection>`,
         ]
@@ -631,8 +639,8 @@ function renderType(type: TypeDoc.SomeType): Text {
   function renderArrayType(type: TypeDoc.ArrayType) {
     return type.elementType.type === "union"
       ? `<code class="symbol">(</code>${renderType(
-          type.elementType,
-        )}<code class="symbol">)[]</code>`
+        type.elementType,
+      )}<code class="symbol">)[]</code>`
       : `${renderType(type.elementType)}<code class="symbol">[]</code>`
   }
   function renderCallbackType(type: TypeDoc.ReflectionType) {
@@ -733,17 +741,17 @@ function flattenNestedTypes(
         { prefix, subType, depth },
         ...(subType.kind === TypeDoc.ReflectionKind.Property
           ? flattenNestedTypes(
-              subType.type!,
-              `${prefix}.${subType.name}`,
-              depth + 1,
-            )
+            subType.type!,
+            `${prefix}.${subType.name}`,
+            depth + 1,
+          )
           : []),
         ...(subType.kind === TypeDoc.ReflectionKind.Accessor
           ? flattenNestedTypes(
-              subType.getSignature?.type!,
-              `${prefix}.${subType.name}`,
-              depth + 1,
-            )
+            subType.getSignature?.type!,
+            `${prefix}.${subType.name}`,
+            depth + 1,
+          )
           : []),
       ])
   }
@@ -764,7 +772,7 @@ function saveFile(moduleName: string, content: any[]) {
 
 function configureLogger() {
   if (process.env.DEBUG) return
-  console.debug = () => {}
+  console.debug = () => { }
 }
 
 async function build() {
@@ -821,4 +829,4 @@ async function build() {
   return project
 }
 
-async function generate() {}
+async function generate() { }
