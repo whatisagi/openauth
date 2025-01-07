@@ -223,7 +223,7 @@ import { createClient } from "@openauthjs/openauth/client"
 
 const client = createClient({
   clientID: "my-client",
-  issuer: "https://auth.myserver.com" // url to the OpenAuth server
+  issuer: "https://auth.myserver.com", // url to the OpenAuth server
 })
 ```
 
@@ -279,7 +279,7 @@ const challenge = JSON.parse(localStorage.getItem("challenge"))
 const exchanged = await client.exchange(
   query.get("code"),
   redirect_uri,
-  challenge.verifier
+  challenge.verifier,
 )
 if (exchanged.err) throw new Error("Invalid code")
 localStorage.setItem("access_token", exchanged.tokens.access)
@@ -293,7 +293,7 @@ const accessToken = localStorage.getItem("access_token")
 fetch("https://auth.example.com/api/user", {
   headers: {
     Authorization: `Bearer ${accessToken}`,
-  }
+  },
 })
 ```
 
