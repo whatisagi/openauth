@@ -279,7 +279,7 @@ function renderIssuer() {
       moduleName: issuer.name,
     }),
     `<div class="tsdoc">`,
-    renderAbout(renderComment(issuer.comment)),
+    renderAbout(renderComment(issuer)),
     renderFunctions(issuer),
     renderInterfaces(issuer),
     "## Errors",
@@ -467,16 +467,16 @@ function renderComment(declaration: TypeDoc.Reflection) {
 
   return [
     declaration instanceof TypeDoc.DeclarationReflection &&
-    declaration.defaultValue
+      declaration.defaultValue
       ? [
-          ``,
-          `<InlineSection>`,
-          `**Default** ${renderType({
-            type: "literal",
-            value: declaration.defaultValue.replace(/"/g, ""),
-          } as TypeDoc.LiteralType)}`,
-          `</InlineSection>`,
-        ]
+        ``,
+        `<InlineSection>`,
+        `**Default** ${renderType({
+          type: "literal",
+          value: declaration.defaultValue.replace(/"/g, ""),
+        } as TypeDoc.LiteralType)}`,
+        `</InlineSection>`,
+      ]
       : [],
     declaration.comment.blockTags
       .filter((tag) => tag.tag === "@default")

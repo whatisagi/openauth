@@ -12,6 +12,128 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 <div class="tsdoc">
 <Section type="about">
+The `issuer` create an OpentAuth server, a [Hono](https://hono.dev) app that's
+designed to run anywhere.
+
+The `issuer` function requires a few things:
+
+```ts title="issuer.ts"
+import { issuer } from "@openauthjs/openauth"
+
+const app = issuer({
+  providers: { ... },
+  storage,
+  subjects,
+  success: async (ctx, value) => { ... }
+})
+```
+
+#### Add providers
+
+You start by specifying the auth providers you are going to use. Let's say you want your users
+to be able to authenticate with GitHub and with their email and password.
+
+```ts title="issuer.ts"
+import { GithubProvider } from "@openauthjs/openauth/provider/github"
+import { PasswordProvider } from "@openauthjs/openauth/provider/password"
+
+const app = issuer({
+  providers: {
+    github: GithubAdapter({
+      // ...
+    }),
+    password: PasswordProvider({
+      // ...
+    }),
+  },
+})
+```
+
+#### Handle success
+
+The `success` callback receives the payload when a user completes a provider's auth flow.
+
+```ts title="issuer.ts"
+const app = issuer({
+  providers: { ... },
+  subjects,
+  async success(ctx, value) {
+    let userID
+    if (value.provider === "password") {
+      console.log(value.email)
+      userID = ... // lookup user or create them
+    }
+    if (value.provider === "github") {
+      console.log(value.tokenset.access)
+      userID = ... // lookup user or create them
+    }
+    return ctx.subject("user", {
+      userID
+    })
+  }
+})
+```
+
+Once complete, the `issuer` issues the access tokens that a client can use. The `ctx.subject`
+call is what is placed in the access token as a JWT.
+
+#### Define subjects
+
+You define the shape of these in the `subjects` field.
+
+```ts title="subjects.ts"
+import { object, string } from "valibot"
+import { createSubjects } from "@openauthjs/openauth/subject"
+
+const subjects = createSubjects({
+  user: object({
+    userID: string()
+  })
+})
+```
+
+It's good to place this in a separate file since this'll be used in your client apps as well.
+
+```ts title="issuer.ts"
+import { subjects } from "./subjects.js"
+
+const app = issuer({
+  providers: { ... },
+  subjects,
+  ...
+})
+```
+
+#### Deploy
+
+Since `issuer` is a Hono app, you can deploy it anywhere Hono supports.
+
+<Tabs>
+  <TabItem label="Node">
+  ```ts
+  import { serve } from "@hono/node-server"
+
+  serve(app)
+  ```
+  </TabItem>
+  <TabItem label="Lambda">
+  ```ts
+  import { handle } from "hono/aws-lambda"
+
+  export const handler = handle(app)
+  ```
+  </TabItem>
+  <TabItem label="Bun">
+  ```ts
+  export default app
+  ```
+  </TabItem>
+  <TabItem label="Workers">
+  ```ts
+  export default app
+  ```
+  </TabItem>
+</Tabs>
 </Section>
 ---
 ## Methods
