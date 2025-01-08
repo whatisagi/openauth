@@ -3,6 +3,7 @@ import * as fs from "fs"
 import * as TypeDoc from "typedoc"
 import config from "./config"
 
+let warnings = 0
 const OUTPUT_DIR = "src/content/docs/docs"
 type Text = string | Text[]
 
@@ -169,6 +170,7 @@ renderIssuer()
 providers.map(renderProvider)
 storages.map(renderStorage)
 uis.map(renderUI)
+printWarnings()
 
 function renderProvider(module: TypeDoc.DeclarationReflection) {
   console.debug(`renderProvider: ${module.name}`)
@@ -594,7 +596,24 @@ function renderType(type: TypeDoc.SomeType): Text {
     if (type.package === "@openauthjs/openauth") return renderOpenAuthType(type)
     if (type.package === "@standard-schema/spec")
       return renderStandardSchemaType(type)
+
+    // Special handle hard-to-document types
+    if (
+      type.package === "@openauthjs/openauth" &&
+      type.qualifiedName === "IssuerInput.Result"
+    )
+      return `<code class="type">${type.name}</code>`
+
     return `<code class="type">${type.name}</code>`
+  }
+  // Special handle hard-to-document types
+  if (type.type === "indexedAccess") {
+    if (
+      type.indexType.type === "typeOperator" &&
+      type.indexType.target.type === "reference" &&
+      type.indexType.target.qualifiedName === "VerifyResult.T"
+    )
+      return `<code class="type">Subject</code>`
   }
   if (
     type.type === "reflection" &&
@@ -603,7 +622,7 @@ function renderType(type: TypeDoc.SomeType): Text {
     if (type.declaration.signatures) return renderCallbackType(type)
     return `<code class="primitive">Object</code>`
   }
-  console.debug(`❗️Rendering "${type.type}" type as any`)
+  console.warn(`🟡️ WARNING: rendering "${type.type}" type as any`)
   return `<code class="primitive">any</code>`
 }
 function renderIntrisicType(type: TypeDoc.IntrinsicType) {
@@ -819,8 +838,22 @@ function saveFile(moduleName: string, content: any[]) {
 }
 
 function configureLogger() {
-  if (process.env.DEBUG) return
+  if (process.env.DEBUG) {
+    console.warn = (...args) => {
+      warnings++
+      console.log(...args)
+    }
+    return
+  }
+
   console.debug = () => {}
+  console.warn = () => {}
+}
+
+function printWarnings() {
+  if (process.env.DEBUG) {
+    console.log(`- - -\n${warnings} warnings`)
+  }
 }
 
 async function build() {
