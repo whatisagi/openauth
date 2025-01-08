@@ -596,7 +596,8 @@ function renderType(type: TypeDoc.SomeType): Text {
     if (type.declaration.signatures) return renderCallbackType(type)
     return `<code class="primitive">Object</code>`
   }
-  return `<code class="primitive">${type.type}</code>`
+  console.debug(`❗️Rendering "${type.type}" type as any`)
+  return `<code class="primitive">any</code>`
 }
 function renderIntrisicType(type: TypeDoc.IntrinsicType) {
   return `<code class="primitive">${type.name}</code>`
@@ -675,7 +676,7 @@ function renderArrayType(type: TypeDoc.ArrayType) {
 function renderCallbackType(type: TypeDoc.ReflectionType) {
   return renderSignatureAsType(type.declaration.signatures![0])
 }
-function renderObjectTypeInline(type: TypeDoc.ReflectionType) {
+function renderObjectTypeInline(type: TypeDoc.ReflectionType): Text {
   return [
     `<code class="symbol">&lcub; </code>`,
     type.declaration
@@ -683,7 +684,11 @@ function renderObjectTypeInline(type: TypeDoc.ReflectionType) {
         [
           `<code class="key">${c.name}</code>`,
           `<code class="symbol">&colon; </code>`,
-          renderType(c.type!),
+          // If rendering inline, also render children inline
+          c.type?.type === "reflection" &&
+          c.type.declaration.kind === TypeDoc.ReflectionKind.TypeLiteral
+            ? renderObjectTypeInline(c.type)
+            : renderType(c.type!),
         ].join(""),
       )
       .join(`<code class="symbol">, </code>`),
