@@ -97,26 +97,26 @@
  *
  * <Tabs>
  *   <TabItem label="Node">
- *   ```ts
+ *   ```ts title="issuer.ts"
  *   import { serve } from "@hono/node-server"
  *
  *   serve(app)
  *   ```
  *   </TabItem>
  *   <TabItem label="Lambda">
- *   ```ts
+ *   ```ts title="issuer.ts"
  *   import { handle } from "hono/aws-lambda"
  *
  *   export const handler = handle(app)
  *   ```
  *   </TabItem>
  *   <TabItem label="Bun">
- *   ```ts
+ *   ```ts title="issuer.ts"
  *   export default app
  *   ```
  *   </TabItem>
  *   <TabItem label="Workers">
- *   ```ts
+ *   ```ts title="issuer.ts"
  *   export default app
  *   ```
  *   </TabItem>
@@ -431,7 +431,7 @@ export function issuer<
 >(input: IssuerInput<Providers, Subjects, Result>) {
   const error =
     input.error ??
-    function (err) {
+    function(err) {
       return new Response(err.message, {
         status: 400,
         headers: {
@@ -933,9 +933,9 @@ export function issuer<
       pkce:
         code_challenge && code_challenge_method
           ? {
-              challenge: code_challenge,
-              method: code_challenge_method,
-            }
+            challenge: code_challenge,
+            method: code_challenge_method,
+          }
           : undefined,
     } as AuthorizationState
     c.set("authorization", authorization)

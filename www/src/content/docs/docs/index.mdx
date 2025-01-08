@@ -4,6 +4,7 @@ description: Introduction to OpenAuth.
 ---
 
 import { Image } from "astro:assets"
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 import themeDark from "./themes-dark.png"
 import themeLight from "./themes-light.png"
@@ -201,21 +202,33 @@ const app = issuer({
 
 And now we are ready to deploy! Here's how you do that depending on your infrastructure.
 
-```ts title="issuer.ts"
-// Bun
-export default app
 
-// Cloudflare
-export default app
+<Tabs>
+  <TabItem label="Node">
+  ```ts title="issuer.ts"
+  import { serve } from "@hono/node-server"
 
-// Lambda
-import { handle } from "hono/aws-lambda"
-export const handler = handle(app)
+  serve(app)
+  ```
+  </TabItem>
+  <TabItem label="Lambda">
+  ```ts title="issuer.ts"
+  import { handle } from "hono/aws-lambda"
 
-// Node.js
-import { serve } from "@hono/node-server"
-serve(app)
-```
+  export const handler = handle(app)
+  ```
+  </TabItem>
+  <TabItem label="Bun">
+  ```ts title="issuer.ts"
+  export default app
+  ```
+  </TabItem>
+  <TabItem label="Workers">
+  ```ts title="issuer.ts"
+  export default app
+  ```
+  </TabItem>
+</Tabs>
 
 You now have a centralized OpenAuth server. Test it out by visiting `/.well-known/oauth-authorization-server` - you can see a live example [here](https://auth.terminal.shop/.well-known/oauth-authorization-server).
 
