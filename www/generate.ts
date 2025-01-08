@@ -261,7 +261,13 @@ function renderClient() {
     `<div class="tsdoc">`,
     renderAbout(renderComment(module)),
     renderFunctions(module),
-    renderInterfaces(module),
+    renderInterfaces(module, {
+      filter: (i) => i.name === "Client",
+      depth: "h3",
+    }),
+    renderInterfaces(module, {
+      filter: (i) => i.name !== "Client",
+    }),
     `</div>`,
   ])
 }
@@ -377,12 +383,21 @@ function renderFunctions(module: TypeDoc.DeclarationReflection) {
   ])
 }
 
-function renderInterfaces(module: TypeDoc.DeclarationReflection) {
+function renderInterfaces(
+  module: TypeDoc.DeclarationReflection,
+  options?: {
+    filter?: (i: TypeDoc.DeclarationReflection) => boolean
+    depth?: "h2" | "h3"
+  },
+) {
   console.debug(` ∟renderInterfaces`)
+  const depth = options?.depth ?? "h2"
   const interfaces = [
     ...module.getChildrenByKind(TypeDoc.ReflectionKind.Interface),
     ...module.getChildrenByKind(TypeDoc.ReflectionKind.TypeAlias),
-  ].sort((a, b) => a.name.localeCompare(b.name))
+  ]
+    .filter(options?.filter ?? (() => true))
+    .sort((a, b) => a.name.localeCompare(b.name))
 
   return interfaces.map((i) => {
     // render type alias as a type
@@ -407,22 +422,25 @@ function renderInterfaces(module: TypeDoc.DeclarationReflection) {
       return [
         `## ${i.name}`,
         `<Segment>`,
-        `<Section type="parameters">`,
-        properties.map((p) => [
-          `- <p>[<code class="key">${renderProperty(p)}</code>](#${buildLinkHash(i.name, p.name)}) ${renderType(p.type!)}</p>`,
-          flattenNestedTypes(p.type!, p.name).map(
-            ({ depth, prefix, subType }) =>
-              `${" ".repeat(depth * 2)}- <p>[<code class="key">${renderProperty(
-                subType,
-              )}</code>](#${buildLinkHash(prefix, subType.name)}) ${renderType(subType.type!)}</p>`,
-          ),
+        render(depth === "h2", [
+          `<Section type="parameters">`,
+          properties.map((p) => [
+            `- <p>[<code class="key">${renderProperty(p)}</code>](#${buildLinkHash(i.name, p.name)}) ${renderType(p.type!)}</p>`,
+            flattenNestedTypes(p.type!, p.name).map(
+              ({ depth, prefix, subType }) =>
+                `${" ".repeat(depth * 2)}- <p>[<code class="key">${renderProperty(
+                  subType,
+                )}</code>](#${buildLinkHash(prefix, subType.name)}) ${renderType(subType.type!)}</p>`,
+            ),
+          ]),
+          methods.map((m) => {
+            return `- <p>[<code class="key">${renderProperty(m)}</code>](#${buildLinkHash(i.name, m.name)}) ${renderSignatureAsType(m.signatures![0])}</p>`
+          }),
+          `</Section>`,
         ]),
-        methods.map((m) => {
-          return `- <p>[<code class="key">${renderProperty(m)}</code>](#${buildLinkHash(i.name, m.name)}) ${renderSignatureAsType(m.signatures![0])}</p>`
-        }),
-        `</Section>`,
         renderComment(i),
         `</Segment>`,
+        // Render nested types
         properties.flatMap((p) => [
           `<NestedTitle id="${buildLinkHash(i.name, p.name)}" Tag="h4" parent="${i.name}.">${renderProperty(p)}</NestedTitle>`,
           `<Segment>`,
@@ -448,7 +466,9 @@ function renderInterfaces(module: TypeDoc.DeclarationReflection) {
           ),
         ]),
         methods.flatMap((m) => [
-          `<NestedTitle id="${buildLinkHash(i.name, m.name)}" Tag="h4" parent="${i.name}.">${renderProperty(m)}</NestedTitle>`,
+          depth === "h2"
+            ? `<NestedTitle id="${buildLinkHash(i.name, m.name)}" Tag="h4" parent="${i.name}.">${renderProperty(m)}</NestedTitle>`
+            : `### ${m.name}`,
           `<Segment>`,
           `<Section type="parameters">`,
           `<InlineSection>`,
