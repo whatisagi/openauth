@@ -536,7 +536,13 @@ function renderSignatureAsType(signature: TypeDoc.SignatureReflection) {
   const parameters = (signature.parameters ?? [])
     .map(
       (parameter) =>
-        `${renderParameter(parameter)}: ${renderType(parameter.type!)}`,
+        `${renderParameter(parameter)}: ${
+          // If the type is an object, render it inline
+          parameter.type?.type === "reflection" &&
+          parameter.type.declaration.kind === TypeDoc.ReflectionKind.TypeLiteral
+            ? renderObjectTypeInline(parameter.type)
+            : renderType(parameter.type!)
+        }`,
     )
     .join(", ")
   return `<code class="primitive">(${parameters}) => ${renderType(
@@ -591,147 +597,146 @@ function renderType(type: TypeDoc.SomeType): Text {
     return `<code class="primitive">Object</code>`
   }
   return `<code class="primitive">${type.type}</code>`
-
-  function renderIntrisicType(type: TypeDoc.IntrinsicType) {
-    return `<code class="primitive">${type.name}</code>`
+}
+function renderIntrisicType(type: TypeDoc.IntrinsicType) {
+  return `<code class="primitive">${type.name}</code>`
+}
+function renderLiteralType(type: TypeDoc.LiteralType) {
+  // Intrisic values: don't print in quotes
+  // ie.
+  // {
+  //   "type": "literal",
+  //   "value": false
+  // }
+  if (type.value === true || type.value === false) {
+    return `<code class="primitive">${type.value}</code>`
   }
-  function renderLiteralType(type: TypeDoc.LiteralType) {
-    // Intrisic values: don't print in quotes
-    // ie.
-    // {
-    //   "type": "literal",
-    //   "value": false
-    // }
-    if (type.value === true || type.value === false) {
-      return `<code class="primitive">${type.value}</code>`
-    }
-    // String value
-    // ie.
-    // {
-    //   "type": "literal",
-    //   "value": "arm64"
-    // }
-    const sanitized =
-      typeof type.value === "string"
-        ? type.value!.replace(/([*:])/g, "\\$1")
-        : type.value
-    return `<code class="symbol">&ldquo;</code><code class="primitive">${sanitized}</code><code class="symbol">&rdquo;</code>`
+  // String value
+  // ie.
+  // {
+  //   "type": "literal",
+  //   "value": "arm64"
+  // }
+  const sanitized =
+    typeof type.value === "string"
+      ? type.value!.replace(/([*:])/g, "\\$1")
+      : type.value
+  return `<code class="symbol">&ldquo;</code><code class="primitive">${sanitized}</code><code class="symbol">&rdquo;</code>`
+}
+function renderTemplateLiteralType(type: TypeDoc.TemplateLiteralType) {
+  // ie. memory: `${number} MB`
+  // {
+  //   "type": "templateLiteral",
+  //   "head": "",
+  //   "tail": [
+  //     [
+  //       {
+  //         "type": "intrinsic",
+  //         "name": "number"
+  //       },
+  //       " MB"
+  //     ]
+  //   ]
+  // },
+  if (
+    typeof type.head !== "string" ||
+    type.tail.length !== 1 ||
+    type.tail[0].length !== 2 ||
+    type.tail[0][0].type !== "intrinsic" ||
+    typeof type.tail[0][1] !== "string"
+  ) {
+    console.error(type)
+    throw new Error(`Unsupported templateLiteral type`)
   }
-  function renderTemplateLiteralType(type: TypeDoc.TemplateLiteralType) {
-    // ie. memory: `${number} MB`
-    // {
-    //   "type": "templateLiteral",
-    //   "head": "",
-    //   "tail": [
-    //     [
-    //       {
-    //         "type": "intrinsic",
-    //         "name": "number"
-    //       },
-    //       " MB"
-    //     ]
-    //   ]
-    // },
-    if (
-      typeof type.head !== "string" ||
-      type.tail.length !== 1 ||
-      type.tail[0].length !== 2 ||
-      type.tail[0][0].type !== "intrinsic" ||
-      typeof type.tail[0][1] !== "string"
-    ) {
-      console.error(type)
-      throw new Error(`Unsupported templateLiteral type`)
-    }
-    return `<code class="symbol">&ldquo;</code><code class="primitive">${type.head}$\\{${type.tail[0][0].name}\\}${type.tail[0][1]}</code><code class="symbol">&rdquo;</code>`
-  }
-  function renderUnionType(type: TypeDoc.UnionType) {
-    return type.types
-      .map((t) => {
-        // Handle discriminated unions
-        if (
-          t.type === "reflection" &&
-          t.declaration.kind === TypeDoc.ReflectionKind.TypeLiteral &&
-          t.declaration.children
-        ) {
-          return renderDiscriminatedUnionType(t)
-        }
-        return renderType(t)
-      })
-      .join(`<code class="symbol"> | </code>`)
-  }
-  function renderArrayType(type: TypeDoc.ArrayType) {
-    return type.elementType.type === "union"
-      ? `<code class="symbol">(</code>${renderType(
-          type.elementType,
-        )}<code class="symbol">)[]</code>`
-      : `${renderType(type.elementType)}<code class="symbol">[]</code>`
-  }
-  function renderCallbackType(type: TypeDoc.ReflectionType) {
-    return renderSignatureAsType(type.declaration.signatures![0])
-  }
-  function renderDiscriminatedUnionType(type: TypeDoc.ReflectionType) {
-    return [
-      `<code class="symbol">&lcub; </code>`,
-      type.declaration
-        .children!.map((c) =>
-          [
-            `<code class="key">${c.name}</code>`,
-            `<code class="symbol">&colon; </code>`,
-            renderType(c.type!),
-          ].join(""),
-        )
-        .join(`<code class="symbol">, </code>`),
-      `<code class="symbol"> &rcub;</code>`,
-    ].join("")
-  }
-  function renderTypescriptType(type: TypeDoc.ReferenceType) {
-    // ie. Partial<Foo> => just render Foo
-    if (type.name === "Partial") return renderType(type.typeArguments![0])
-
-    // ie. Record<string, string>
-    return [
-      `<code class="primitive">${type.name}</code>`,
-      `<code class="symbol">&lt;</code>`,
-      type.typeArguments?.map((t) => renderType(t)).join(", "),
-      `<code class="symbol">&gt;</code>`,
-    ].join("")
-  }
-  function renderOpenAuthType(type: TypeDoc.ReferenceType) {
-    // Reference to a non-documented type, ie. FetchLike
-    if (!type.reflection) return `<code class="type">${type.name}</code>`
-
-    // Reference to a generic type
-    // ie.
-    // export function createSubjects<Schema extends SubjectSchema>(types: Schema): Schema {
-    //   return { ...types }
-    // }
-    if (type.reflection.kind === TypeDoc.ReflectionKind.TypeParameter) {
-      const t = (type.reflection as TypeDoc.TypeParameterReflection).type
-      if (t) return renderType(t)
-    }
-
-    if (
-      type.reflection.kind === TypeDoc.ReflectionKind.TypeAlias ||
-      type.reflection.kind === TypeDoc.ReflectionKind.Interface ||
-      type.reflection.kind === TypeDoc.ReflectionKind.Class
-    ) {
-      const t = type.reflection as TypeDoc.DeclarationReflection
-      const fileName = t.sources?.[0]?.fileName
-      if (fileName?.startsWith("packages/openauth/src/subject.ts"))
-        return `[<code class="type">${t.name}</code>](/docs/subject#${t.name.toLowerCase()})`
-      if (fileName?.startsWith("packages/openauth/src/error.ts"))
-        return `[<code class="type">${t.name}</code>](/docs/issuer#${t.name.toLowerCase()})`
-      if (fileName?.startsWith("packages/openauth/src/provider/")) {
-        const provider = fileName.split("/").pop()?.split(".")[0]
-        return `[<code class="type">${t.name}</code>](/docs/provider/${provider}#${t.name.toLowerCase()})`
+  return `<code class="symbol">&ldquo;</code><code class="primitive">${type.head}$\\{${type.tail[0][0].name}\\}${type.tail[0][1]}</code><code class="symbol">&rdquo;</code>`
+}
+function renderUnionType(type: TypeDoc.UnionType) {
+  return type.types
+    .map((t) => {
+      // Handle discriminated unions
+      if (
+        t.type === "reflection" &&
+        t.declaration.kind === TypeDoc.ReflectionKind.TypeLiteral &&
+        t.declaration.children
+      ) {
+        return renderObjectTypeInline(t)
       }
-    }
+      return renderType(t)
+    })
+    .join(`<code class="symbol"> | </code>`)
+}
+function renderArrayType(type: TypeDoc.ArrayType) {
+  return type.elementType.type === "union"
+    ? `<code class="symbol">(</code>${renderType(
+        type.elementType,
+      )}<code class="symbol">)[]</code>`
+    : `${renderType(type.elementType)}<code class="symbol">[]</code>`
+}
+function renderCallbackType(type: TypeDoc.ReflectionType) {
+  return renderSignatureAsType(type.declaration.signatures![0])
+}
+function renderObjectTypeInline(type: TypeDoc.ReflectionType) {
+  return [
+    `<code class="symbol">&lcub; </code>`,
+    type.declaration
+      .children!.map((c) =>
+        [
+          `<code class="key">${c.name}</code>`,
+          `<code class="symbol">&colon; </code>`,
+          renderType(c.type!),
+        ].join(""),
+      )
+      .join(`<code class="symbol">, </code>`),
+    `<code class="symbol"> &rcub;</code>`,
+  ].join("")
+}
+function renderTypescriptType(type: TypeDoc.ReferenceType) {
+  // ie. Partial<Foo> => just render Foo
+  if (type.name === "Partial") return renderType(type.typeArguments![0])
 
-    return `[<code class="type">${type.name}</code>](#${type.name.toLowerCase()})`
+  // ie. Record<string, string>
+  return [
+    `<code class="primitive">${type.name}</code>`,
+    `<code class="symbol">&lt;</code>`,
+    type.typeArguments?.map((t) => renderType(t)).join(", "),
+    `<code class="symbol">&gt;</code>`,
+  ].join("")
+}
+function renderOpenAuthType(type: TypeDoc.ReferenceType) {
+  // Reference to a non-documented type, ie. FetchLike
+  if (!type.reflection) return `<code class="type">${type.name}</code>`
+
+  // Reference to a generic type
+  // ie.
+  // export function createSubjects<Schema extends SubjectSchema>(types: Schema): Schema {
+  //   return { ...types }
+  // }
+  if (type.reflection.kind === TypeDoc.ReflectionKind.TypeParameter) {
+    const t = (type.reflection as TypeDoc.TypeParameterReflection).type
+    if (t) return renderType(t)
   }
-  function renderStandardSchemaType(type: TypeDoc.ReferenceType) {
-    return `[<code class="type">${type.name}</code>](https://github.com/standard-schema/standard-schema)`
+
+  if (
+    type.reflection.kind === TypeDoc.ReflectionKind.TypeAlias ||
+    type.reflection.kind === TypeDoc.ReflectionKind.Interface ||
+    type.reflection.kind === TypeDoc.ReflectionKind.Class
+  ) {
+    const t = type.reflection as TypeDoc.DeclarationReflection
+    const fileName = t.sources?.[0]?.fileName
+    if (fileName?.startsWith("packages/openauth/src/subject.ts"))
+      return `[<code class="type">${t.name}</code>](/docs/subject#${t.name.toLowerCase()})`
+    if (fileName?.startsWith("packages/openauth/src/error.ts"))
+      return `[<code class="type">${t.name}</code>](/docs/issuer#${t.name.toLowerCase()})`
+    if (fileName?.startsWith("packages/openauth/src/provider/")) {
+      const provider = fileName.split("/").pop()?.split(".")[0]
+      return `[<code class="type">${t.name}</code>](/docs/provider/${provider}#${t.name.toLowerCase()})`
+    }
   }
+
+  return `[<code class="type">${type.name}</code>](#${type.name.toLowerCase()})`
+}
+function renderStandardSchemaType(type: TypeDoc.ReferenceType) {
+  return `[<code class="type">${type.name}</code>](https://github.com/standard-schema/standard-schema)`
 }
 
 function render(condition: any, content: Text) {
