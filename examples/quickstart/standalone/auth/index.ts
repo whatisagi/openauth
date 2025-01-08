@@ -24,7 +24,7 @@ export default issuer({
   success: async (ctx, value) => {
     if (value.provider === "code") {
       return ctx.subject("user", {
-        id: await getUser(value.claims.email)
+        id: await getUser(value.claims.email),
       })
     }
     throw new Error("Invalid provider")
