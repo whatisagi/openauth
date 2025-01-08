@@ -6,7 +6,7 @@
  *
  * ```ts title="subjects.ts"
  * import { object, string } from "valibot"
- * 
+ *
  * const subjects = createSubjects({
  *   user: object({
  *     userID: string()

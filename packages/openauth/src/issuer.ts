@@ -443,7 +443,7 @@ export function issuer<
 >(input: IssuerInput<Providers, Subjects, Result>) {
   const error =
     input.error ??
-    function(err) {
+    function (err) {
       return new Response(err.message, {
         status: 400,
         headers: {
@@ -945,9 +945,9 @@ export function issuer<
       pkce:
         code_challenge && code_challenge_method
           ? {
-            challenge: code_challenge,
-            method: code_challenge_method,
-          }
+              challenge: code_challenge,
+              method: code_challenge_method,
+            }
           : undefined,
     } as AuthorizationState
     c.set("authorization", authorization)
