@@ -100,7 +100,7 @@ import { subjects } from "./subjects.js"
 const app = issuer({
   providers: { ... },
   subjects,
-  ...
+  // ...
 })
 ```
 
@@ -110,26 +110,26 @@ Since `issuer` is a Hono app, you can deploy it anywhere Hono supports.
 
 <Tabs>
   <TabItem label="Node">
-  ```ts
+  ```ts title="issuer.ts"
   import { serve } from "@hono/node-server"
 
   serve(app)
   ```
   </TabItem>
   <TabItem label="Lambda">
-  ```ts
+  ```ts title="issuer.ts"
   import { handle } from "hono/aws-lambda"
 
   export const handler = handle(app)
   ```
   </TabItem>
   <TabItem label="Bun">
-  ```ts
+  ```ts title="issuer.ts"
   export default app
   ```
   </TabItem>
   <TabItem label="Workers">
-  ```ts
+  ```ts title="issuer.ts"
   export default app
   ```
   </TabItem>
@@ -156,23 +156,23 @@ Create an OpenAuth server, a Hono app.
 ## IssuerInput
 <Segment>
 <Section type="parameters">
-- <p>[<code class="key">providers</code>](#issuerinput.providers) <code class="primitive">any</code></p>
+- <p>[<code class="key">providers</code>](#issuerinput.providers) <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="type">Provider</code><code class="symbol">&gt;</code></p>
 - <p>[<code class="key">storage?</code>](#issuerinput.storage) <code class="type">StorageAdapter</code></p>
-- <p>[<code class="key">subjects</code>](#issuerinput.subjects) <code class="primitive">any</code></p>
+- <p>[<code class="key">subjects</code>](#issuerinput.subjects) [<code class="type">SubjectSchema</code>](/docs/subject#subjectschema)</p>
 - <p>[<code class="key">theme?</code>](#issuerinput.theme) [<code class="type">Theme</code>](#theme)</p>
 - <p>[<code class="key">ttl?</code>](#issuerinput.ttl) <code class="primitive">Object</code></p>
   - <p>[<code class="key">access?</code>](#ttl.access) <code class="primitive">number</code></p>
   - <p>[<code class="key">refresh?</code>](#ttl.refresh) <code class="primitive">number</code></p>
-- <p>[<code class="key">allow?</code>](#issuerinput.allow) <code class="primitive">(input: <code class="primitive">Object</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">boolean</code><code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">allow?</code>](#issuerinput.allow) <code class="primitive">(input: <code class="symbol">&lcub; </code><code class="key">audience</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">clientID</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">redirectURI</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol"> &rcub;</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">boolean</code><code class="symbol">&gt;</code></code></p>
 - <p>[<code class="key">select?</code>](#issuerinput.select) <code class="primitive">(providers: <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
-- <p>[<code class="key">success</code>](#issuerinput.success) <code class="primitive">(response: [<code class="type">OnSuccessResponder</code>](#onsuccessresponder), input: <code class="primitive">any</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">success</code>](#issuerinput.success) <code class="primitive">(response: [<code class="type">OnSuccessResponder</code>](#onsuccessresponder), input: [<code class="type">Result</code>](#result), req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
 </Section>
 </Segment>
 <NestedTitle id="issuerinput.providers" Tag="h4" parent="IssuerInput.">providers</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>
-**Type** <code class="primitive">any</code>
+**Type** <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="type">Provider</code><code class="symbol">&gt;</code>
 </InlineSection>
 </Section>
 The providers that you want your OpenAuth server to support.
@@ -225,7 +225,7 @@ issuer({
 <Segment>
 <Section type="parameters">
 <InlineSection>
-**Type** <code class="primitive">any</code>
+**Type** [<code class="type">SubjectSchema</code>](/docs/subject#subjectschema)
 </InlineSection>
 </Section>
 The shape of the subjects that you want to return.
@@ -327,7 +327,7 @@ The TTL for refresh tokens.
 <Segment>
 <Section type="parameters">
 <InlineSection>
-**Type** <code class="primitive">(input: <code class="primitive">Object</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">boolean</code><code class="symbol">&gt;</code></code>
+**Type** <code class="primitive">(input: <code class="symbol">&lcub; </code><code class="key">audience</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">clientID</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">redirectURI</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol"> &rcub;</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="primitive">boolean</code><code class="symbol">&gt;</code></code>
 </InlineSection>
 </Section>
 Override the logic for whether a client request is allowed to call the issuer.
@@ -378,7 +378,7 @@ issuer({
 <Segment>
 <Section type="parameters">
 <InlineSection>
-**Type** <code class="primitive">(response: [<code class="type">OnSuccessResponder</code>](#onsuccessresponder), input: <code class="primitive">any</code>, req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
+**Type** <code class="primitive">(response: [<code class="type">OnSuccessResponder</code>](#onsuccessresponder), input: [<code class="type">Result</code>](#result), req: <code class="type">Request</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
 </InlineSection>
 </Section>
 The success callback that's called when the user completes the flow.
@@ -407,17 +407,27 @@ This is called after the user has been redirected back to your app after the OAu
 ## OnSuccessResponder
 <Segment>
 <Section type="parameters">
-- <p>[<code class="key">subject</code>](#onsuccessresponder.subject) <code class="primitive">(type: <code class="primitive">any</code>, properties: <code class="primitive">indexedAccess</code>, opts?: <code class="primitive">Object</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
+- <p>[<code class="key">subject</code>](#onsuccessresponder.subject) <code class="primitive">(type: <code class="primitive">string</code>, properties: <code class="primitive">any</code>, opts?: <code class="symbol">&lcub; </code><code class="key">subject</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">ttl</code><code class="symbol">&colon; </code><code class="symbol">&lcub; </code><code class="key">access</code><code class="symbol">&colon; </code><code class="primitive">number</code><code class="symbol">, </code><code class="key">refresh</code><code class="symbol">&colon; </code><code class="primitive">number</code><code class="symbol"> &rcub;</code><code class="symbol"> &rcub;</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code></p>
 </Section>
-The interface for the success responder.
+Sets the subject payload in the JWT token and returns the response.
+
+```ts
+ctx.subject("user", {
+  userID
+})
+```
 </Segment>
 <NestedTitle id="onsuccessresponder.subject" Tag="h4" parent="OnSuccessResponder.">subject</NestedTitle>
 <Segment>
 <Section type="parameters">
 <InlineSection>
-**Type** <code class="primitive">(type: <code class="primitive">any</code>, properties: <code class="primitive">indexedAccess</code>, opts?: <code class="primitive">Object</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
+**Type** <code class="primitive">(type: <code class="primitive">string</code>, properties: <code class="primitive">any</code>, opts?: <code class="symbol">&lcub; </code><code class="key">subject</code><code class="symbol">&colon; </code><code class="primitive">string</code><code class="symbol">, </code><code class="key">ttl</code><code class="symbol">&colon; </code><code class="symbol">&lcub; </code><code class="key">access</code><code class="symbol">&colon; </code><code class="primitive">number</code><code class="symbol">, </code><code class="key">refresh</code><code class="symbol">&colon; </code><code class="primitive">number</code><code class="symbol"> &rcub;</code><code class="symbol"> &rcub;</code>) => <code class="primitive">Promise</code><code class="symbol">&lt;</code><code class="type">Response</code><code class="symbol">&gt;</code></code>
 </InlineSection>
 </Section>
+The `type` is the type of the subject, that was defined in the `subjects` field.
+
+The `properties` are the properties of the subject. This is the shape of the subject that
+you defined in the `subjects` field.
 </Segment>
 ## Errors
 <Section type="about">

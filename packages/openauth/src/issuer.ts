@@ -87,7 +87,7 @@
  * const app = issuer({
  *   providers: { ... },
  *   subjects,
- *   ...
+ *   // ...
  * })
  * ```
  *
@@ -132,11 +132,23 @@ import { Context } from "hono"
 import { deleteCookie, getCookie, setCookie } from "hono/cookie"
 
 /**
- * The interface for the success responder.
+ * Sets the subject payload in the JWT token and returns the response.
+ *
+ * ```ts
+ * ctx.subject("user", {
+ *   userID
+ * })
+ * ```
  */
 export interface OnSuccessResponder<
   T extends { type: string; properties: any },
 > {
+  /**
+   * The `type` is the type of the subject, that was defined in the `subjects` field.
+   *
+   * The `properties` are the properties of the subject. This is the shape of the subject that
+   * you defined in the `subjects` field.
+   */
   subject<Type extends T["type"]>(
     type: Type,
     properties: Extract<T, { type: Type }>["properties"],
