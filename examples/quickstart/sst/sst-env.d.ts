@@ -6,13 +6,13 @@ import "sst"
 export {}
 declare module "sst" {
   export interface Resource {
-    "MyAuth": {
-      "type": "sst.aws.Auth"
-      "url": string
+    MyAuth: {
+      type: "sst.aws.Auth"
+      url: string
     }
-    "MyWeb": {
-      "type": "sst.aws.Nextjs"
-      "url": string
+    MyWeb: {
+      type: "sst.aws.Nextjs"
+      url: string
     }
   }
 }

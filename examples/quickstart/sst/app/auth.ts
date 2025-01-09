@@ -4,7 +4,7 @@ import { cookies as getCookies } from "next/headers"
 
 export const client = createClient({
   clientID: "nextjs",
-  issuer: Resource.MyAuth.url
+  issuer: Resource.MyAuth.url,
 })
 
 export async function setTokens(access: string, refresh: string) {
