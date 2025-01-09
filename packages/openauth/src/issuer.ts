@@ -326,17 +326,25 @@ export interface IssuerInput<
    */
   ttl?: {
     /**
-     * The TTL for access tokens.
-     *
-     * @default 60 * 60 * 24 * 30
+     * Interval in seconds where the access token is valid.
+     * @default 30d
      */
     access?: number
     /**
-     * The TTL for refresh tokens.
-     *
-     * @default 60 * 60 * 24 * 365
+     * Interval in seconds where the refresh token is valid.
+     * @default 1y
      */
     refresh?: number
+    /**
+     * Interval in seconds where refresh token reuse is allowed. Helps mitigrate concurrency issues.
+     * @default 60s
+     */
+    reuse?: number
+    /**
+     * Interval in seconds to retain refresh tokens for reuse detection.
+     * @default 0s
+     */
+    retention?: number
   }
   /**
    * Optionally, configure the UI that's displayed when the user visits the root URL of the
@@ -453,6 +461,8 @@ export function issuer<
     }
   const ttlAccess = input.ttl?.access ?? 60 * 60 * 24 * 30
   const ttlRefresh = input.ttl?.refresh ?? 60 * 60 * 24 * 365
+  const ttlRefreshReuse = input.ttl?.reuse ?? 60
+  const ttlRefreshRetention = input.ttl?.retention ?? 0
   if (input.theme) {
     setTheme(input.theme)
   }
@@ -592,10 +602,11 @@ export function issuer<
       deleteCookie(ctx, key)
     },
     async invalidate(subject: string) {
-      for await (const [key] of Storage.scan(this.storage, [
-        "oauth:refresh",
-        subject,
-      ])) {
+      // Resolve the scan in case modifications interfere with iteration
+      const keys = await Array.fromAsync(
+        Storage.scan(this.storage, ["oauth:refresh", subject]),
+      )
+      for (const [key] of keys) {
         await Storage.remove(this.storage, key)
       }
     },
@@ -640,17 +651,33 @@ export function issuer<
         access: number
         refresh: number
       }
+      timeUsed?: number
+      nextToken?: string
+    },
+    opts?: {
+      generateRefreshToken?: boolean
     },
   ) {
-    const refreshToken = crypto.randomUUID()
-    await Storage.set(
-      storage!,
-      ["oauth:refresh", value.subject, refreshToken],
-      {
+    const refreshToken = value.nextToken ?? crypto.randomUUID()
+    if (opts?.generateRefreshToken ?? true) {
+      /**
+       * Generate and store the next refresh token after the one we are currently returning.
+       * Reserving these in advance avoids concurrency issues with multiple refreshes.
+       * Similar treatment should be given to any other values that may have race conditions,
+       * for example if a jti claim was added to the access token.
+       */
+      const refreshValue = {
         ...value,
-      },
-      value.ttl.refresh,
-    )
+        nextToken: crypto.randomUUID(),
+      }
+      delete refreshValue.timeUsed
+      await Storage.set(
+        storage!,
+        ["oauth:refresh", value.subject, refreshToken],
+        refreshValue,
+        value.ttl.refresh,
+      )
+    }
     return {
       access: await new SignJWT({
         mode: "access",
@@ -660,7 +687,9 @@ export function issuer<
         iss: issuer(ctx),
         sub: value.subject,
       })
-        .setExpirationTime(Date.now() / 1000 + value.ttl.access)
+        .setExpirationTime(
+          Math.floor((value.timeUsed ?? Date.now()) / 1000 + value.ttl.access),
+        )
         .setProtectedHeader(
           await signingKey.then((k) => ({
             alg: k.alg,
@@ -854,6 +883,8 @@ export function issuer<
             access: number
             refresh: number
           }
+          nextToken: string
+          timeUsed?: number
         }>(storage, key)
         if (!payload) {
           return c.json(
@@ -864,8 +895,32 @@ export function issuer<
             400,
           )
         }
-        await Storage.remove(storage, key)
-        const tokens = await generateTokens(c, payload)
+        const generateRefreshToken = !payload.timeUsed
+        if (ttlRefreshReuse <= 0) {
+          // no reuse interval, remove the refresh token immediately
+          await Storage.remove(storage, key)
+        } else if (!payload.timeUsed) {
+          payload.timeUsed = Date.now()
+          await Storage.set(
+            storage,
+            key,
+            payload,
+            ttlRefreshReuse + ttlRefreshRetention,
+          )
+        } else if (Date.now() > payload.timeUsed + ttlRefreshReuse * 1000) {
+          // token was reused past the allowed interval
+          await auth.invalidate(subject)
+          return c.json(
+            {
+              error: "invalid_grant",
+              error_description: "Refresh token has been used or expired",
+            },
+            400,
+          )
+        }
+        const tokens = await generateTokens(c, payload, {
+          generateRefreshToken,
+        })
         return c.json({
           access_token: tokens.access,
           refresh_token: tokens.refresh,
