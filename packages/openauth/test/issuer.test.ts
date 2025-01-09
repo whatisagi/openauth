@@ -278,8 +278,8 @@ describe("refresh token", () => {
       ...issuerConfig,
       ttl: {
         ...issuerConfig.ttl,
-        refreshReuse: 0,
-        refreshRetention: 0,
+        reuse: 0,
+        retention: 0,
       },
     })
     await createClientAndTokens(issuerWithoutReuse)
