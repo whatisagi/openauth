@@ -1052,10 +1052,6 @@ export function issuer<
     )
   })
 
-  app.all("/*", async (c) => {
-    return c.notFound()
-  })
-
   app.onError(async (err, c) => {
     console.error(err)
     if (err instanceof UnknownStateError) {
