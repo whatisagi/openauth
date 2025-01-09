@@ -283,10 +283,7 @@ describe("refresh token", () => {
       },
     })
     await createClientAndTokens(issuerWithoutReuse)
-    let response = await requestRefreshToken(
-      tokens.refresh,
-      issuerWithoutReuse,
-    )
+    let response = await requestRefreshToken(tokens.refresh, issuerWithoutReuse)
     expect(response.status).toBe(200)
 
     response = await requestRefreshToken(tokens.refresh, issuerWithoutReuse)
