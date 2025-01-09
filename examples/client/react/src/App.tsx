@@ -33,7 +33,6 @@ function App() {
     setIsAuthenticating(false)
 
     if (token) {
-      accessToken.current = token
       await user()
     }
   }
