@@ -11,7 +11,7 @@ export default $config({
   },
   async run() {
     const auth = new sst.aws.Auth("MyAuth", {
-      authorizer: "auth/index.handler",
+      issuer: "auth/index.handler",
     })
 
     new sst.aws.Nextjs("MyWeb", {

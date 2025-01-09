@@ -125,7 +125,7 @@ Now let's add this to our SST app. Replace the `run` function in `sst.config.ts`
 
 ```ts title="sst.config.ts" {6}
 const auth = new sst.aws.Auth("MyAuth", {
-  authorizer: "auth/index.handler",
+  issuer: "auth/index.handler",
 });
 
 new sst.aws.Nextjs("MyWeb", {
