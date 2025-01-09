@@ -80,6 +80,7 @@ export default defineConfig({
           label: "Quick Start",
           items: [
             { label: "Standalone", slug: "docs/start/standalone" },
+            { label: "SST", slug: "docs/start/sst" },
           ],
         },
         {

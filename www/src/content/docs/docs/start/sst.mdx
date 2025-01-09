@@ -1,6 +1,6 @@
 ---
-title: OpenAuth with Next.js
-description: Use OpenAuth to add authentication to your Next.js app.
+title: OpenAuth with SST and Next.js
+description: Add OpenAuth to your Next.js app and deploy it with SST.
 ---
 
 import { Image } from "astro:assets"
@@ -8,10 +8,10 @@ import { Image } from "astro:assets"
 import nextAppDark from "./nextjs-dark.png"
 import nextAppLight from "./nextjs-light.png"
 
-We are going to createa new Next.js app and add authentication to it with OpenAuth.
+We are going to createa new Next.js app, add authentication to it with OpenAuth, and deploy it with SST.
 
 :::tip[View source]
-You can [view the source](https://github.com/openauthjs/openauth/tree/master/examples/quickstart/standalone) of this example in our repo.
+You can [view the source](https://github.com/openauthjs/openauth/tree/master/examples/quickstart/sst) of this example in our repo.
 :::
 
 We are going to authenticate users by sending them a code to verify their email address.
@@ -23,14 +23,23 @@ We are going to authenticate users by sending them a code to verify their email 
 Let's start by creating our Next.js app and starting it in dev mode.
 
 ```bash
-bun create next-app oa-nextjs
+npx create-next-app@latest oa-nextjs
 cd oa-nextjs
-bun dev
 ```
 
 We are picking **TypeScript** and not selecting **ESLint**.
 
-This will start our Next.js app at `http://localhost:3000`.
+---
+
+##### Init SST
+
+Now let's initialize SST in our app.
+
+```bash
+npx sst@latest init
+```
+
+Select the defaults and pick **AWS**. This'll create a `sst.config.ts` file in your project root.
 
 ---
 
@@ -45,6 +54,7 @@ mkdir auth
 Add our OpenAuth server to a `auth/index.ts` file.
 
 ```ts title="auth/index.ts"
+import { handle } from "hono/aws-lambda"
 import { issuer } from "@openauthjs/openauth"
 import { CodeUI } from "@openauthjs/openauth/ui/code"
 import { CodeProvider } from "@openauthjs/openauth/provider/code"
@@ -56,9 +66,11 @@ async function getUser(email: string) {
   return "123"
 }
 
-export default issuer({
+const app = issuer({
   subjects,
   storage: MemoryStorage(),
+  // Remove after setting custom domain
+  allow: async () => true,
   providers: {
     code: CodeProvider(
       CodeUI({
@@ -77,6 +89,9 @@ export default issuer({
     throw new Error("Invalid provider")
   },
 })
+
+
+export const handler = handle(app)
 ```
 
 ---
@@ -99,22 +114,45 @@ export const subjects = createSubjects({
 Let's install our dependencies.
 
 ```bash
-bun add @openauthjs/openauth valibot
+npm install @openauthjs/openauth valibot hono
 ```
 
-And add a script to start our auth server to `package.json`.
+---
 
-```js title="package.json"
-"dev:auth": "PORT=3001 bun run --hot auth/index.ts",
+##### Add Auth component
+
+Now let's add this to our SST app. Replace the `run` function in `sst.config.ts` with the following.
+
+```ts title="sst.config.ts" {6}
+const auth = new sst.aws.Auth("MyAuth", {
+  authorizer: "auth/index.handler",
+});
+
+new sst.aws.Nextjs("MyWeb", {
+  link: [auth]
+});
 ```
 
-Now run the auth server in a separate terminal.
+This is defining our OpenAuth component and linking it to our Next.js app.
+
+---
+
+##### Start dev mode
+
+Run the following to start dev mode. This'll start SST, your Next.js app, and your OpenAuth server.
 
 ```bash
-bun dev:auth
+npx sst dev
 ```
 
-This will start our auth server at `http://localhost:3001`.
+Once complete, it should give you the URL of your OpenAuth server.
+
+```bash
+✓  Complete
+   MyAuth: https://fv62a3niazbkrazxheevotace40affnk.lambda-url.us-east-1.on.aws
+```
+
+Also click on **MyWeb** in the sidebar and open your Next.js app by going to `http://localhost:3000`.
 
 ---
 
@@ -122,13 +160,14 @@ This will start our auth server at `http://localhost:3001`.
 
 Next, let's add our OpenAuth client to our Next.js app. Add the following to `app/auth.ts`.
 
-```ts title="app/auth.ts"
+```ts title="app/auth.ts" {7}
+import { Resource } from "sst"
 import { createClient } from "@openauthjs/openauth/client"
 import { cookies as getCookies } from "next/headers"
 
 export const client = createClient({
   clientID: "nextjs",
-  issuer: "http://localhost:3001",
+  issuer: Resource.MyAuth.url
 })
 
 export async function setTokens(access: string, refresh: string) {
@@ -151,9 +190,10 @@ export async function setTokens(access: string, refresh: string) {
     maxAge: 34560000,
   })
 }
+
 ```
 
-Here we are assuming that our auth server is running at `http://localhost:3001`. Once the user is authenticated, we'll be saving their access and refresh tokens in _http only_ cookies.
+Here we are _linking_ to our auth server. And once the user is authenticated, we'll be saving their access and refresh tokens in _http only_ cookies.
 
 ---
 
@@ -353,7 +393,7 @@ button.secondary {
 
 Head to `http://localhost:3000` and click the login button, you should be redirected to the OpenAuth server asking you to put in your email.
 
-If you check the terminal running the auth server, you'll see the code being console logged. You can use this code to login.
+If you check the **Functions** tab in your `sst dev` session, you'll see the code being console logged. You can use this code to login.
 
 <picture>
   <source srcset={nextAppDark.src} media="(prefers-color-scheme: dark)" />
@@ -367,10 +407,18 @@ This should log you in and print your user ID.
 
 ## Deploy your app
 
-To are now ready to deploy your app and your OpenAuth server. A couple of changes you'll need to make.
+Now let's deploy your app to AWS.
 
-1. Use a more persistent `storage` like [DynamoDB](https://aws.amazon.com/dynamodb/) or [Cloudflare KV](https://developers.cloudflare.com/kv/) in your `auth/index.ts`.
-2. Instead of printing out the code, email that to the user.
-3. Finally, in your `app/auth.ts`, use the deployed auth server URL instead of `http://localhost:3001`.
+```bash
+npx sst deploy --stage production
+```
 
-You can also check out the [**SST quick start**](/docs/start/sst) for a fully deployed example.
+You can use any stage name here but it's good to create a new stage for production.
+
+```bash
+✓  Complete
+   MyAuth: https://vp3honbl3od4gmo7mei37mchky0waxew.lambda-url.us-east-1.on.aws
+   MyWeb: https://d2fjg1rqbqi95t.cloudfront.net
+```
+
+Congrats! Your app and your OpenAuth server should now be live!
