@@ -605,7 +605,7 @@ If passed in, this will automatically refresh the access token if it has expired
 <Segment>
 <Section type="parameters">
 - <p>[<code class="key">err?</code>](#verifyresult.err) <code class="primitive">undefined</code></p>
-- <p>[<code class="key">subject</code>](#verifyresult.subject) <code class="primitive">any</code></p>
+- <p>[<code class="key">subject</code>](#verifyresult.subject) <code class="type">Subject</code></p>
 - <p>[<code class="key">tokens?</code>](#verifyresult.tokens) [<code class="type">Tokens</code>](#tokens)</p>
 </Section>
 </Segment>
@@ -622,7 +622,7 @@ This is always `undefined` when the verify is successful.
 <Segment>
 <Section type="parameters">
 <InlineSection>
-**Type** <code class="primitive">any</code>
+**Type** <code class="type">Subject</code>
 </InlineSection>
 </Section>
 The decoded subjects from the access token.

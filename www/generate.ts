@@ -586,6 +586,24 @@ function renderProperty(property: TypeDoc.DeclarationReflection) {
 }
 
 function renderType(type: TypeDoc.SomeType): Text {
+  // Special handle hard-to-document types
+  if (
+    type.type === "reference" &&
+    type.package === "@openauthjs/openauth" &&
+    type.qualifiedName === "IssuerInput.Result"
+  )
+    return `<code class="type">${type.name}</code>`
+
+  // Special handle hard-to-document types
+  if (type.type === "indexedAccess") {
+    if (
+      type.indexType.type === "typeOperator" &&
+      type.indexType.target.type === "reference" &&
+      type.indexType.target.qualifiedName === "VerifyResult.T"
+    )
+      return `<code class="type">Subject</code>`
+  }
+
   if (type.type === "intrinsic") return renderIntrisicType(type)
   if (type.type === "literal") return renderLiteralType(type)
   if (type.type === "templateLiteral") return renderTemplateLiteralType(type)
@@ -596,24 +614,7 @@ function renderType(type: TypeDoc.SomeType): Text {
     if (type.package === "@openauthjs/openauth") return renderOpenAuthType(type)
     if (type.package === "@standard-schema/spec")
       return renderStandardSchemaType(type)
-
-    // Special handle hard-to-document types
-    if (
-      type.package === "@openauthjs/openauth" &&
-      type.qualifiedName === "IssuerInput.Result"
-    )
-      return `<code class="type">${type.name}</code>`
-
     return `<code class="type">${type.name}</code>`
-  }
-  // Special handle hard-to-document types
-  if (type.type === "indexedAccess") {
-    if (
-      type.indexType.type === "typeOperator" &&
-      type.indexType.target.type === "reference" &&
-      type.indexType.target.qualifiedName === "VerifyResult.T"
-    )
-      return `<code class="type">Subject</code>`
   }
   if (
     type.type === "reflection" &&
