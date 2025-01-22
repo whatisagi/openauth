@@ -5,7 +5,7 @@ import {
   useEffect,
   useContext,
   createContext,
-} from "react";
+} from "react"
 import { createClient } from "@openauthjs/openauth/client"
 
 const client = createClient({
@@ -14,15 +14,15 @@ const client = createClient({
 })
 
 interface AuthContextType {
-  userId?: string;
-  accessToken?: string;
-  authenticating: boolean;
-  login: () => Promise<void>;
-  logout: () => void;
-  callback: (code: string, state: string) => Promise<void>;
+  userId?: string
+  accessToken?: string
+  authenticating: boolean
+  login: () => Promise<void>
+  logout: () => void
+  callback: (code: string, state: string) => Promise<void>
 }
 
-const AuthContext = createContext({} as AuthContextType);
+const AuthContext = createContext({} as AuthContextType)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const initializing = useRef(true)
@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { challenge, url } = await client.authorize(
         location.origin,
         "code",
-        { pkce: true }
+        { pkce: true },
       )
       sessionStorage.setItem("challenge", JSON.stringify(challenge))
       location.href = url
@@ -111,20 +111,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{
-      login,
-      logout,
-      userId,
-      callback,
-      authenticating,
-      accessToken: accessToken.current,
-    }}>
+    <AuthContext.Provider
+      value={{
+        login,
+        logout,
+        userId,
+        callback,
+        authenticating,
+        accessToken: accessToken.current,
+      }}
+    >
       {children}
     </AuthContext.Provider>
-  );
-
+  )
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  return useContext(AuthContext)
 }
