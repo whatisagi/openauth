@@ -17,8 +17,8 @@ interface AuthContextType {
   userId?: string
   accessToken?: string
   authenticating: boolean
-  login: () => Promise<void>
   logout: () => void
+  login: () => Promise<void>
   callback: (code: string, state: string) => Promise<void>
 }
 
