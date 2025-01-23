@@ -1,18 +1,19 @@
-import { useEffect } from "react"
+import { useState } from "react"
 import { useAuth } from "./AuthContext"
 
 function App() {
   const auth = useAuth()
+  const [status, setStatus] = useState("")
 
-  useEffect(() => {
-    const hash = new URLSearchParams(location.search.slice(1))
-    const code = hash.get("code")
-    const state = hash.get("state")
+  async function callApi() {
+    const res = await fetch("http://localhost:3001/", {
+      headers: {
+        Authorization: `Bearer ${await auth.accessToken()}`,
+      },
+    })
 
-    if (code && state) {
-      auth.callback(code, state)
-    }
-  }, [])
+    setStatus(res.ok ? "success" : "error")
+  }
 
   return auth.authenticating ? (
     <div>Loading...</div>
@@ -24,6 +25,8 @@ function App() {
             <span>Logged in</span>
             {auth.userId && <span> as {auth.userId}</span>}
           </p>
+          {status !== "" && <p>API call: {status}</p>}
+          <button onClick={callApi}>Call API</button>
           <button onClick={auth.logout}>Logout</button>
         </div>
       ) : (

@@ -15,22 +15,29 @@ const client = createClient({
 
 interface AuthContextType {
   userId?: string
-  accessToken?: string
   authenticating: boolean
   logout: () => void
   login: () => Promise<void>
-  callback: (code: string, state: string) => Promise<void>
+  accessToken: () => Promise<string | undefined>
 }
 
 const AuthContext = createContext({} as AuthContextType)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const initializing = useRef(true)
-  const accessToken = useRef<string | undefined>(undefined)
+  const token = useRef<string | undefined>(undefined)
   const [userId, setUserId] = useState<string | undefined>()
   const [authenticating, setAuthenticating] = useState(true)
 
   useEffect(() => {
+    const hash = new URLSearchParams(location.search.slice(1))
+    const code = hash.get("code")
+    const state = hash.get("state")
+
+    if (code && state) {
+      callback(code, state)
+    }
+
     if (initializing.current) {
       initializing.current = false
       auth()
@@ -51,28 +58,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const refresh = localStorage.getItem("refresh")
     if (!refresh) return
     const next = await client.refresh(refresh, {
-      access: accessToken.current,
+      access: token.current,
     })
     if (next.err) return
-    if (!next.tokens) return accessToken.current
+    if (!next.tokens) return token.current
 
     localStorage.setItem("refresh", next.tokens.refresh)
-    accessToken.current = next.tokens.access
+    token.current = next.tokens.access
 
     return next.tokens.access
   }
 
-  async function login() {
+  async function accessToken() {
     const token = await getToken()
+
     if (!token) {
-      const { challenge, url } = await client.authorize(
-        location.origin,
-        "code",
-        { pkce: true },
-      )
-      sessionStorage.setItem("challenge", JSON.stringify(challenge))
-      location.href = url
+      await login()
+      return
     }
+
+    return token
+  }
+
+  async function login() {
+    const { challenge, url } = await client.authorize(
+      location.origin,
+      "code",
+      { pkce: true },
+    )
+    sessionStorage.setItem("challenge", JSON.stringify(challenge))
+    location.href = url
   }
 
   async function callback(code: string, state: string) {
@@ -85,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           challenge.verifier,
         )
         if (!exchanged.err) {
-          accessToken.current = exchanged.tokens?.access
+          token.current = exchanged.tokens?.access
           localStorage.setItem("refresh", exchanged.tokens.refresh)
         }
       }
@@ -96,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function user() {
     const res = await fetch("http://localhost:3001/", {
       headers: {
-        Authorization: `Bearer ${accessToken.current}`,
+        Authorization: `Bearer ${token.current}`,
       },
     })
 
@@ -105,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   function logout() {
     localStorage.removeItem("refresh")
-    accessToken.current = undefined
+    token.current = undefined
 
     window.location.replace("/")
   }
@@ -116,9 +131,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         userId,
-        callback,
+        accessToken,
         authenticating,
-        accessToken: accessToken.current,
       }}
     >
       {children}
