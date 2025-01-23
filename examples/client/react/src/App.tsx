@@ -8,18 +8,18 @@ function App() {
   async function callApi() {
     const res = await fetch("http://localhost:3001/", {
       headers: {
-        Authorization: `Bearer ${await auth.accessToken()}`,
+        Authorization: `Bearer ${await auth.getToken()}`,
       },
     })
 
     setStatus(res.ok ? "success" : "error")
   }
 
-  return auth.authenticating ? (
+  return !auth.loaded ? (
     <div>Loading...</div>
   ) : (
     <div>
-      {auth.userId ? (
+      {auth.loggedIn ? (
         <div>
           <p>
             <span>Logged in</span>

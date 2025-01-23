@@ -15,19 +15,21 @@ const client = createClient({
 
 interface AuthContextType {
   userId?: string
-  authenticating: boolean
+  loaded: boolean
+  loggedIn: boolean
   logout: () => void
   login: () => Promise<void>
-  accessToken: () => Promise<string | undefined>
+  getToken: () => Promise<string | undefined>
 }
 
 const AuthContext = createContext({} as AuthContextType)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const initializing = useRef(true)
+  const [loaded, setLoaded] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false)
   const token = useRef<string | undefined>(undefined)
   const [userId, setUserId] = useState<string | undefined>()
-  const [authenticating, setAuthenticating] = useState(true)
 
   useEffect(() => {
     const hash = new URLSearchParams(location.search.slice(1))
@@ -45,16 +47,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   async function auth() {
-    const token = await getToken()
-
-    setAuthenticating(false)
+    const token = await refreshTokens()
 
     if (token) {
       await user()
     }
+
+    setLoaded(true)
   }
 
-  async function getToken() {
+  async function refreshTokens() {
     const refresh = localStorage.getItem("refresh")
     if (!refresh) return
     const next = await client.refresh(refresh, {
@@ -69,8 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return next.tokens.access
   }
 
-  async function accessToken() {
-    const token = await getToken()
+  async function getToken() {
+    const token = await refreshTokens()
 
     if (!token) {
       await login()
@@ -113,7 +115,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     })
 
-    res.ok && setUserId(await res.text())
+    if (res.ok) {
+      setUserId(await res.text())
+      setLoggedIn(true)
+    }
   }
 
   function logout() {
@@ -129,8 +134,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         userId,
-        accessToken,
-        authenticating,
+        loaded,
+        loggedIn,
+        getToken,
       }}
     >
       {children}
