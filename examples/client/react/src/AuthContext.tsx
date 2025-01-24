@@ -37,14 +37,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const state = hash.get("state")
 
     if (!initializing.current) {
-      return;
+      return
     }
 
     initializing.current = false
 
     if (code && state) {
       callback(code, state)
-      return;
+      return
     }
 
     auth()
