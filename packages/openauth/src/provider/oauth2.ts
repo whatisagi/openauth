@@ -147,7 +147,7 @@ export function Oauth2Provider(
         await ctx.set<ProviderState>(c, "provider", 60 * 10, {
           state,
           redirect: getRelativeUrl(c, "./callback"),
-          codeVerifier: pkce?.verifier
+          codeVerifier: pkce?.verifier,
         })
         const authorization = new URL(config.endpoint.authorization)
         authorization.searchParams.set("client_id", config.clientID)
@@ -186,7 +186,9 @@ export function Oauth2Provider(
           code,
           grant_type: "authorization_code",
           redirect_uri: provider.redirect,
-          ...(provider.codeVerifier ? { code_verifier: provider.codeVerifier } : {})
+          ...(provider.codeVerifier
+            ? { code_verifier: provider.codeVerifier }
+            : {}),
         })
         const json: any = await fetch(config.endpoint.token, {
           method: "POST",
