@@ -196,7 +196,7 @@ import { encryptionKeys, legacySigningKeys, signingKeys } from "./keys.js"
 import { validatePKCE } from "./pkce.js"
 import { Select } from "./ui/select.js"
 import { setTheme, Theme } from "./ui/theme.js"
-import { isDomainMatch } from "./util.js"
+import { getRelativeUrl, isDomainMatch } from "./util.js"
 import { DynamoStorage } from "./storage/dynamo.js"
 import { MemoryStorage } from "./storage/memory.js"
 import { cors } from "hono/cors"
@@ -478,7 +478,7 @@ export function issuer<
       }
       const forwarded = req.headers.get("x-forwarded-host")
       const host = forwarded
-        ? new URL(`https://` + forwarded).hostname
+        ? new URL(`https://${forwarded}`).hostname
         : new URL(req.url).hostname
 
       return isDomainMatch(redir, host)
@@ -715,9 +715,7 @@ export function issuer<
   }
 
   function issuer(ctx: Context) {
-    const url = new URL(ctx.req.url)
-    const host = ctx.req.header("x-forwarded-host") ?? url.host
-    return url.protocol + "//" + host
+    return (new URL(getRelativeUrl(ctx, '/'))).origin
   }
 
   const app = new Hono<{
