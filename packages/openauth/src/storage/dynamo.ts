@@ -66,7 +66,6 @@ export interface DynamoStorageOptions {
  * @param options - The config for the adapter.
  */
 export function DynamoStorage(options: DynamoStorageOptions): StorageAdapter {
-  const c = client()
   const pk = options.pk || "pk"
   const sk = options.sk || "sk"
   const ttl = options.ttl || "expiry"
@@ -86,23 +85,37 @@ export function DynamoStorage(options: DynamoStorageOptions): StorageAdapter {
   }
 
   async function dynamo(action: string, payload: any) {
-    const client = await c
+    const c = await client()
     const endpoint =
-      options.endpoint || `https://dynamodb.${client.region}.amazonaws.com`
-    const response = await client.fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-amz-json-1.0",
-        "X-Amz-Target": `DynamoDB_20120810.${action}`,
-      },
-      body: JSON.stringify(payload),
-    })
+      options.endpoint || `https://dynamodb.${c.region}.amazonaws.com`
+    let retries = 0
+    while (true) {
+      const response = await c
+        .fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-amz-json-1.0",
+            "X-Amz-Target": `DynamoDB_20120810.${action}`,
+          },
+          body: JSON.stringify(payload),
+        })
+        .catch((e) => {
+          retries++
+          if (retries > 3) {
+            throw e
+          }
+          console.error(e)
+        })
+      if (!response) {
+        console.log("retrying dynamo call")
+        continue
+      }
 
-    if (!response.ok) {
-      throw new Error(`DynamoDB request failed: ${response.statusText}`)
+      if (!response.ok) {
+        throw new Error(`DynamoDB request failed: ${response.statusText}`)
+      }
+      return response.json() as Promise<any>
     }
-
-    return response.json() as Promise<any>
   }
 
   return {
