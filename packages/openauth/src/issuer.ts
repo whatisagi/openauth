@@ -200,6 +200,7 @@ import { getRelativeUrl, isDomainMatch } from "./util.js"
 import { DynamoStorage } from "./storage/dynamo.js"
 import { MemoryStorage } from "./storage/memory.js"
 import { cors } from "hono/cors"
+import { logger } from "hono/logger"
 
 /** @internal */
 export const aws = awsHandle
@@ -722,7 +723,7 @@ export function issuer<
     Variables: {
       authorization: AuthorizationState
     }
-  }>()
+  }>().use(logger())
 
   for (const [name, value] of Object.entries(input.providers)) {
     const route = new Hono<any>()
