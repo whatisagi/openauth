@@ -105,6 +105,9 @@ export function DynamoStorage(options: DynamoStorageOptions): StorageAdapter {
             throw e
           }
           console.error(e)
+          if (e instanceof Error) {
+            console.error(e.cause)
+          }
         })
       if (!response) {
         console.log("retrying dynamo call")
