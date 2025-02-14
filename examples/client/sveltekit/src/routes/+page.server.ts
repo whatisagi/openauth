@@ -1,5 +1,5 @@
 export async function load(event) {
-    return {
-        subject: event.locals.session
-    }
+  return {
+    subject: event.locals.session,
+  }
 }
