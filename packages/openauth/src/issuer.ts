@@ -753,6 +753,7 @@ export function issuer<
       return c.json({
         keys: all.map((item) => ({
           ...item.jwk,
+          alg: item.alg,
           exp: item.expired
             ? Math.floor(item.expired.getTime() / 1000)
             : undefined,
