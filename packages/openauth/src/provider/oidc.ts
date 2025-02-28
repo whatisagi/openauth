@@ -105,12 +105,27 @@ export function OidcProvider(
   const query = config.query || {}
   const scopes = config.scopes || []
 
-  const wk = fetch(config.issuer + "/.well-known/openid-configuration").then(
-    async (r) => {
+  const wk = (async () => {
+    let retries = 0
+    while (true) {
+      const r = await fetch(
+        config.issuer + "/.well-known/openid-configuration",
+      ).catch((e) => {
+        console.error(e)
+        console.log("failed to fetch well-known")
+        if (e instanceof Error) {
+          console.log(e.cause)
+        }
+      })
+      if (!r) {
+        retries++
+        if (retries > 3) throw new Error("failed to fetch well-known")
+        continue
+      }
       if (!r.ok) throw new Error(await r.text())
       return r.json() as Promise<WellKnown>
-    },
-  )
+    }
+  })()
 
   const jwks = wk
     .then((r) => r.jwks_uri)
