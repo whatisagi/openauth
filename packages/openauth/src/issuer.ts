@@ -196,7 +196,7 @@ import { encryptionKeys, legacySigningKeys, signingKeys } from "./keys.js"
 import { validatePKCE } from "./pkce.js"
 import { Select } from "./ui/select.js"
 import { setTheme, Theme } from "./ui/theme.js"
-import { getRelativeUrl, isDomainMatch } from "./util.js"
+import { getRelativeUrl, isDomainMatch, lazy } from "./util.js"
 import { DynamoStorage } from "./storage/dynamo.js"
 import { MemoryStorage } from "./storage/memory.js"
 import { cors } from "hono/cors"
@@ -469,21 +469,23 @@ export function issuer<
     setTheme(input.theme)
   }
 
-  const select = input.select ?? Select()
-  const allow =
-    input.allow ??
-    (async (input, req) => {
-      const redir = new URL(input.redirectURI).hostname
-      if (redir === "localhost" || redir === "127.0.0.1") {
-        return true
-      }
-      const forwarded = req.headers.get("x-forwarded-host")
-      const host = forwarded
-        ? new URL(`https://${forwarded}`).hostname
-        : new URL(req.url).hostname
+  const select = lazy(() => input.select ?? Select())
+  const allow = lazy(
+    () =>
+      input.allow ??
+      (async (input: any, req: Request) => {
+        const redir = new URL(input.redirectURI).hostname
+        if (redir === "localhost" || redir === "127.0.0.1") {
+          return true
+        }
+        const forwarded = req.headers.get("x-forwarded-host")
+        const host = forwarded
+          ? new URL(`https://${forwarded}`).hostname
+          : new URL(req.url).hostname
 
-      return isDomainMatch(redir, host)
-    })
+        return isDomainMatch(redir, host)
+      }),
+  )
 
   let storage = input.storage
   if (process.env.OPENAUTH_STORAGE) {
@@ -499,13 +501,14 @@ export function issuer<
     throw new Error(
       "Store is not configured. Either set the `storage` option or set `OPENAUTH_STORAGE` environment variable.",
     )
-  const allSigning = Promise.all([
-    signingKeys(storage),
-    legacySigningKeys(storage),
-  ]).then(([a, b]) => [...a, ...b])
-  const allEncryption = encryptionKeys(storage)
-  const signingKey = allSigning.then((all) => all[0])
-  const encryptionKey = allEncryption.then((all) => all[0])
+  const allSigning = lazy(() =>
+    Promise.all([signingKeys(storage), legacySigningKeys(storage)]).then(
+      ([a, b]) => [...a, ...b],
+    ),
+  )
+  const allEncryption = lazy(() => encryptionKeys(storage))
+  const signingKey = lazy(() => allSigning().then((all) => all[0]))
+  const encryptionKey = lazy(() => allEncryption().then((all) => all[0]))
 
   const auth: Omit<ProviderOptions<any>, "name"> = {
     async success(ctx: Context, properties: any, successOpts) {
@@ -627,7 +630,7 @@ export function issuer<
       new TextEncoder().encode(JSON.stringify(value)),
     )
       .setProtectedHeader({ alg: "RSA-OAEP-512", enc: "A256GCM" })
-      .encrypt(await encryptionKey.then((k) => k.public))
+      .encrypt(await encryptionKey().then((k) => k.public))
   }
 
   async function resolveSubject(type: string, properties: any) {
@@ -692,13 +695,13 @@ export function issuer<
       })
         .setExpirationTime(Math.floor(accessTimeUsed + value.ttl.access))
         .setProtectedHeader(
-          await signingKey.then((k) => ({
+          await signingKey().then((k) => ({
             alg: k.alg,
             kid: k.id,
             typ: "JWT",
           })),
         )
-        .sign(await signingKey.then((item) => item.private)),
+        .sign(await signingKey().then((item) => item.private)),
       expiresIn: Math.floor(
         accessTimeUsed + value.ttl.access - Date.now() / 1000,
       ),
@@ -711,7 +714,7 @@ export function issuer<
       new TextDecoder().decode(
         await compactDecrypt(
           value,
-          await encryptionKey.then((v) => v.private),
+          await encryptionKey().then((v) => v.private),
         ).then((value) => value.plaintext),
       ),
     )
@@ -749,7 +752,7 @@ export function issuer<
       credentials: false,
     }),
     async (c) => {
-      const all = await allSigning
+      const all = await allSigning()
       return c.json({
         keys: all.map((item) => ({
           ...item.jwk,
@@ -1046,7 +1049,7 @@ export function issuer<
     }
 
     if (
-      !(await allow(
+      !(await allow()(
         {
           clientID: client_id,
           redirectURI: redirect_uri,
@@ -1062,7 +1065,7 @@ export function issuer<
     if (providers.length === 1) return c.redirect(`/${providers[0]}/authorize`)
     return auth.forward(
       c,
-      await select(
+      await select()(
         Object.fromEntries(
           Object.entries(input.providers).map(([key, value]) => [
             key,

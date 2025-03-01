@@ -9,7 +9,7 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "5.0.2",
-    "@openauthjs/openauth": "workspace:*"
+    "@openauthjs/openauth": "workspace:*",
+    "astro": "5.0.2"
   }
 }

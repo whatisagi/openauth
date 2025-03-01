@@ -3,6 +3,6 @@
   "version": "0.0.0",
   "dependencies": {
     "@openauthjs/openauth": "workspace:*",
-    "sst": "3.4.22"
+    "sst": "3.5.1"
   }
 }

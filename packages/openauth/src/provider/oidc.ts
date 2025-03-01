@@ -7,7 +7,7 @@
  * export default issuer({
  *   providers: {
  *     oauth2: OidcProvider({
- *       clientID: "1234567890",
+ *       clientId: "1234567890",
  *       issuer: "https://auth.myserver.com"
  *     })
  *   }
@@ -23,7 +23,7 @@ import { WellKnown } from "../client.js"
 import { OauthError } from "../error.js"
 import { Provider } from "./provider.js"
 import { JWTPayload } from "hono/utils/jwt/types"
-import { getRelativeUrl } from "../util.js"
+import { getRelativeUrl, lazy } from "../util.js"
 
 export interface OidcConfig {
   /**
@@ -105,35 +105,24 @@ export function OidcProvider(
   const query = config.query || {}
   const scopes = config.scopes || []
 
-  const wk = (async () => {
-    let retries = 0
-    while (true) {
-      const r = await fetch(
-        config.issuer + "/.well-known/openid-configuration",
-      ).catch((e) => {
-        console.error(e)
-        console.log("failed to fetch well-known")
-        if (e instanceof Error) {
-          console.log(e.cause)
-        }
-      })
-      if (!r) {
-        retries++
-        if (retries > 3) throw new Error("failed to fetch well-known")
-        continue
-      }
-      if (!r.ok) throw new Error(await r.text())
-      return r.json() as Promise<WellKnown>
-    }
-  })()
+  const wk = lazy(() =>
+    fetch(config.issuer + "/.well-known/openid-configuration").then(
+      async (r) => {
+        if (!r.ok) throw new Error(await r.text())
+        return r.json() as Promise<WellKnown>
+      },
+    ),
+  )
 
-  const jwks = wk
-    .then((r) => r.jwks_uri)
-    .then(async (uri) => {
-      const r = await fetch(uri)
-      if (!r.ok) throw new Error(await r.text())
-      return createLocalJWKSet((await r.json()) as JSONWebKeySet)
-    })
+  const jwks = lazy(() =>
+    wk()
+      .then((r) => r.jwks_uri)
+      .then(async (uri) => {
+        const r = await fetch(uri)
+        if (!r.ok) throw new Error(await r.text())
+        return createLocalJWKSet((await r.json()) as JSONWebKeySet)
+      }),
+  )
 
   return {
     type: config.type || "oidc",
@@ -146,7 +135,7 @@ export function OidcProvider(
         }
         await ctx.set(c, "provider", 60 * 10, provider)
         const authorization = new URL(
-          await wk.then((r) => r.authorization_endpoint),
+          await wk().then((r) => r.authorization_endpoint),
         )
         authorization.searchParams.set("client_id", config.clientID)
         authorization.searchParams.set("response_type", "id_token")
@@ -174,7 +163,7 @@ export function OidcProvider(
         const idToken = body.get("id_token")
         if (!idToken)
           throw new OauthError("invalid_request", "Missing id_token")
-        const result = await jwtVerify(idToken.toString(), await jwks, {
+        const result = await jwtVerify(idToken.toString(), await jwks(), {
           audience: config.clientID,
         })
         if (result.payload.nonce !== provider.nonce) {

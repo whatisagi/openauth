@@ -46,3 +46,13 @@ export function isDomainMatch(a: string, b: string): boolean {
   const tailB = partsB.slice(min).join(".")
   return tailA === tailB
 }
+
+export function lazy<T>(fn: () => T): () => T {
+  let value: T | undefined
+  return () => {
+    if (value === undefined) {
+      value = fn()
+    }
+    return value
+  }
+}
