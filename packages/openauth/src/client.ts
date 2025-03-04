@@ -86,6 +86,11 @@ export interface Tokens {
    * The refresh token.
    */
   refresh: string
+
+  /**
+   * The number of seconds until the access token expires.
+   */
+  expiresIn: number
 }
 
 interface ResponseLike {
@@ -642,6 +647,7 @@ export function createClient(input: ClientInput): Client {
         tokens: {
           access: json.access_token as string,
           refresh: json.refresh_token as string,
+          expiresIn: json.expires_in as number,
         },
       }
     },
@@ -684,6 +690,7 @@ export function createClient(input: ClientInput): Client {
         tokens: {
           access: json.access_token as string,
           refresh: json.refresh_token as string,
+          expiresIn: json.expires_in as number,
         },
       }
     },

@@ -949,6 +949,7 @@ export function issuer<
         return c.json({
           access_token: tokens.access,
           refresh_token: tokens.refresh,
+          expires_in: tokens.expiresIn,
         })
       }
 
