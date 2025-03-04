@@ -106,6 +106,7 @@ describe("code flow", () => {
     expect(tokens).toStrictEqual({
       access: expectNonEmptyString,
       refresh: expectNonEmptyString,
+      expiresIn: 60,
     })
     const verified = await client.verify(subjects, tokens.access)
     if (verified.err) throw verified.err
@@ -221,6 +222,7 @@ describe("refresh token", () => {
     expect(refreshed).toStrictEqual({
       access_token: expectNonEmptyString,
       refresh_token: expectNonEmptyString,
+      expires_in: expect.any(Number),
     })
     expect(refreshed.access_token).not.toEqual(tokens.access)
     expect(refreshed.refresh_token).not.toEqual(tokens.refresh)
@@ -246,6 +248,7 @@ describe("refresh token", () => {
     expect(refreshed).toStrictEqual({
       access_token: expectNonEmptyString,
       refresh_token: expectNonEmptyString,
+      expires_in: expect.any(Number),
     })
 
     expect(refreshed.access_token).not.toEqual(tokens.access)

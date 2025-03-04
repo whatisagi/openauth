@@ -122,6 +122,7 @@ describe("verify", () => {
     expect(verified).toStrictEqual({
       aud: "123",
       tokens: {
+        expiresIn: 60,
         access: expectNonEmptyString,
         refresh: expectNonEmptyString,
       },
