@@ -1,9 +1,9 @@
 <p align="center">
   <a href="https://openauth.js.org">
     <picture>
-      <source srcset="https://raw.githubusercontent.com/toolbeam/identity/main/logo-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="https://raw.githubusercontent.com/toolbeam/identity/main/logo-light.svg" media="(prefers-color-scheme: light)">
-      <img src="https://raw.githubusercontent.com/toolbeam/identity/main/logo-light.svg" alt="OpenAuth logo">
+      <source srcset="https://raw.githubusercontent.com/toolbeam/identity/main/openauth/logo-dark.svg" media="(prefers-color-scheme: dark)">
+      <source srcset="https://raw.githubusercontent.com/toolbeam/identity/main/openauth/logo-light.svg" media="(prefers-color-scheme: light)">
+      <img src="https://raw.githubusercontent.com/toolbeam/identity/main/openauth/logo-light.svg" alt="OpenAuth logo">
     </picture>
   </a>
 </p>
@@ -23,9 +23,9 @@
 - **Customizable**: It comes with prebuilt themeable UI that you can customize or opt out of.
 
 <picture>
-  <source srcset="https://raw.githubusercontent.com/toolbeam/identity/main/assets/themes-dark.png" media="(prefers-color-scheme: dark)">
-  <source srcset="https://raw.githubusercontent.com/toolbeam/identity/main/assets/themes-light.png" media="(prefers-color-scheme: dark)">
-  <img src="https://raw.githubusercontent.com/toolbeam/identity/main/assets/themes-light.png" alt="OpenAuth themes">
+  <source srcset="https://raw.githubusercontent.com/toolbeam/identity/main/openauth/assets/themes-dark.png" media="(prefers-color-scheme: dark)">
+  <source srcset="https://raw.githubusercontent.com/toolbeam/identity/main/openauth/assets/themes-light.png" media="(prefers-color-scheme: dark)">
+  <img src="https://raw.githubusercontent.com/toolbeam/identity/main/openauth/assets/themes-light.png" alt="OpenAuth themes">
 </picture>
 
 ## Quick Start
