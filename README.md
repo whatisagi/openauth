@@ -30,7 +30,7 @@
 
 ## Quick Start
 
-If you just want to get started as fast as possible you can jump straight into the [code examples](https://github.com/toolbeam/openauthjs/tree/master/examples) folder and copy paste away. There are also [SST components](https://sst.dev/docs/component/aws/auth) for deploying everything OpenAuth needs.
+If you just want to get started as fast as possible you can jump straight into the [code examples](https://github.com/toolbeam/openauth/tree/master/examples) folder and copy paste away. There are also [SST components](https://sst.dev/docs/component/aws/auth) for deploying everything OpenAuth needs.
 
 ## Approach
 
