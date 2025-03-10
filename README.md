@@ -1,16 +1,16 @@
 <p align="center">
   <a href="https://openauth.js.org">
     <picture>
-      <source srcset="https://raw.githubusercontent.com/openauthjs/identity/main/logo-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="https://raw.githubusercontent.com/openauthjs/identity/main/logo-light.svg" media="(prefers-color-scheme: light)">
-      <img src="https://raw.githubusercontent.com/openauthjs/identity/main/logo-light.svg" alt="OpenAuth logo">
+      <source srcset="https://raw.githubusercontent.com/toolbeam/identity/main/logo-dark.svg" media="(prefers-color-scheme: dark)">
+      <source srcset="https://raw.githubusercontent.com/toolbeam/identity/main/logo-light.svg" media="(prefers-color-scheme: light)">
+      <img src="https://raw.githubusercontent.com/toolbeam/identity/main/logo-light.svg" alt="OpenAuth logo">
     </picture>
   </a>
 </p>
 <p align="center">
   <a href="https://sst.dev/discord"><img alt="Discord" src="https://img.shields.io/discord/983865673656705025?style=flat-square&label=Discord" /></a>
   <a href="https://www.npmjs.com/package/@openauthjs/openauth"><img alt="npm" src="https://img.shields.io/npm/v/%40openauthjs%2Fcore?style=flat-square" /></a>
-  <a href="https://github.com/openauthjs/openauth/actions/workflows/release.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/openauthjs/openauth/release.yml?style=flat-square&branch=master" /></a>
+  <a href="https://github.com/toolbeam/openauth/actions/workflows/release.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/toolbeam/openauth/release.yml?style=flat-square&branch=master" /></a>
 </p>
 
 ---
@@ -23,14 +23,14 @@
 - **Customizable**: It comes with prebuilt themeable UI that you can customize or opt out of.
 
 <picture>
-  <source srcset="https://raw.githubusercontent.com/openauthjs/identity/main/assets/themes-dark.png" media="(prefers-color-scheme: dark)">
-  <source srcset="https://raw.githubusercontent.com/openauthjs/identity/main/assets/themes-light.png" media="(prefers-color-scheme: dark)">
-  <img src="https://raw.githubusercontent.com/openauthjs/identity/main/assets/themes-light.png" alt="OpenAuth themes">
+  <source srcset="https://raw.githubusercontent.com/toolbeam/identity/main/assets/themes-dark.png" media="(prefers-color-scheme: dark)">
+  <source srcset="https://raw.githubusercontent.com/toolbeam/identity/main/assets/themes-light.png" media="(prefers-color-scheme: dark)">
+  <img src="https://raw.githubusercontent.com/toolbeam/identity/main/assets/themes-light.png" alt="OpenAuth themes">
 </picture>
 
 ## Quick Start
 
-If you just want to get started as fast as possible you can jump straight into the [code examples](https://github.com/openauthjs/openauthjs/tree/master/examples) folder and copy paste away. There are also [SST components](https://sst.dev/docs/component/aws/auth) for deploying everything OpenAuth needs.
+If you just want to get started as fast as possible you can jump straight into the [code examples](https://github.com/toolbeam/openauthjs/tree/master/examples) folder and copy paste away. There are also [SST components](https://sst.dev/docs/component/aws/auth) for deploying everything OpenAuth needs.
 
 ## Approach
 
