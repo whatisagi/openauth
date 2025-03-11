@@ -319,6 +319,7 @@ function renderHeader(input: {
     `---`,
     "",
     "import { Segment, Section, NestedTitle, InlineSection } from 'toolbeam-docs-theme/components'",
+    "import { Tabs, TabItem } from '@astrojs/starlight/components'",
     "",
   ]
 }

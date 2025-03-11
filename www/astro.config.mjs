@@ -3,9 +3,8 @@ import starlight from "@astrojs/starlight"
 import { defineConfig } from "astro/config"
 import { rehypeHeadingIds } from "@astrojs/markdown-remark"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
+import config from "./config"
 
-const github = "https://github.com/toolbeam/openauth"
-const discord = "https://sst.dev/discord"
 const url = "https://openauth.js.org"
 
 // https://astro.build/config
@@ -67,12 +66,12 @@ export default defineConfig({
         replacesTitle: true,
       },
       social: {
-        github,
-        discord,
+        github: config.github,
+        discord: config.discord,
       },
       lastUpdated: true,
       editLink: {
-        baseUrl: `${github}/edit/master/www/`,
+        baseUrl: `${config.github}/edit/master/www/`,
       },
       components: {
         Hero: "./src/components/Hero.astro",
