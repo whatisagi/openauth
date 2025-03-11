@@ -489,16 +489,16 @@ function renderComment(declaration: TypeDoc.Reflection) {
 
   return [
     declaration instanceof TypeDoc.DeclarationReflection &&
-      declaration.defaultValue
+    declaration.defaultValue
       ? [
-        ``,
-        `<InlineSection>`,
-        `**Default** ${renderType({
-          type: "literal",
-          value: declaration.defaultValue.replace(/"/g, ""),
-        } as TypeDoc.LiteralType)}`,
-        `</InlineSection>`,
-      ]
+          ``,
+          `<InlineSection>`,
+          `**Default** ${renderType({
+            type: "literal",
+            value: declaration.defaultValue.replace(/"/g, ""),
+          } as TypeDoc.LiteralType)}`,
+          `</InlineSection>`,
+        ]
       : [],
     declaration.comment.blockTags
       .filter((tag) => tag.tag === "@default")
@@ -510,13 +510,13 @@ function renderComment(declaration: TypeDoc.Reflection) {
           // Otherwise render it as a comment ie. No domains configured
           tag.content.length === 1 && tag.content[0].kind === "code"
             ? `**Default** ${renderType(
-              new TypeDoc.IntrinsicType(
-                tag.content[0].text
-                  .replace(/`/g, "")
-                  .replace(/{/g, "&lcub;")
-                  .replace(/}/g, "&rcub;"),
-              ),
-            )}`
+                new TypeDoc.IntrinsicType(
+                  tag.content[0].text
+                    .replace(/`/g, "")
+                    .replace(/{/g, "&lcub;")
+                    .replace(/}/g, "&rcub;"),
+                ),
+              )}`
             : `**Default** ${tag.content.map((c) => c.text)}`,
           `</InlineSection>`,
         ]
@@ -538,11 +538,11 @@ function renderSignatureAsType(signature: TypeDoc.SignatureReflection) {
     .map(
       (parameter) =>
         `${renderParameter(parameter)}: ${
-        // If the type is an object, render it inline
-        parameter.type?.type === "reflection" &&
+          // If the type is an object, render it inline
+          parameter.type?.type === "reflection" &&
           parameter.type.declaration.kind === TypeDoc.ReflectionKind.TypeLiteral
-          ? renderObjectTypeInline(parameter.type)
-          : renderType(parameter.type!)
+            ? renderObjectTypeInline(parameter.type)
+            : renderType(parameter.type!)
         }`,
     )
     .join(", ")
@@ -688,8 +688,8 @@ function renderUnionType(type: TypeDoc.UnionType) {
 function renderArrayType(type: TypeDoc.ArrayType) {
   return type.elementType.type === "union"
     ? `<code class="symbol">(</code>${renderType(
-      type.elementType,
-    )}<code class="symbol">)[]</code>`
+        type.elementType,
+      )}<code class="symbol">)[]</code>`
     : `${renderType(type.elementType)}<code class="symbol">[]</code>`
 }
 function renderCallbackType(type: TypeDoc.ReflectionType) {
@@ -705,7 +705,7 @@ function renderObjectTypeInline(type: TypeDoc.ReflectionType): Text {
           `<code class="symbol">&colon; </code>`,
           // If rendering inline, also render children inline
           c.type?.type === "reflection" &&
-            c.type.declaration.kind === TypeDoc.ReflectionKind.TypeLiteral
+          c.type.declaration.kind === TypeDoc.ReflectionKind.TypeLiteral
             ? renderObjectTypeInline(c.type)
             : renderType(c.type!),
         ].join(""),
@@ -801,17 +801,17 @@ function flattenNestedTypes(
         { prefix, subType, depth },
         ...(subType.kind === TypeDoc.ReflectionKind.Property
           ? flattenNestedTypes(
-            subType.type!,
-            `${prefix}.${subType.name}`,
-            depth + 1,
-          )
+              subType.type!,
+              `${prefix}.${subType.name}`,
+              depth + 1,
+            )
           : []),
         ...(subType.kind === TypeDoc.ReflectionKind.Accessor
           ? flattenNestedTypes(
-            subType.getSignature?.type!,
-            `${prefix}.${subType.name}`,
-            depth + 1,
-          )
+              subType.getSignature?.type!,
+              `${prefix}.${subType.name}`,
+              depth + 1,
+            )
           : []),
       ])
   }
@@ -839,8 +839,8 @@ function configureLogger() {
     return
   }
 
-  console.debug = () => { }
-  console.warn = () => { }
+  console.debug = () => {}
+  console.warn = () => {}
 }
 
 function printWarnings() {
