@@ -1,8 +1,0 @@
----
-interface Props {
-  type: "about" | "signature" | "parameters";
-}
-
-const { type } = Astro.props;
----
-<section class={type}><slot /></section>

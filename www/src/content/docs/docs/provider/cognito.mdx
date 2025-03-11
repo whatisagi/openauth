@@ -4,11 +4,7 @@ editUrl: https://github.com/openauthjs/openauth/blob/master/packages/openauth/sr
 description: Reference doc for the `CognitoProvider`.
 ---
 
-import Segment from '../../../../components/tsdoc/Segment.astro';
-import Section from '../../../../components/tsdoc/Section.astro';
-import NestedTitle from '../../../../components/tsdoc/NestedTitle.astro';
-import InlineSection from '../../../../components/tsdoc/InlineSection.astro';
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Segment, Section, NestedTitle, InlineSection } from 'toolbeam-docs-theme/components'
 
 <div class="tsdoc">
 <Section type="about">
@@ -62,6 +58,7 @@ CognitoProvider({
 - <p>[<code class="key">clientID</code>](#cognitoconfig.clientid) <code class="primitive">string</code></p>
 - <p>[<code class="key">clientSecret</code>](#cognitoconfig.clientsecret) <code class="primitive">string</code></p>
 - <p>[<code class="key">domain</code>](#cognitoconfig.domain) <code class="primitive">string</code></p>
+- <p>[<code class="key">pkce?</code>](#cognitoconfig.pkce) <code class="primitive">boolean</code></p>
 - <p>[<code class="key">query?</code>](#cognitoconfig.query) <code class="primitive">Record</code><code class="symbol">&lt;</code><code class="primitive">string</code>, <code class="primitive">string</code><code class="symbol">&gt;</code></p>
 - <p>[<code class="key">region</code>](#cognitoconfig.region) <code class="primitive">string</code></p>
 - <p>[<code class="key">scopes</code>](#cognitoconfig.scopes) <code class="primitive">string</code><code class="symbol">[]</code></p>
@@ -112,6 +109,20 @@ The domain of the Cognito User Pool.
   domain: "your-domain.auth.us-east-1.amazoncognito.com"
 }
 ```
+</Segment>
+<NestedTitle id="cognitoconfig.pkce" Tag="h4" parent="CognitoConfig.">pkce?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">boolean</code>
+</InlineSection>
+</Section>
+
+<InlineSection>
+**Default** false
+</InlineSection>
+Whether to use PKCE (Proof Key for Code Exchange) for the authorization code flow.
+Some providers like x.com require this.
 </Segment>
 <NestedTitle id="cognitoconfig.query" Tag="h4" parent="CognitoConfig.">query?</NestedTitle>
 <Segment>

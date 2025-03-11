@@ -4,11 +4,7 @@ editUrl: https://github.com/openauthjs/openauth/blob/master/packages/openauth/sr
 description: Reference doc for the OpenAuth client.
 ---
 
-import Segment from '../../../components/tsdoc/Segment.astro';
-import Section from '../../../components/tsdoc/Section.astro';
-import NestedTitle from '../../../components/tsdoc/NestedTitle.astro';
-import InlineSection from '../../../components/tsdoc/InlineSection.astro';
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Segment, Section, NestedTitle, InlineSection } from 'toolbeam-docs-theme/components'
 
 <div class="tsdoc">
 <Section type="about">
@@ -528,6 +524,7 @@ If they are still valid, this will be `undefined`.
 <Segment>
 <Section type="parameters">
 - <p>[<code class="key">access</code>](#tokens.access) <code class="primitive">string</code></p>
+- <p>[<code class="key">expiresIn</code>](#tokens.expiresin) <code class="primitive">number</code></p>
 - <p>[<code class="key">refresh</code>](#tokens.refresh) <code class="primitive">string</code></p>
 </Section>
 The tokens returned by the auth server.
@@ -540,6 +537,15 @@ The tokens returned by the auth server.
 </InlineSection>
 </Section>
 The access token.
+</Segment>
+<NestedTitle id="tokens.expiresin" Tag="h4" parent="Tokens.">expiresIn</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">number</code>
+</InlineSection>
+</Section>
+The number of seconds until the access token expires.
 </Segment>
 <NestedTitle id="tokens.refresh" Tag="h4" parent="Tokens.">refresh</NestedTitle>
 <Segment>

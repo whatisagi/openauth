@@ -4,11 +4,7 @@ editUrl: https://github.com/openauthjs/openauth/blob/master/packages/openauth/sr
 description: Reference doc for the DynamoDB storage adapter.
 ---
 
-import Segment from '../../../../components/tsdoc/Segment.astro';
-import Section from '../../../../components/tsdoc/Section.astro';
-import NestedTitle from '../../../../components/tsdoc/NestedTitle.astro';
-import InlineSection from '../../../../components/tsdoc/InlineSection.astro';
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Segment, Section, NestedTitle, InlineSection } from 'toolbeam-docs-theme/components'
 
 <div class="tsdoc">
 <Section type="about">
@@ -55,6 +51,7 @@ Creates a DynamoDB store.
 - <p>[<code class="key">pk?</code>](#dynamostorageoptions.pk) <code class="primitive">string</code></p>
 - <p>[<code class="key">sk?</code>](#dynamostorageoptions.sk) <code class="primitive">string</code></p>
 - <p>[<code class="key">table</code>](#dynamostorageoptions.table) <code class="primitive">string</code></p>
+- <p>[<code class="key">ttl?</code>](#dynamostorageoptions.ttl) <code class="primitive">string</code></p>
 </Section>
 Configure the DynamoDB table that's created.
 ```ts
@@ -85,6 +82,10 @@ Endpoint URL for the DynamoDB service. Useful for local testing.
 **Type** <code class="primitive">string</code>
 </InlineSection>
 </Section>
+
+<InlineSection>
+**Default** "pk"
+</InlineSection>
 The primary key column name.
 </Segment>
 <NestedTitle id="dynamostorageoptions.sk" Tag="h4" parent="DynamoStorageOptions.">sk?</NestedTitle>
@@ -94,6 +95,10 @@ The primary key column name.
 **Type** <code class="primitive">string</code>
 </InlineSection>
 </Section>
+
+<InlineSection>
+**Default** "sk"
+</InlineSection>
 The sort key column name.
 </Segment>
 <NestedTitle id="dynamostorageoptions.table" Tag="h4" parent="DynamoStorageOptions.">table</NestedTitle>
@@ -104,5 +109,18 @@ The sort key column name.
 </InlineSection>
 </Section>
 The name of the DynamoDB table.
+</Segment>
+<NestedTitle id="dynamostorageoptions.ttl" Tag="h4" parent="DynamoStorageOptions.">ttl?</NestedTitle>
+<Segment>
+<Section type="parameters">
+<InlineSection>
+**Type** <code class="primitive">string</code>
+</InlineSection>
+</Section>
+
+<InlineSection>
+**Default** "expiry"
+</InlineSection>
+The name of the time to live attribute.
 </Segment>
 </div>

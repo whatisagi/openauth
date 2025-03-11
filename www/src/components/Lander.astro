@@ -1,9 +1,9 @@
 ---
 import { Image } from 'astro:assets';
+import config from "virtual:starlight/user-config";
 import type { Props } from '@astrojs/starlight/props';
-import config from '../../config';
 
-const { data } = Astro.props.entry;
+const { data } = Astro.locals.starlightRoute.entry;
 const { title = data.title, tagline, image, actions = [] } = data.hero || {};
 
 const imageAttrs = {
@@ -45,10 +45,10 @@ if (image) {
         <a href="https://www.youtube.com/watch?v=SSjNUuQ06tk" target="_blank">Learn more</a>
       </div>
       <div class="col2">
-      <a href="/docs">View the docs</a>
+      <a href="/docs/">View the docs</a>
       </div>
       <div class="col3">
-        <a href={config.github}>Star on GitHub</a>
+        <a href={config.social.github.url}>Star on GitHub</a>
       </div>
     </section>
 

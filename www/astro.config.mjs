@@ -1,18 +1,23 @@
-import { defineConfig } from "astro/config"
+import theme from "toolbeam-docs-theme"
 import starlight from "@astrojs/starlight"
+import { defineConfig } from "astro/config"
 import { rehypeHeadingIds } from "@astrojs/markdown-remark"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
-import config from "./config"
+
+const github = "https://github.com/toolbeam/openauth"
+const discord = "https://sst.dev/discord"
+const url = "https://openauth.js.org"
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://openauth.js.org",
+  site: url,
   trailingSlash: 'always',
   devToolbar: {
     enabled: false,
   },
   integrations: [
     starlight({
+      plugins: [theme()],
       title: "OpenAuth",
       description: "Universal, standards-based auth provider.",
       head: [
@@ -41,39 +46,40 @@ export default defineConfig({
             media: "(prefers-color-scheme: dark)",
           },
         },
+        {
+          tag: "meta",
+          attrs: {
+            property: "og:image",
+            content: `${url}/social-share.png`,
+          },
+        },
+        {
+          tag: "meta",
+          attrs: {
+            property: "twitter:image",
+            content: `${url}/social-share.png`,
+          },
+        },
       ],
-      pagination: false,
       logo: {
         light: "./src/assets/logo-light.svg",
         dark: "./src/assets/logo-dark.svg",
         replacesTitle: true,
       },
       social: {
-        github: config.github,
-        discord: config.discord,
+        github,
+        discord,
       },
       lastUpdated: true,
       editLink: {
-        baseUrl: `${config.github}/edit/master/www/`,
+        baseUrl: `${github}/edit/master/www/`,
       },
       components: {
         Hero: "./src/components/Hero.astro",
-        Head: "./src/components/Head.astro",
-        Header: "./src/components/Header.astro",
-        Footer: "./src/components/Footer.astro",
-        PageTitle: "./src/components/PageTitle.astro",
       },
       customCss: [
-        "@fontsource/ibm-plex-mono/400.css",
-        "@fontsource/ibm-plex-mono/400-italic.css",
-        "@fontsource/ibm-plex-mono/500.css",
-        "@fontsource/ibm-plex-mono/600.css",
-        "@fontsource/ibm-plex-mono/700.css",
         "./src/custom.css",
-        "./src/styles/tsdoc.css",
         "./src/styles/lander.css",
-        "./src/styles/markdown.css",
-        "./src/styles/headings.css",
       ],
       sidebar: [
         { label: "Intro", slug: "docs" },
