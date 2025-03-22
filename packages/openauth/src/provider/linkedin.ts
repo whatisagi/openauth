@@ -1,7 +1,7 @@
-import { Oauth2Adapter, type Oauth2WrappedConfig } from "./oauth2.js"
+import { Oauth2Provider, type Oauth2WrappedConfig } from "./oauth2.js"
 
 export function LinkedInAdapter(config: Oauth2WrappedConfig) {
-  return Oauth2Adapter({
+  return Oauth2Provider({
     ...config,
     type: "linkedin",
     endpoint: {
